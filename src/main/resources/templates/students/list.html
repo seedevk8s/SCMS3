@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/default}">
+<head>
+    <title>학생 관리</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="fas fa-users text-primary"></i>
+                        학생 관리
+                    </h2>
+                    <button type="button" class="btn btn-primary" id="addStudentBtn">
+                        <i class="fas fa-plus"></i> 학생 추가
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-table"></i> 학생 목록 (TOAST UI Grid)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add/Edit Student Modal -->
+        <div class="modal fade" id="studentModal" tabindex="-1" aria-labelledby="studentModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="studentModalLabel">학생 정보</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="studentForm">
+                            <input type="hidden" id="studentIdHidden" name="id">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="studentId" class="form-label">학번 *</label>
+                                    <input type="text" class="form-control" id="studentId" name="studentId" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">이름 *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">이메일 *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">전화번호</label>
+                                    <input type="text" class="form-control" id="phone" name="phone">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="department" class="form-label">학과</label>
+                                    <input type="text" class="form-control" id="department" name="department">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="grade" class="form-label">학년</label>
+                                    <select class="form-select" id="grade" name="grade">
+                                        <option value="">선택</option>
+                                        <option value="1">1학년</option>
+                                        <option value="2">2학년</option>
+                                        <option value="3">3학년</option>
+                                        <option value="4">4학년</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="status" class="form-label">상태</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="재학">재학</option>
+                                        <option value="휴학">휴학</option>
+                                        <option value="졸업">졸업</option>
+                                        <option value="자퇴">자퇴</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i> 취소
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveStudentBtn">
+                            <i class="fas fa-save"></i> 저장
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="extra-js">
+        <script th:inline="javascript">
+            let grid;
+            let studentModal;
+            let isEditMode = false;
+
+            // Initialize
+            $(document).ready(function() {
+                studentModal = new bootstrap.Modal(document.getElementById('studentModal'));
+                initGrid();
+                loadStudents();
+
+                // Event Listeners
+                $('#addStudentBtn').click(function() {
+                    openModal(false);
+                });
+
+                $('#saveStudentBtn').click(function() {
+                    saveStudent();
+                });
+            });
+
+            // Initialize TOAST UI Grid
+            function initGrid() {
+                grid = new tui.Grid({
+                    el: document.getElementById('grid'),
+                    data: [],
+                    columns: [
+                        {
+                            header: 'ID',
+                            name: 'id',
+                            width: 70,
+                            align: 'center',
+                            hidden: true
+                        },
+                        {
+                            header: '학번',
+                            name: 'studentId',
+                            width: 120,
+                            align: 'center'
+                        },
+                        {
+                            header: '이름',
+                            name: 'name',
+                            width: 120,
+                            align: 'center'
+                        },
+                        {
+                            header: '이메일',
+                            name: 'email',
+                            width: 200
+                        },
+                        {
+                            header: '전화번호',
+                            name: 'phone',
+                            width: 130,
+                            align: 'center'
+                        },
+                        {
+                            header: '학과',
+                            name: 'department',
+                            width: 150
+                        },
+                        {
+                            header: '학년',
+                            name: 'grade',
+                            width: 80,
+                            align: 'center'
+                        },
+                        {
+                            header: '상태',
+                            name: 'status',
+                            width: 100,
+                            align: 'center'
+                        },
+                        {
+                            header: '작업',
+                            name: 'actions',
+                            width: 150,
+                            align: 'center',
+                            formatter: function(props) {
+                                return `
+                                    <button class="btn btn-sm btn-warning edit-btn" data-id="${props.row.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-btn" data-id="${props.row.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                `;
+                            }
+                        }
+                    ],
+                    rowHeaders: ['rowNum'],
+                    pageOptions: {
+                        perPage: 10
+                    },
+                    bodyHeight: 400,
+                    columnOptions: {
+                        resizable: true
+                    }
+                });
+
+                // Grid click event
+                grid.on('click', function(ev) {
+                    if (ev.targetType === 'cell') {
+                        const rowKey = ev.rowKey;
+                        const row = grid.getRow(rowKey);
+
+                        if ($(ev.nativeEvent.target).hasClass('edit-btn') ||
+                            $(ev.nativeEvent.target).closest('.edit-btn').length) {
+                            editStudent(row);
+                        } else if ($(ev.nativeEvent.target).hasClass('delete-btn') ||
+                                   $(ev.nativeEvent.target).closest('.delete-btn').length) {
+                            deleteStudent(row.id);
+                        }
+                    }
+                });
+            }
+
+            // Load Students
+            function loadStudents() {
+                $.ajax({
+                    url: '/students/api',
+                    method: 'GET',
+                    success: function(data) {
+                        grid.resetData(data);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('학생 목록을 불러오는데 실패했습니다.');
+                        console.error(error);
+                    }
+                });
+            }
+
+            // Open Modal
+            function openModal(editMode, data = null) {
+                isEditMode = editMode;
+                $('#studentModalLabel').text(editMode ? '학생 정보 수정' : '학생 추가');
+                $('#studentForm')[0].reset();
+
+                if (editMode && data) {
+                    $('#studentIdHidden').val(data.id);
+                    $('#studentId').val(data.studentId).prop('readonly', true);
+                    $('#name').val(data.name);
+                    $('#email').val(data.email);
+                    $('#phone').val(data.phone);
+                    $('#department').val(data.department);
+                    $('#grade').val(data.grade);
+                    $('#status').val(data.status);
+                } else {
+                    $('#studentId').prop('readonly', false);
+                }
+
+                studentModal.show();
+            }
+
+            // Edit Student
+            function editStudent(data) {
+                openModal(true, data);
+            }
+
+            // Save Student
+            function saveStudent() {
+                const formData = {
+                    studentId: $('#studentId').val(),
+                    name: $('#name').val(),
+                    email: $('#email').val(),
+                    phone: $('#phone').val(),
+                    department: $('#department').val(),
+                    grade: $('#grade').val(),
+                    status: $('#status').val() || '재학'
+                };
+
+                if (!formData.studentId || !formData.name || !formData.email) {
+                    alert('필수 항목을 입력해주세요.');
+                    return;
+                }
+
+                const url = isEditMode ? `/students/api/${$('#studentIdHidden').val()}` : '/students/api';
+                const method = isEditMode ? 'PUT' : 'POST';
+
+                $.ajax({
+                    url: url,
+                    method: method,
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function(response) {
+                        alert(isEditMode ? '학생 정보가 수정되었습니다.' : '학생이 추가되었습니다.');
+                        studentModal.hide();
+                        loadStudents();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('저장에 실패했습니다.');
+                        console.error(error);
+                    }
+                });
+            }
+
+            // Delete Student
+            function deleteStudent(id) {
+                if (!confirm('정말 삭제하시겠습니까?')) {
+                    return;
+                }
+
+                $.ajax({
+                    url: `/students/api/${id}`,
+                    method: 'DELETE',
+                    success: function() {
+                        alert('삭제되었습니다.');
+                        loadStudents();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('삭제에 실패했습니다.');
+                        console.error(error);
+                    }
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>
