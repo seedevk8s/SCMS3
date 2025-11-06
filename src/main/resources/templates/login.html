@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>로그인 - 우석대학교 CHAMP</title>
+    <th:block layout:fragment="css">
+        <style>
+            .login-container {
+                max-width: 450px;
+                margin: 80px auto;
+            }
+
+            .login-card {
+                background: var(--bg-white);
+                border-radius: var(--radius-lg);
+                box-shadow: var(--shadow-xl);
+                padding: var(--spacing-xxl);
+            }
+
+            .login-header {
+                text-align: center;
+                margin-bottom: var(--spacing-xl);
+            }
+
+            .login-header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: var(--primary-color);
+                margin-bottom: var(--spacing-sm);
+            }
+
+            .login-header p {
+                color: var(--text-secondary);
+                font-size: 14px;
+            }
+
+            .login-form .form-group {
+                margin-bottom: var(--spacing-lg);
+            }
+
+            .login-form .form-label {
+                font-weight: 600;
+                margin-bottom: var(--spacing-sm);
+            }
+
+            .login-form .form-control {
+                height: 48px;
+                font-size: 16px;
+            }
+
+            .login-form .btn-login {
+                width: 100%;
+                height: 48px;
+                font-size: 16px;
+                font-weight: 600;
+                margin-top: var(--spacing-md);
+            }
+
+            .login-links {
+                text-align: center;
+                margin-top: var(--spacing-lg);
+                padding-top: var(--spacing-lg);
+                border-top: 1px solid var(--gray-200);
+            }
+
+            .login-links a {
+                color: var(--secondary-color);
+                text-decoration: none;
+                font-size: 14px;
+                margin: 0 var(--spacing-md);
+            }
+
+            .login-links a:hover {
+                text-decoration: underline;
+            }
+
+            .alert {
+                padding: var(--spacing-md);
+                border-radius: var(--radius-md);
+                margin-bottom: var(--spacing-lg);
+            }
+
+            .alert-error {
+                background-color: #FFF4F4;
+                border: 1px solid #FFC9C9;
+                color: #C62828;
+            }
+
+            .alert-success {
+                background-color: #F1F8F4;
+                border: 1px solid var(--accent-green);
+                color: #2E7D32;
+            }
+
+            .password-toggle {
+                position: relative;
+            }
+
+            .password-toggle input {
+                padding-right: 40px;
+            }
+
+            .password-toggle-btn {
+                position: absolute;
+                right: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: var(--text-tertiary);
+            }
+        </style>
+    </th:block>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="login-container">
+            <div class="login-card">
+                <!-- 로그인 헤더 -->
+                <div class="login-header">
+                    <h1>로그인</h1>
+                    <p>학번과 비밀번호를 입력해주세요</p>
+                </div>
+
+                <!-- 에러 메시지 -->
+                <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+                <!-- 성공 메시지 -->
+                <div th:if="${message}" class="alert alert-success" th:text="${message}"></div>
+
+                <!-- 로그인 폼 -->
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="studentNum" class="form-label">학번</label>
+                        <input type="number"
+                               id="studentNum"
+                               name="studentNum"
+                               class="form-control"
+                               placeholder="학번을 입력하세요"
+                               required
+                               autofocus>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">비밀번호</label>
+                        <div class="password-toggle">
+                            <input type="password"
+                                   id="password"
+                                   name="password"
+                                   class="form-control"
+                                   placeholder="비밀번호를 입력하세요"
+                                   required>
+                            <button type="button" class="password-toggle-btn" id="togglePassword">
+                                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-login">로그인</button>
+                </form>
+
+                <!-- 링크 -->
+                <div class="login-links">
+                    <a href="/password/reset">비밀번호 찾기</a>
+                    <span>|</span>
+                    <a href="/help">로그인 도움말</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="script">
+        <script>
+            $(document).ready(function() {
+                // 비밀번호 보기/숨기기
+                $('#togglePassword').click(function() {
+                    const passwordInput = $('#password');
+                    const type = passwordInput.attr('type') === 'password' ? 'text' : 'password';
+                    passwordInput.attr('type', type);
+                });
+
+                // 로그인 폼 제출
+                $('#loginForm').submit(function(e) {
+                    e.preventDefault();
+
+                    const studentNum = $('#studentNum').val();
+                    const password = $('#password').val();
+
+                    // 유효성 검사
+                    if (!studentNum || !password) {
+                        alert('학번과 비밀번호를 모두 입력해주세요.');
+                        return;
+                    }
+
+                    // API 호출
+                    $.ajax({
+                        url: '/api/auth/login',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            studentNum: parseInt(studentNum),
+                            password: password
+                        }),
+                        success: function(response) {
+                            console.log('로그인 성공:', response);
+
+                            // 최초 로그인인 경우 비밀번호 변경 페이지로
+                            if (response.isFirstLogin) {
+                                alert('최초 로그인입니다. 비밀번호를 변경해주세요.');
+                                window.location.href = '/password/change';
+                            } else {
+                                // 홈으로 리다이렉트
+                                window.location.href = '/';
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('로그인 실패:', xhr);
+
+                            let errorMessage = '로그인에 실패했습니다.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+
+                            // 에러 메시지 표시
+                            $('.alert-error').remove();
+                            $('<div class="alert alert-error">' + errorMessage + '</div>')
+                                .insertBefore('#loginForm');
+                        }
+                    });
+                });
+            });
+        </script>
+    </th:block>
+</body>
+</html>

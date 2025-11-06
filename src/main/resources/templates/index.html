@@ -1,110 +1,266 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+<html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/default}">
+      layout:decorate="~{layout/layout}">
 <head>
-    <title>홈</title>
+    <title>우석대학교 CHAMP</title>
+    <th:block layout:fragment="css">
+        <style>
+            /* 히어로 섹션 */
+            .hero-section {
+                background: linear-gradient(135deg, #2C5F5D 0%, #3A7472 100%);
+                color: white;
+                padding: 48px 24px;
+                border-radius: 12px;
+                margin-bottom: 32px;
+                text-align: center;
+            }
+
+            .hero-title {
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 16px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+                opacity: 0.9;
+                margin-bottom: 24px;
+            }
+
+            /* 빠른 링크 */
+            .quick-links {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 16px;
+                margin-bottom: 32px;
+            }
+
+            .quick-link {
+                background: white;
+                padding: 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                text-align: center;
+                text-decoration: none;
+                color: #172B4D;
+                transition: all 0.3s;
+            }
+
+            .quick-link:hover {
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+                transform: translateY(-2px);
+            }
+
+            .quick-link-icon {
+                font-size: 36px;
+                margin-bottom: 8px;
+            }
+
+            .quick-link-title {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            /* 프로그램 카드 */
+            .section-title {
+                font-size: 24px;
+                font-weight: 700;
+                margin-bottom: 24px;
+            }
+
+            .program-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 24px;
+                margin-bottom: 32px;
+            }
+
+            .program-card {
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+                transition: all 0.3s;
+                cursor: pointer;
+            }
+
+            .program-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            }
+
+            .program-image {
+                width: 100%;
+                height: 180px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 48px;
+                position: relative;
+            }
+
+            .program-badge {
+                position: absolute;
+                top: 16px;
+                left: 16px;
+                background: #0052CC;
+                color: white;
+                padding: 4px 16px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .program-content {
+                padding: 24px;
+            }
+
+            .program-category {
+                display: inline-block;
+                background: #F4F5F7;
+                color: #505F79;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                margin-bottom: 8px;
+            }
+
+            .program-title {
+                font-size: 18px;
+                font-weight: 600;
+                color: #172B4D;
+                margin-bottom: 8px;
+            }
+
+            .program-date {
+                font-size: 13px;
+                color: #7A869A;
+                margin-bottom: 16px;
+            }
+
+            .progress-bar-container {
+                width: 100%;
+                height: 8px;
+                background: #EBECF0;
+                border-radius: 9999px;
+                overflow: hidden;
+                margin-bottom: 4px;
+            }
+
+            .progress-bar {
+                height: 100%;
+                background: #0052CC;
+                border-radius: 9999px;
+            }
+
+            .progress-text {
+                font-size: 12px;
+                color: #7A869A;
+                text-align: right;
+            }
+        </style>
+    </th:block>
 </head>
+
 <body>
     <div layout:fragment="content">
-        <div class="row">
-            <div class="col-12">
-                <h1 class="mb-4">
-                    <i class="fas fa-graduation-cap text-primary"></i>
-                    학생 역량 관리 시스템 (SCMS2)
-                </h1>
-                <p class="lead">Student Competency Management System v2.0</p>
-            </div>
+        <!-- 히어로 섹션 -->
+        <div class="hero-section">
+            <h1 class="hero-title">🎓 핵심역량 진단에 참여하세요!</h1>
+            <p class="hero-subtitle">진단결과는 핵심능력 및 역량점수를 제공하며 자기계발 가이드로 활용하실 수 있습니다.</p>
+            <p style="font-size: 14px; opacity: 0.8;">(진단결과는 추후 확인이 가능합니다!)</p>
         </div>
 
-        <div class="row mt-4">
-            <!-- Student Management Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-users fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">학생 관리</h5>
-                        <p class="card-text">학생 정보를 등록, 조회, 수정, 삭제할 수 있습니다.</p>
-                        <a th:href="@{/students}" class="btn btn-primary">
-                            <i class="fas fa-arrow-right"></i> 바로가기
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Competency Management Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">역량 관리</h5>
-                        <p class="card-text">학생들의 역량을 평가하고 관리할 수 있습니다.</p>
-                        <a href="#" class="btn btn-success">
-                            <i class="fas fa-arrow-right"></i> 바로가기
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistics Card -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
-                        <h5 class="card-title">통계 분석</h5>
-                        <p class="card-text">다양한 통계 및 분석 자료를 확인할 수 있습니다.</p>
-                        <a href="#" class="btn btn-info text-white">
-                            <i class="fas fa-arrow-right"></i> 바로가기
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <!-- 빠른 링크 -->
+        <div class="quick-links">
+            <a href="/assessment" class="quick-link">
+                <div class="quick-link-icon">📋</div>
+                <div class="quick-link-title">역량진단</div>
+            </a>
+            <a href="/programs" class="quick-link">
+                <div class="quick-link-icon">📚</div>
+                <div class="quick-link-title">비교과 프로그램</div>
+            </a>
+            <a href="/counseling" class="quick-link">
+                <div class="quick-link-icon">💬</div>
+                <div class="quick-link-title">통합상담</div>
+            </a>
+            <a href="/mileage" class="quick-link">
+                <div class="quick-link-icon">⭐</div>
+                <div class="quick-link-title">마일리지</div>
+            </a>
         </div>
 
-        <!-- Sample TOAST UI Chart -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> 샘플 차트 (TOAST UI Chart)</h5>
+        <h2 class="section-title">📁 전체 행정부서</h2>
+
+        <!-- 프로그램 카드 그리드 -->
+        <div class="program-grid">
+            <!-- 예시 카드 1 -->
+            <div class="program-card">
+                <div class="program-image">
+                    <span class="program-badge">D-3</span>
+                    📋
+                </div>
+                <div class="program-content">
+                    <span class="program-category">취업일자원센터</span>
+                    <h3 class="program-title">[진전] 전공설계 포트폴리오 특강</h3>
+                    <div class="program-date">📅 신청: 2025.10.14(화) ~ 2025.11.06(목)</div>
+                    <div class="program-progress">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text">0/무제한</div>
                     </div>
-                    <div class="card-body">
-                        <div id="chart" style="height: 400px;"></div>
+                </div>
+            </div>
+
+            <!-- 예시 카드 2 -->
+            <div class="program-card">
+                <div class="program-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <span class="program-badge">D-3</span>
+                    🎭
+                </div>
+                <div class="program-content">
+                    <span class="program-category">학생상담센터</span>
+                    <h3 class="program-title">2025-2 나스나 대인관계능력 향상 프로그램</h3>
+                    <div class="program-date">📅 신청: 2025.09.05(금) ~ 2025.11.10(월)</div>
+                    <div class="program-progress">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 85.7%; background: #f5576c;"></div>
+                        </div>
+                        <div class="progress-text">6/주제한</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 예시 카드 3 -->
+            <div class="program-card">
+                <div class="program-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    <span class="program-badge">D-4</span>
+                    🎓
+                </div>
+                <div class="program-content">
+                    <span class="program-category">대학일자리본부</span>
+                    <h3 class="program-title">2025년 2학기 면접스피치 과정</h3>
+                    <div class="program-date">📅 신청: 2025.09.29(월) ~ 2025.11.10(월)</div>
+                    <div class="program-progress">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 36.4%; background: #00f2fe;"></div>
+                        </div>
+                        <div class="progress-text">20/55명</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <th:block layout:fragment="extra-js">
-        <script th:inline="javascript">
-            // Sample TOAST UI Chart
-            const data = {
-                categories: ['1학년', '2학년', '3학년', '4학년'],
-                series: [
-                    {
-                        name: '등록 학생 수',
-                        data: [120, 135, 98, 87]
-                    }
-                ]
-            };
-
-            const options = {
-                chart: { width: 'auto', height: 350 },
-                series: {
-                    dataLabels: { visible: true }
-                },
-                theme: {
-                    series: {
-                        colors: ['#0d6efd', '#198754', '#ffc107', '#dc3545']
-                    }
-                }
-            };
-
-            const chart = toastui.Chart.columnChart({
-                el: document.getElementById('chart'),
-                data: data,
-                options: options
+    <th:block layout:fragment="script">
+        <script>
+            $('.program-card').click(function() {
+                alert('프로그램 상세 페이지 (준비 중)');
             });
         </script>
     </th:block>

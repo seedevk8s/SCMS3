@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="header">
+<header class="header">
+    <div class="header-container">
+        <!-- 로고 -->
+        <a href="/" class="header-logo">
+            <span class="header-logo-text">🎓 우석대학교 CHAMP</span>
+        </a>
+
+        <!-- 메인 네비게이션 -->
+        <nav>
+            <ul class="header-nav">
+                <li class="header-nav-item">
+                    <a href="/programs" class="header-nav-link">CHAMP 비교과 프로그램</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/mileage" class="header-nav-link">CHAMP 마일리지</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/counseling" class="header-nav-link">통합상담</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/assessment" class="header-nav-link">역량진단</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/portfolio" class="header-nav-link">포트폴리오</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/survey" class="header-nav-link">설문조사</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 우측 액션 버튼 -->
+        <div class="header-actions">
+            <span th:if="${session.name}" class="text-white" th:text="${session.name} + '님'"></span>
+            <a th:if="${session.userId == null}" href="/login" class="btn btn-light btn-sm">로그인</a>
+            <a th:if="${session.userId != null}" href="/logout" class="btn btn-light btn-sm">로그아웃</a>
+            <button class="btn-search" aria-label="검색">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+</html>
