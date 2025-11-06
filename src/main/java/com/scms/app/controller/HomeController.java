@@ -25,7 +25,7 @@ public class HomeController {
             model.addAttribute("userRole", session.getAttribute("role"));
         }
 
-        model.addAttribute("pageTitle", "푸름대학교 학생성장지원센터 CHAMP");
+        model.addAttribute("pageTitle", "풀무대학교 학생성장지원센터 CHAMP");
         return "index";
     }
 
