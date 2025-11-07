@@ -1,6 +1,7 @@
 package com.scms.app.controller;
 
 import com.scms.app.model.Program;
+import com.scms.app.model.UserRole;
 import com.scms.app.service.ProgramService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,10 @@ public class HomeController {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId != null) {
             model.addAttribute("userName", session.getAttribute("name"));
-            model.addAttribute("userRole", session.getAttribute("role"));
+            UserRole role = (UserRole) session.getAttribute("role");
+            model.addAttribute("userRole", role);
+            // 관리자 여부 플래그
+            model.addAttribute("isAdmin", role == UserRole.ADMIN);
         }
 
         // 메인 페이지용 프로그램 목록 조회 (최신 8개)
