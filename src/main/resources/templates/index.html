@@ -500,202 +500,54 @@
         <!-- 프로그램 카드 그리드 -->
         <div class="program-section">
             <div class="program-grid">
-                <!-- 프로그램 카드 1 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);">
-                        <div class="program-dday urgent">입박</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">160 HITS</div>
-                        📋
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">취창업지원센터</div>
-                        <div class="program-title">[진전] 전공설계 포트폴리오 특강</div>
-                        <div class="program-category">(4주차)나만의 마스터 입사지원서 제작과 면접준비</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.10.14(화) ~ 2025.11.06(목)<br>
-                            ⏰ 운영: 2025.10.14(화) ~ 2025.11.06(목)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 0%;"></div>
-                            </div>
-                            <div class="progress-text">0/무제한</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- 프로그램 카드 반복 -->
+                <div th:each="program, iterStat : ${programs}" class="program-card">
+                    <div class="program-image"
+                         th:style="'background: ' + ${#lists.contains({0,1,2,3,4,5,6,7}, iterStat.index % 8) ?
+                            (iterStat.index % 8 == 0 ? 'linear-gradient(135deg, #a8e063 0%, #56ab2f 100%)' :
+                             iterStat.index % 8 == 1 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' :
+                             iterStat.index % 8 == 2 ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' :
+                             iterStat.index % 8 == 3 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' :
+                             iterStat.index % 8 == 4 ? 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)' :
+                             iterStat.index % 8 == 5 ? 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' :
+                             iterStat.index % 8 == 6 ? 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' :
+                             'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)') :
+                            'linear-gradient(135deg, #a8e063 0%, #56ab2f 100%)'};">
 
-                <!-- 프로그램 카드 2 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                        <div class="program-dday blue">D-3</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">172 HITS</div>
-                        🎭
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">(진전)학생상담센터</div>
-                        <div class="program-title">2025-2 나스너(WOW-더플 대인관계능력 향상 프로그램)</div>
-                        <div class="program-category">7회기</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.09.05(금) ~ 2025.11.10(월)<br>
-                            ⏰ 운영: 2025.11.11(화) 15:00 ~ 17:00
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 85.7%; background: #f5576c;"></div>
-                            </div>
-                            <div class="progress-text">6/무제한</div>
-                        </div>
-                    </div>
-                </div>
+                        <!-- D-day 배지 -->
+                        <div th:if="${program.dDay != null}"
+                             th:class="${program.dDay <= 2 ? 'program-dday urgent' : program.dDay <= 7 ? 'program-dday blue' : 'program-dday green'}"
+                             th:text="${program.dDay == 0 ? 'D-Day' : program.dDay == 1 ? '입박' : 'D-' + program.dDay}"></div>
+                        <div th:if="${program.dDay == null}"
+                             class="program-dday closed"
+                             th:text="${program.status.description}"></div>
 
-                <!-- 프로그램 카드 3 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                        <div class="program-dday blue">D-4</div>
                         <div class="program-favorite">⭐</div>
-                        <div class="program-hits">198 HITS</div>
-                        🎓
+                        <div class="program-hits" th:text="${program.hits} + ' HITS'"></div>
+                        <span th:text="${iterStat.index % 8 == 0 ? '📋' :
+                                       iterStat.index % 8 == 1 ? '🎭' :
+                                       iterStat.index % 8 == 2 ? '🎓' :
+                                       iterStat.index % 8 == 3 ? '🎯' :
+                                       iterStat.index % 8 == 4 ? '🌟' :
+                                       iterStat.index % 8 == 5 ? '🌈' :
+                                       iterStat.index % 8 == 6 ? '🎨' : '📖'}"></span>
                     </div>
                     <div class="program-content">
-                        <div class="program-department">대학일자리본부 대학일자리본...</div>
-                        <div class="program-title">2025년 2학기 면접스피치&이미지메이킹 과정</div>
-                        <div class="program-category">면접스피치&이미지메이킹 2회차</div>
+                        <div class="program-department" th:text="${program.department}"></div>
+                        <div class="program-title" th:text="${program.title}"></div>
+                        <div class="program-category" th:text="${program.subCategory ?: program.category}"></div>
                         <div class="program-dates">
-                            📅 신청: 2025.09.29(월) ~ 2025.11.10(월)<br>
-                            ⏰ 운영: 2025.11.12(수) 13:00 ~ 15:00
+                            <span th:text="'📅 신청: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span><br>
+                            <span th:if="${program.content}"
+                                  th:text="'⏰ 운영: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span>
                         </div>
                         <div class="program-progress">
                             <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 36.4%; background: #00f2fe;"></div>
+                                <div class="progress-bar"
+                                     th:style="'width: ' + ${program.participationRate} + '%;'"></div>
                             </div>
-                            <div class="progress-text">20/55명</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 프로그램 카드 4 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                        <div class="program-dday blue">D-4</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">31 HITS</div>
-                        🎯
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">교수학습지원센터</div>
-                        <div class="program-title">동기역량강화 집단 학습컨설팅(2025-2학기)</div>
-                        <div class="program-category">동기역량강화 집단 학습컨설팅(2025-2학기)</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.11.03(월) ~ 2025.11.10(월)<br>
-                            ⏰ 운영: 2025.11.12(수) ~ 2025.12.03(수)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 62.5%; background: #fee140;"></div>
-                            </div>
-                            <div class="progress-text">5/8명</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 프로그램 카드 5 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
-                        <div class="program-dday closed">마감</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">94 HITS</div>
-                        🌟
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">학생복지센터 학생복지센터 - ...</div>
-                        <div class="program-title">세대공감 '인생책 함께읽기'</div>
-                        <div class="program-category">세대공감 '인생책 함께읽기'</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.10.27(월) ~ 2025.11.07(금)<br>
-                            ⏰ 운영: 2025.11.01(토) ~ 2025.12.19(금)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%; background: #330867;"></div>
-                            </div>
-                            <div class="progress-text">15/무제한</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 프로그램 카드 6 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                        <div class="program-dday closed">모집완료</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">90 HITS</div>
-                        🌈
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">약학대학 약학과(2+4) - 약학과...</div>
-                        <div class="program-title">우리 몸의 닮 조절을 위한 인슐린 작용 이해</div>
-                        <div class="program-category">우리 몸의 닮 조절을 위한 인슐린 작용 이해</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.10.01(수) ~ 2025.11.28(금)<br>
-                            ⏰ 운영: 2025.10.01(수) ~ 2025.11.28(금)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%; background: #fed6e3;"></div>
-                            </div>
-                            <div class="progress-text">승인필요</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 프로그램 카드 7 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);">
-                        <div class="program-dday green">D-24</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">713 HITS</div>
-                        🎨
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">역량개발인증센터 역량개발인...</div>
-                        <div class="program-title">2025학년도 2학기 우석챔프 시즌제 장학금</div>
-                        <div class="program-category">2025학년도 2학기 우석챔프 시즌제 장학금</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.09.08(월) ~ 2025.11.30(일)<br>
-                            ⏰ 운영: 2025.09.08(월) ~ 2026.01.31(토)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%; background: #fecfef;"></div>
-                            </div>
-                            <div class="progress-text">160/무제한</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 프로그램 카드 8 -->
-                <div class="program-card">
-                    <div class="program-image" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-                        <div class="program-dday green">D-35</div>
-                        <div class="program-favorite">⭐</div>
-                        <div class="program-hits">398 HITS</div>
-                        📖
-                    </div>
-                    <div class="program-content">
-                        <div class="program-department">전공설계지원센터</div>
-                        <div class="program-title">[전주] 2025학년도 1학기 찾아가는 Academic Advising</div>
-                        <div class="program-category">[전주] 2025학년도 1학기 찾아가는 Academic Advising</div>
-                        <div class="program-dates">
-                            📅 신청: 2025.03.03(월) ~ 2025.12.12(금)<br>
-                            ⏰ 운영: 2025.03.03(월) ~ 2025.12.19(금)
-                        </div>
-                        <div class="program-progress">
-                            <div class="progress-bar-container">
-                                <div class="progress-bar" style="width: 100%; background: #fcb69f;"></div>
-                            </div>
-                            <div class="progress-text">432/무제한</div>
+                            <div class="progress-text"
+                                 th:text="${program.currentParticipants} + '/' + ${program.maxParticipants != null ? program.maxParticipants + '명' : '무제한'}"></div>
                         </div>
                     </div>
                 </div>
