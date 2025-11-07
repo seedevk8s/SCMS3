@@ -53,6 +53,7 @@ public class AuthController {
         session.setAttribute("name", response.getName());
         session.setAttribute("role", response.getRole());
         session.setAttribute("isFirstLogin", response.getIsFirstLogin());
+        session.setAttribute("isAdmin", response.getRole() == com.scms.app.model.UserRole.ADMIN);
 
         // Spring Security SecurityContext에 인증 정보 설정
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
