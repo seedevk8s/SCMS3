@@ -44,18 +44,32 @@ public class ProgramAdminController {
      */
     @GetMapping
     public String listPrograms(Model model, HttpSession session) {
+        log.info("========================================");
+        log.info("=== /admin/programs 호출됨");
+        log.info("=== Session ID: {}", session.getId());
+        log.info("=== Session userId: {}", session.getAttribute("userId"));
+        log.info("=== Session name: {}", session.getAttribute("name"));
+        log.info("=== Session isAdmin: {}", session.getAttribute("isAdmin"));
+
         // 관리자 권한 체크
         if (!checkAdminRole(session)) {
+            log.warn("=== 관리자 권한 없음! 홈으로 리다이렉트");
             return "redirect:/";
         }
 
+        log.info("=== 관리자 권한 확인 완료");
         List<Program> programs = programService.getAllPrograms();
         List<ProgramResponse> programResponses = programs.stream()
                 .map(ProgramResponse::from)
                 .collect(Collectors.toList());
 
+        log.info("=== 프로그램 개수: {}", programResponses.size());
         model.addAttribute("programs", programResponses);
         model.addAttribute("pageTitle", "프로그램 관리");
+
+        log.info("=== 반환할 템플릿: admin/program-list");
+        log.info("=== 이 템플릿은 layout/admin-layout을 사용해야 함");
+        log.info("========================================");
         return "admin/program-list";
     }
 
