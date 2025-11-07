@@ -226,6 +226,43 @@
                 font-size: 48px;
             }
 
+            /* 프로그램 카드 배경색 (8가지) */
+            .program-image[data-bg-index="0"] {
+                background: linear-gradient(135deg, #a8e063 0%, #56ab2f 100%);
+            }
+
+            .program-image[data-bg-index="1"] {
+                background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            }
+
+            .program-image[data-bg-index="2"] {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            }
+
+            .program-image[data-bg-index="3"] {
+                background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            }
+
+            .program-image[data-bg-index="4"] {
+                background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+            }
+
+            .program-image[data-bg-index="5"] {
+                background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            }
+
+            .program-image[data-bg-index="6"] {
+                background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            }
+
+            .program-image[data-bg-index="7"] {
+                background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            }
+
+            .program-icon {
+                font-size: 48px;
+            }
+
             .program-dday {
                 position: absolute;
                 top: 12px;
@@ -502,52 +539,48 @@
             <div class="program-grid">
                 <!-- 프로그램 카드 반복 -->
                 <div th:each="program, iterStat : ${programs}" class="program-card">
-                    <div class="program-image"
-                         th:style="'background: ' + ${#lists.contains({0,1,2,3,4,5,6,7}, iterStat.index % 8) ?
-                            (iterStat.index % 8 == 0 ? 'linear-gradient(135deg, #a8e063 0%, #56ab2f 100%)' :
-                             iterStat.index % 8 == 1 ? 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)' :
-                             iterStat.index % 8 == 2 ? 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)' :
-                             iterStat.index % 8 == 3 ? 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)' :
-                             iterStat.index % 8 == 4 ? 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)' :
-                             iterStat.index % 8 == 5 ? 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' :
-                             iterStat.index % 8 == 6 ? 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' :
-                             'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)') :
-                            'linear-gradient(135deg, #a8e063 0%, #56ab2f 100%)'};">
-
+                    <!-- 배경색 설정 -->
+                    <div class="program-image" th:attr="data-bg-index=${iterStat.index % 8}">
                         <!-- D-day 배지 -->
                         <div th:if="${program.dDay != null}"
-                             th:class="${program.dDay <= 2 ? 'program-dday urgent' : program.dDay <= 7 ? 'program-dday blue' : 'program-dday green'}"
-                             th:text="${program.dDay == 0 ? 'D-Day' : program.dDay == 1 ? '입박' : 'D-' + program.dDay}"></div>
-                        <div th:if="${program.dDay == null}"
-                             class="program-dday closed"
-                             th:text="${program.status.description}"></div>
+                             th:class="${program.dDay <= 2 ? 'program-dday urgent' : program.dDay <= 7 ? 'program-dday blue' : 'program-dday green'}">
+                            <span th:if="${program.dDay == 0}">D-Day</span>
+                            <span th:if="${program.dDay == 1}">입박</span>
+                            <span th:if="${program.dDay > 1}" th:text="'D-' + ${program.dDay}"></span>
+                        </div>
+                        <div th:if="${program.dDay == null}" class="program-dday closed" th:text="${program.status.description}"></div>
 
                         <div class="program-favorite">⭐</div>
-                        <div class="program-hits" th:text="${program.hits} + ' HITS'"></div>
-                        <span th:text="${iterStat.index % 8 == 0 ? '📋' :
-                                       iterStat.index % 8 == 1 ? '🎭' :
-                                       iterStat.index % 8 == 2 ? '🎓' :
-                                       iterStat.index % 8 == 3 ? '🎯' :
-                                       iterStat.index % 8 == 4 ? '🌟' :
-                                       iterStat.index % 8 == 5 ? '🌈' :
-                                       iterStat.index % 8 == 6 ? '🎨' : '📖'}"></span>
+                        <div class="program-hits"><span th:text="${program.hits}"></span> HITS</div>
+
+                        <!-- 아이콘 -->
+                        <span class="program-icon">
+                            <span th:if="${iterStat.index % 8 == 0}">📋</span>
+                            <span th:if="${iterStat.index % 8 == 1}">🎭</span>
+                            <span th:if="${iterStat.index % 8 == 2}">🎓</span>
+                            <span th:if="${iterStat.index % 8 == 3}">🎯</span>
+                            <span th:if="${iterStat.index % 8 == 4}">🌟</span>
+                            <span th:if="${iterStat.index % 8 == 5}">🌈</span>
+                            <span th:if="${iterStat.index % 8 == 6}">🎨</span>
+                            <span th:if="${iterStat.index % 8 == 7}">📖</span>
+                        </span>
                     </div>
                     <div class="program-content">
                         <div class="program-department" th:text="${program.department}"></div>
                         <div class="program-title" th:text="${program.title}"></div>
-                        <div class="program-category" th:text="${program.subCategory ?: program.category}"></div>
+                        <div class="program-category" th:text="${program.subCategory != null ? program.subCategory : program.category}"></div>
                         <div class="program-dates">
                             <span th:text="'📅 신청: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span><br>
-                            <span th:if="${program.content}"
+                            <span th:if="${program.content != null}"
                                   th:text="'⏰ 운영: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span>
                         </div>
                         <div class="program-progress">
                             <div class="progress-bar-container">
-                                <div class="progress-bar"
-                                     th:style="'width: ' + ${program.participationRate} + '%;'"></div>
+                                <div class="progress-bar" th:style="'width: ' + ${program.participationRate} + '%;'"></div>
                             </div>
-                            <div class="progress-text"
-                                 th:text="${program.currentParticipants} + '/' + ${program.maxParticipants != null ? program.maxParticipants + '명' : '무제한'}"></div>
+                            <div class="progress-text">
+                                <span th:text="${program.currentParticipants}"></span>/<span th:if="${program.maxParticipants != null}" th:text="${program.maxParticipants} + '명'"></span><span th:if="${program.maxParticipants == null}">무제한</span>
+                            </div>
                         </div>
                     </div>
                 </div>

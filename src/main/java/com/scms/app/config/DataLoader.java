@@ -33,18 +33,26 @@ public class DataLoader {
         return args -> {
             // users 테이블이 비어있으면 초기 데이터 생성
             if (userRepository.count() == 0) {
+                log.info("=================================================");
                 log.info("초기 사용자 데이터를 생성합니다...");
+                log.info("=================================================");
                 createInitialUsers();
+                log.info("=================================================");
                 log.info("초기 사용자 데이터 생성 완료!");
+                log.info("=================================================");
             } else {
                 log.info("기존 사용자 데이터가 있습니다. 초기 데이터 생성을 건너뜁니다.");
             }
 
             // programs 테이블이 비어있으면 샘플 데이터 생성
             if (programRepository.count() == 0) {
+                log.info("=================================================");
                 log.info("샘플 프로그램 데이터를 생성합니다...");
+                log.info("=================================================");
                 createSamplePrograms();
-                log.info("샘플 프로그램 데이터 생성 완료!");
+                log.info("=================================================");
+                log.info("샘플 프로그램 데이터 8개 생성 완료!");
+                log.info("=================================================");
             } else {
                 log.info("기존 프로그램 데이터가 있습니다. 샘플 데이터 생성을 건너뜁니다.");
             }
@@ -94,7 +102,7 @@ public class DataLoader {
                 .failCnt(0)
                 .build();
         userRepository.save(admin);
-        log.info("관리자 계정 생성: {} (학번: {})", admin.getName(), admin.getStudentNum());
+        log.info("✅ 관리자 계정 생성: {} (학번: {}, 비밀번호: admin123)", admin.getName(), admin.getStudentNum());
     }
 
     /**
@@ -124,7 +132,7 @@ public class DataLoader {
                 .build();
 
         userRepository.save(user);
-        log.info("사용자 생성: {} (학번: {}, 초기 비밀번호: {})", name, studentNum, initialPassword);
+        log.info("✅ 학생 계정 생성: {} (학번: {}, 초기 비밀번호: {})", name, studentNum, initialPassword);
     }
 
     /**
@@ -271,6 +279,6 @@ public class DataLoader {
             .build();
 
         programRepository.save(program);
-        log.info("프로그램 생성: {} (신청 마감: {})", title, applicationEndDate.toLocalDate());
+        log.info("✅ 프로그램 생성: {} (신청 마감: {})", title, applicationEndDate.toLocalDate());
     }
 }
