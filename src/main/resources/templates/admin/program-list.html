@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>프로그램 관리</title>
+    <th:block layout:fragment="css">
+        <style>
+            .admin-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .admin-header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #172B4D;
+            }
+
+            .btn-primary {
+                background: #2C5F5D;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s;
+                text-decoration: none;
+                display: inline-block;
+            }
+
+            .btn-primary:hover {
+                background: #1a3d3b;
+            }
+
+            .alert {
+                padding: 16px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .alert-success {
+                background: #E3FCEF;
+                border: 1px solid #36B37E;
+                color: #006644;
+            }
+
+            .alert-error {
+                background: #FFEBE6;
+                border: 1px solid #DE350B;
+                color: #BF2600;
+            }
+
+            .program-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .program-table thead {
+                background: #F4F5F7;
+            }
+
+            .program-table th {
+                padding: 16px;
+                text-align: left;
+                font-size: 14px;
+                font-weight: 600;
+                color: #172B4D;
+                border-bottom: 2px solid #DFE1E6;
+            }
+
+            .program-table td {
+                padding: 16px;
+                border-bottom: 1px solid #F4F5F7;
+                font-size: 14px;
+                color: #42526E;
+            }
+
+            .program-table tbody tr:hover {
+                background: #F9FAFB;
+            }
+
+            .status-badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .status-SCHEDULED {
+                background: #E3FCEF;
+                color: #006644;
+            }
+
+            .status-OPEN {
+                background: #DEEBFF;
+                color: #0052CC;
+            }
+
+            .status-FULL {
+                background: #FFF0B3;
+                color: #FF8B00;
+            }
+
+            .status-CLOSED {
+                background: #F4F5F7;
+                color: #505F79;
+            }
+
+            .dday-badge {
+                display: inline-block;
+                padding: 4px 8px;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .dday-urgent {
+                background: #8B5CF6;
+                color: white;
+            }
+
+            .dday-soon {
+                background: #0052CC;
+                color: white;
+            }
+
+            .dday-normal {
+                background: #36B37E;
+                color: white;
+            }
+
+            .btn-group {
+                display: flex;
+                gap: 8px;
+            }
+
+            .btn-sm {
+                padding: 6px 12px;
+                font-size: 12px;
+                border-radius: 4px;
+                border: none;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s;
+            }
+
+            .btn-edit {
+                background: #0052CC;
+                color: white;
+            }
+
+            .btn-edit:hover {
+                background: #0747A6;
+            }
+
+            .btn-delete {
+                background: #DE350B;
+                color: white;
+            }
+
+            .btn-delete:hover {
+                background: #BF2600;
+            }
+
+            .no-data {
+                text-align: center;
+                padding: 60px 20px;
+                color: #7A869A;
+                font-size: 16px;
+            }
+
+            .truncate {
+                max-width: 300px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="container" style="max-width: 1400px; margin: 40px auto; padding: 0 24px;">
+            <!-- 헤더 -->
+            <div class="admin-header">
+                <h1>프로그램 관리</h1>
+                <a href="/admin/programs/new" class="btn-primary">
+                    + 새 프로그램 등록
+                </a>
+            </div>
+
+            <!-- 알림 메시지 -->
+            <div th:if="${message}" th:class="'alert alert-' + ${messageType}">
+                <span th:text="${message}"></span>
+            </div>
+
+            <!-- 프로그램 목록 테이블 -->
+            <div th:if="${programs.size() > 0}">
+                <table class="program-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>제목</th>
+                            <th>부서</th>
+                            <th>카테고리</th>
+                            <th>D-day</th>
+                            <th>상태</th>
+                            <th>참가자</th>
+                            <th>조회수</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="program : ${programs}">
+                            <td th:text="${program.programId}"></td>
+                            <td>
+                                <div class="truncate" th:text="${program.title}" th:title="${program.title}"></div>
+                            </td>
+                            <td th:text="${program.department}"></td>
+                            <td th:text="${program.category}"></td>
+                            <td>
+                                <span th:if="${program.dDay != null}"
+                                      th:class="${program.dDay <= 2 ? 'dday-badge dday-urgent' :
+                                                 program.dDay <= 7 ? 'dday-badge dday-soon' :
+                                                 'dday-badge dday-normal'}">
+                                    <span th:if="${program.dDay == 1}">입박</span>
+                                    <span th:if="${program.dDay != 1}" th:text="'D-' + ${program.dDay}"></span>
+                                </span>
+                                <span th:if="${program.dDay == null}" style="color: #7A869A;">마감</span>
+                            </td>
+                            <td>
+                                <span th:class="'status-badge status-' + ${program.status}"
+                                      th:text="${program.status.description}"></span>
+                            </td>
+                            <td>
+                                <span th:text="${program.currentParticipants}"></span> /
+                                <span th:if="${program.maxParticipants != null}" th:text="${program.maxParticipants}"></span>
+                                <span th:if="${program.maxParticipants == null}">무제한</span>
+                            </td>
+                            <td th:text="${program.hits}"></td>
+                            <td>
+                                <div class="btn-group">
+                                    <a th:href="@{/admin/programs/{id}/edit(id=${program.programId})}"
+                                       class="btn-sm btn-edit">수정</a>
+                                    <form th:action="@{/admin/programs/{id}/delete(id=${program.programId})}"
+                                          method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                        <button type="submit" class="btn-sm btn-delete">삭제</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 데이터 없음 -->
+            <div th:if="${programs.size() == 0}" class="no-data">
+                등록된 프로그램이 없습니다.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

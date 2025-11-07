@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${isEdit ? '프로그램 수정' : '프로그램 등록'}">프로그램 등록</title>
+    <th:block layout:fragment="css">
+        <style>
+            .form-container {
+                max-width: 900px;
+                margin: 40px auto;
+                padding: 0 24px;
+            }
+
+            .form-header {
+                margin-bottom: 30px;
+            }
+
+            .form-header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #172B4D;
+            }
+
+            .form-card {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                padding: 32px;
+            }
+
+            .form-group {
+                margin-bottom: 24px;
+            }
+
+            .form-label {
+                display: block;
+                font-size: 14px;
+                font-weight: 600;
+                color: #172B4D;
+                margin-bottom: 8px;
+            }
+
+            .form-label.required::after {
+                content: '*';
+                color: #DE350B;
+                margin-left: 4px;
+            }
+
+            .form-input,
+            .form-textarea,
+            .form-select {
+                width: 100%;
+                padding: 10px 12px;
+                border: 2px solid #DFE1E6;
+                border-radius: 4px;
+                font-size: 14px;
+                color: #172B4D;
+                transition: border-color 0.2s;
+                box-sizing: border-box;
+            }
+
+            .form-input:focus,
+            .form-textarea:focus,
+            .form-select:focus {
+                outline: none;
+                border-color: #2C5F5D;
+            }
+
+            .form-textarea {
+                resize: vertical;
+                min-height: 100px;
+            }
+
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+
+            .form-error {
+                color: #DE350B;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+
+            .form-help {
+                color: #7A869A;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 12px;
+                justify-content: flex-end;
+                margin-top: 32px;
+                padding-top: 24px;
+                border-top: 1px solid #DFE1E6;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                border: none;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s;
+            }
+
+            .btn-primary {
+                background: #2C5F5D;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #1a3d3b;
+            }
+
+            .btn-secondary {
+                background: #F4F5F7;
+                color: #42526E;
+            }
+
+            .btn-secondary:hover {
+                background: #DFE1E6;
+            }
+
+            .input-error {
+                border-color: #DE350B;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="form-container">
+            <!-- 헤더 -->
+            <div class="form-header">
+                <h1 th:text="${isEdit ? '프로그램 수정' : '프로그램 등록'}">프로그램 등록</h1>
+            </div>
+
+            <!-- 폼 카드 -->
+            <div class="form-card">
+                <form th:action="${isEdit ? '/admin/programs/' + programId + '/edit' : '/admin/programs/new'}"
+                      th:object="${programRequest}"
+                      method="post">
+
+                    <!-- 프로그램 제목 -->
+                    <div class="form-group">
+                        <label class="form-label required" for="title">프로그램 제목</label>
+                        <input type="text"
+                               id="title"
+                               th:field="*{title}"
+                               th:classappend="${#fields.hasErrors('title')} ? 'input-error'"
+                               class="form-input"
+                               placeholder="프로그램 제목을 입력하세요">
+                        <div class="form-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
+                    </div>
+
+                    <!-- 간단 설명 -->
+                    <div class="form-group">
+                        <label class="form-label" for="description">간단 설명</label>
+                        <textarea id="description"
+                                  th:field="*{description}"
+                                  class="form-textarea"
+                                  placeholder="프로그램에 대한 간단한 설명을 입력하세요"></textarea>
+                        <div class="form-help">카드에 표시될 간단한 설명입니다.</div>
+                    </div>
+
+                    <!-- 상세 내용 -->
+                    <div class="form-group">
+                        <label class="form-label" for="content">상세 내용</label>
+                        <textarea id="content"
+                                  th:field="*{content}"
+                                  class="form-textarea"
+                                  style="min-height: 150px;"
+                                  placeholder="프로그램에 대한 상세한 설명을 입력하세요"></textarea>
+                        <div class="form-help">상세 페이지에 표시될 내용입니다.</div>
+                    </div>
+
+                    <!-- 부서 및 단과대학 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="department">행정부서</label>
+                            <input type="text"
+                                   id="department"
+                                   th:field="*{department}"
+                                   class="form-input"
+                                   placeholder="예: 취창업지원센터">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="college">단과대학</label>
+                            <input type="text"
+                                   id="college"
+                                   th:field="*{college}"
+                                   class="form-input"
+                                   placeholder="예: 공과대학">
+                        </div>
+                    </div>
+
+                    <!-- 카테고리 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="category">카테고리</label>
+                            <input type="text"
+                                   id="category"
+                                   th:field="*{category}"
+                                   th:classappend="${#fields.hasErrors('category')} ? 'input-error'"
+                                   class="form-input"
+                                   placeholder="예: 진로지도">
+                            <div class="form-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="subCategory">세부 카테고리</label>
+                            <input type="text"
+                                   id="subCategory"
+                                   th:field="*{subCategory}"
+                                   class="form-input"
+                                   placeholder="세부 분류 (선택)">
+                        </div>
+                    </div>
+
+                    <!-- 신청 기간 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label required" for="applicationStartDate">신청 시작일</label>
+                            <input type="datetime-local"
+                                   id="applicationStartDate"
+                                   th:field="*{applicationStartDate}"
+                                   th:classappend="${#fields.hasErrors('applicationStartDate')} ? 'input-error'"
+                                   class="form-input">
+                            <div class="form-error" th:if="${#fields.hasErrors('applicationStartDate')}" th:errors="*{applicationStartDate}"></div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required" for="applicationEndDate">신청 종료일</label>
+                            <input type="datetime-local"
+                                   id="applicationEndDate"
+                                   th:field="*{applicationEndDate}"
+                                   th:classappend="${#fields.hasErrors('applicationEndDate')} ? 'input-error'"
+                                   class="form-input">
+                            <div class="form-error" th:if="${#fields.hasErrors('applicationEndDate')}" th:errors="*{applicationEndDate}"></div>
+                        </div>
+                    </div>
+
+                    <!-- 정원 및 상태 -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="maxParticipants">최대 정원</label>
+                            <input type="number"
+                                   id="maxParticipants"
+                                   th:field="*{maxParticipants}"
+                                   class="form-input"
+                                   placeholder="무제한인 경우 비워두세요"
+                                   min="1">
+                            <div class="form-help">비워두면 무제한으로 설정됩니다.</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required" for="status">프로그램 상태</label>
+                            <select id="status"
+                                    th:field="*{status}"
+                                    th:classappend="${#fields.hasErrors('status')} ? 'input-error'"
+                                    class="form-select">
+                                <option th:each="status : ${statuses}"
+                                        th:value="${status}"
+                                        th:text="${status.description}"></option>
+                            </select>
+                            <div class="form-error" th:if="${#fields.hasErrors('status')}" th:errors="*{status}"></div>
+                        </div>
+                    </div>
+
+                    <!-- 썸네일 URL -->
+                    <div class="form-group">
+                        <label class="form-label" for="thumbnailUrl">썸네일 URL</label>
+                        <input type="text"
+                               id="thumbnailUrl"
+                               th:field="*{thumbnailUrl}"
+                               class="form-input"
+                               placeholder="프로그램 이미지 URL (선택)">
+                        <div class="form-help">외부 이미지 URL을 입력하세요.</div>
+                    </div>
+
+                    <!-- 작업 버튼 -->
+                    <div class="form-actions">
+                        <a href="/admin/programs" class="btn btn-secondary">취소</a>
+                        <button type="submit" class="btn btn-primary" th:text="${isEdit ? '수정' : '등록'}">등록</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
