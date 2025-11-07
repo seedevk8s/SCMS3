@@ -63,7 +63,9 @@ public class HomeController {
     @PostMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/login?message=로그아웃되었습니다";
+        // Spring Security SecurityContext도 클리어
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        return "redirect:/";
     }
 
     /**
