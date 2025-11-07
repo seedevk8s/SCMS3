@@ -37,6 +37,12 @@
 
         <!-- 우측 액션 버튼 -->
         <div class="header-actions">
+            <!-- 디버그 정보 (임시) -->
+            <span style="color: red; font-size: 10px; margin-right: 10px;">
+                DEBUG: userId=<span th:text="${session.userId}">?</span>,
+                role=<span th:text="${session.role}">?</span>
+            </span>
+
             <a href="#" class="header-link">외부취업가점</a>
             <span class="header-divider">|</span>
             <span th:if="${session.name}" class="header-link" th:text="${session.name} + '님'"></span>

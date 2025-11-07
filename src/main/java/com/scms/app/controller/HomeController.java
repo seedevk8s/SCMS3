@@ -31,6 +31,14 @@ public class HomeController {
         if (userId != null) {
             model.addAttribute("userName", session.getAttribute("name"));
             model.addAttribute("userRole", session.getAttribute("role"));
+
+            // 디버그: 세션 정보 로그 출력
+            System.out.println("=== 세션 디버그 ===");
+            System.out.println("userId: " + userId);
+            System.out.println("name: " + session.getAttribute("name"));
+            System.out.println("role: " + session.getAttribute("role"));
+            System.out.println("role class: " + (session.getAttribute("role") != null ? session.getAttribute("role").getClass().getName() : "null"));
+            System.out.println("==================");
         }
 
         // 메인 페이지용 프로그램 목록 조회 (최신 8개)
