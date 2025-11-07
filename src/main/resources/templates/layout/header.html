@@ -40,6 +40,9 @@
             <a href="#" class="header-link">외부취업가점</a>
             <span class="header-divider">|</span>
             <span th:if="${session.name}" class="header-link" th:text="${session.name} + '님'"></span>
+            <span th:if="${session.role != null and session.role.name() == 'ADMIN'}" class="header-divider">|</span>
+            <a th:if="${session.role != null and session.role.name() == 'ADMIN'}" href="/admin/programs" class="header-link" style="color: #2C5F5D; font-weight: 600;">프로그램 관리</a>
+            <span th:if="${session.userId != null}" class="header-divider">|</span>
             <a th:if="${session.userId == null}" href="/login" class="header-link">로그인</a>
             <a th:if="${session.userId != null}" href="/logout" class="header-link">로그아웃</a>
             <button class="btn-search" aria-label="검색">
