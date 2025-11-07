@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      layout:decorate="~{layout/layout}">
+      layout:decorate="~{layout/admin-layout}">
 <head>
     <title>프로그램 관리</title>
     <th:block layout:fragment="css">
@@ -191,10 +191,13 @@
 </head>
 <body>
     <div layout:fragment="content">
-        <div class="container" style="max-width: 1400px; margin: 40px auto; padding: 0 24px;">
+        <div style="max-width: 100%;">
             <!-- 헤더 -->
-            <div class="admin-header">
-                <h1>프로그램 관리</h1>
+            <div class="admin-page-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1 class="admin-page-title">프로그램 관리</h1>
+                    <p class="admin-page-subtitle">CHAMP 비교과 프로그램을 관리합니다</p>
+                </div>
                 <a href="/admin/programs/new" class="btn-primary">
                     + 새 프로그램 등록
                 </a>
