@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -28,6 +30,7 @@ import java.util.Collections;
 public class AuthController {
 
     private final UserService userService;
+    private final SecurityContextRepository securityContextRepository;
 
     /**
      * 로그인 API
@@ -61,9 +64,18 @@ public class AuthController {
                 null, // credentials (비밀번호는 저장하지 않음)
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + response.getRole().name()))
         );
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // SecurityContext에 인증 정보 저장
+        SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+        securityContext.setAuthentication(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // SecurityContext를 HttpSession에 명시적으로 저장 (REST API 로그인이므로 필수!)
+        securityContextRepository.saveContext(securityContext, httpRequest, null);
 
         log.info("로그인 성공: {} ({}) - Role: {}", response.getName(), response.getStudentNum(), response.getRole());
+        log.info("Spring Security 인증 정보 저장 완료: Principal={}, Authorities={}",
+                authentication.getPrincipal(), authentication.getAuthorities());
 
         return ResponseEntity.ok(response);
     }

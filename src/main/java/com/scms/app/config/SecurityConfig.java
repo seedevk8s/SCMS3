@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 
 /**
  * Spring Security 설정
@@ -16,6 +18,14 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     /**
+     * SecurityContext를 HttpSession에 저장하기 위한 Repository
+     */
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
+    /**
      * Security Filter Chain 설정
      */
     @Bean
@@ -23,6 +33,11 @@ public class SecurityConfig {
         http
                 // CSRF 비활성화 (개발 단계, 추후 활성화 필요)
                 .csrf(csrf -> csrf.disable())
+
+                // SecurityContext를 세션에 저장하도록 설정
+                .securityContext(context -> context
+                        .securityContextRepository(securityContextRepository())
+                )
 
                 // 요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
