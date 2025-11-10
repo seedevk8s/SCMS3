@@ -63,11 +63,13 @@ public class DataLoader implements CommandLineRunner {
         log.info("초기 프로그램 데이터 50개를 로드합니다...");
 
         try {
-            // data.sql 파일 읽기
+            // data.sql 파일 읽기 (주석 제거)
             ClassPathResource resource = new ClassPathResource("data.sql");
             String sql = new BufferedReader(
                 new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
                 .lines()
+                .filter(line -> !line.trim().startsWith("--"))  // 주석 라인 제거
+                .filter(line -> !line.trim().isEmpty())         // 빈 라인 제거
                 .collect(Collectors.joining("\n"));
 
             // SQL을 개별 INSERT 문으로 분리
@@ -76,18 +78,19 @@ public class DataLoader implements CommandLineRunner {
             int insertCount = 0;
             for (String statement : statements) {
                 String trimmed = statement.trim();
-                if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
+                if (!trimmed.isEmpty()) {
                     try {
                         jdbcTemplate.execute(trimmed);
                         insertCount++;
+                        log.debug("SQL 실행 성공 ({}번째)", insertCount);
                     } catch (Exception e) {
-                        log.warn("SQL 실행 실패 (건너뜀): {}", e.getMessage());
+                        log.error("SQL 실행 실패: {}", e.getMessage());
                     }
                 }
             }
 
             long afterCount = programRepository.count();
-            log.info("✅ 초기 데이터 로드 완료: {}개 프로그램 생성됨", afterCount);
+            log.info("✅ 초기 데이터 로드 완료: {}개 INSERT 문 실행, {}개 프로그램 생성됨", insertCount, afterCount);
 
         } catch (Exception e) {
             log.error("초기 데이터 로드 중 오류 발생", e);
