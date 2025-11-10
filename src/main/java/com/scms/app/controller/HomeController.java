@@ -5,6 +5,7 @@ import com.scms.app.model.UserRole;
 import com.scms.app.service.ProgramService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -71,6 +72,8 @@ public class HomeController {
             @RequestParam(required = false) String college,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
             Model model,
             HttpSession session) {
         // 세션에서 사용자 정보 가져오기
@@ -84,16 +87,21 @@ public class HomeController {
             }
         }
 
-        // 필터링 또는 검색
-        List<Program> programs;
+        // 필터링 또는 검색 with 페이지네이션
+        Page<Program> programPage;
         if (search != null && !search.trim().isEmpty()) {
-            programs = programService.searchProgramsByTitle(search);
+            programPage = programService.searchProgramsByTitleWithPagination(search, page, size);
         } else if (department != null || college != null || category != null) {
-            programs = programService.getProgramsByFilters(department, college, category);
+            programPage = programService.getProgramsByFiltersWithPagination(department, college, category, page, size);
         } else {
-            programs = programService.getAllPrograms();
+            programPage = programService.getAllProgramsWithPagination(page, size);
         }
-        model.addAttribute("programs", programs);
+
+        model.addAttribute("programs", programPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", programPage.getTotalPages());
+        model.addAttribute("totalItems", programPage.getTotalElements());
+        model.addAttribute("pageSize", size);
 
         // 현재 선택된 필터 정보를 Model에 추가
         model.addAttribute("selectedDepartment", department);

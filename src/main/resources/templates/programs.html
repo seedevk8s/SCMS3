@@ -348,6 +348,59 @@
             color: #999;
         }
 
+        /* 페이지네이션 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 48px;
+            padding: 24px 0;
+        }
+
+        .pagination-button {
+            min-width: 40px;
+            height: 40px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-button:hover:not(:disabled):not(.active) {
+            border-color: #2C5F5D;
+            color: #2C5F5D;
+            background: #f8fafa;
+        }
+
+        .pagination-button.active {
+            background: #2C5F5D;
+            color: white;
+            border-color: #2C5F5D;
+            cursor: default;
+        }
+
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-button.prev,
+        .pagination-button.next {
+            padding: 8px 16px;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #666;
+            margin: 0 16px;
+        }
+
         /* 반응형 */
         @media (max-width: 1200px) {
             .programs-grid {
@@ -532,6 +585,56 @@
             <h3>검색 결과가 없습니다</h3>
             <p>다른 검색어나 필터를 시도해보세요</p>
         </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination" th:if="${totalPages > 0}">
+            <!-- 이전 버튼 -->
+            <button class="pagination-button prev"
+                    th:disabled="${currentPage == 0}"
+                    onclick="goToPage([[${currentPage - 1}]])">
+                <i class="fas fa-chevron-left"></i> 이전
+            </button>
+
+            <!-- 페이지 번호 -->
+            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                <!-- 첫 3페이지 -->
+                <button th:if="${i < 3}"
+                        class="pagination-button"
+                        th:classappend="${i == currentPage ? 'active' : ''}"
+                        th:text="${i + 1}"
+                        th:onclick="'goToPage(' + ${i} + ')'">
+                </button>
+
+                <!-- ... (생략 표시) -->
+                <span th:if="${i == 3 && totalPages > 7 && currentPage > 3}" class="pagination-info">...</span>
+
+                <!-- 현재 페이지 주변 (currentPage-1, currentPage, currentPage+1) -->
+                <button th:if="${i >= 3 && i < totalPages - 3 && i >= currentPage - 1 && i <= currentPage + 1}"
+                        class="pagination-button"
+                        th:classappend="${i == currentPage ? 'active' : ''}"
+                        th:text="${i + 1}"
+                        th:onclick="'goToPage(' + ${i} + ')'">
+                </button>
+
+                <!-- ... (생략 표시) -->
+                <span th:if="${i == totalPages - 4 && totalPages > 7 && currentPage < totalPages - 4}" class="pagination-info">...</span>
+
+                <!-- 마지막 3페이지 -->
+                <button th:if="${i >= totalPages - 3 && totalPages > 3}"
+                        class="pagination-button"
+                        th:classappend="${i == currentPage ? 'active' : ''}"
+                        th:text="${i + 1}"
+                        th:onclick="'goToPage(' + ${i} + ')'">
+                </button>
+            </th:block>
+
+            <!-- 다음 버튼 -->
+            <button class="pagination-button next"
+                    th:disabled="${currentPage == totalPages - 1}"
+                    onclick="goToPage([[${currentPage + 1}]])">
+                다음 <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
     </div>
 
     <th:block layout:fragment="script">
@@ -602,6 +705,13 @@
             // 필터 초기화
             function resetFilters() {
                 window.location.href = '/programs';
+            }
+
+            // 페이지 이동
+            function goToPage(pageNum) {
+                const url = new URL(window.location.href);
+                url.searchParams.set('page', pageNum);
+                window.location.href = url.toString();
             }
 
             // 외부 클릭 시 메뉴 닫기

@@ -2,6 +2,8 @@ package com.scms.app.repository;
 
 import com.scms.app.model.Program;
 import com.scms.app.model.ProgramStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -89,6 +91,33 @@ public interface ProgramRepository extends JpaRepository<Program, Integer> {
         @Param("college") String college,
         @Param("category") String category
     );
+
+    /**
+     * 복합 필터 검색 with 페이지네이션
+     */
+    @Query("SELECT p FROM Program p WHERE " +
+           "(:department IS NULL OR p.department = :department) AND " +
+           "(:college IS NULL OR p.college = :college) AND " +
+           "(:category IS NULL OR p.category = :category) AND " +
+           "p.deletedAt IS NULL")
+    Page<Program> findByFiltersWithPagination(
+        @Param("department") String department,
+        @Param("college") String college,
+        @Param("category") String category,
+        Pageable pageable
+    );
+
+    /**
+     * 제목 검색 with 페이지네이션
+     */
+    @Query("SELECT p FROM Program p WHERE p.title LIKE %:keyword% AND p.deletedAt IS NULL")
+    Page<Program> searchByTitleWithPagination(@Param("keyword") String keyword, Pageable pageable);
+
+    /**
+     * 전체 프로그램 조회 with 페이지네이션
+     */
+    @Query("SELECT p FROM Program p WHERE p.deletedAt IS NULL")
+    Page<Program> findAllNotDeletedWithPagination(Pageable pageable);
 
     /**
      * 메인 페이지용 최신 프로그램 조회 (상위 8개, 삭제되지 않은 것만)

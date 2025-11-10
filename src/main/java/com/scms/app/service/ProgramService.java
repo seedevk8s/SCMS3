@@ -5,6 +5,10 @@ import com.scms.app.model.ProgramStatus;
 import com.scms.app.repository.ProgramRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,6 +119,30 @@ public class ProgramService {
      */
     public List<Program> getProgramsByFilters(String department, String college, String category) {
         return programRepository.findByFilters(department, college, category);
+    }
+
+    /**
+     * 복합 필터로 프로그램 조회 with 페이지네이션
+     */
+    public Page<Program> getProgramsByFiltersWithPagination(String department, String college, String category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return programRepository.findByFiltersWithPagination(department, college, category, pageable);
+    }
+
+    /**
+     * 제목으로 프로그램 검색 with 페이지네이션
+     */
+    public Page<Program> searchProgramsByTitleWithPagination(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return programRepository.searchByTitleWithPagination(keyword, pageable);
+    }
+
+    /**
+     * 전체 프로그램 조회 with 페이지네이션
+     */
+    public Page<Program> getAllProgramsWithPagination(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return programRepository.findAllNotDeletedWithPagination(pageable);
     }
 
     /**
