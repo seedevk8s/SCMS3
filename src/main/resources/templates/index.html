@@ -825,14 +825,7 @@
                 changeSlide(1);
             }, 5000);
 
-            // 프로그램 카드 클릭
-            document.querySelectorAll('.program-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    if (!e.target.classList.contains('program-favorite')) {
-                        alert('프로그램 상세 페이지 (준비 중)');
-                    }
-                });
-            });
+            // 프로그램 카드 클릭은 HTML onclick 속성으로 처리됨
 
             // 즐겨찾기 클릭
             document.querySelectorAll('.program-favorite').forEach(star => {
