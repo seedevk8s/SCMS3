@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * 주의: 초기 데이터 로드 후에는 @Component를 주석처리하여 비활성화하세요.
  * (재시작 시 데이터가 삭제되는 것을 방지하기 위함)
  */
-// @Component  // 초기 데이터 로드 완료 - 재시작 시 데이터 삭제 방지를 위해 비활성화
+@Component  // 썸네일 URL 추가를 위해 재활성화
 @RequiredArgsConstructor
 @Slf4j
 public class DataLoader implements CommandLineRunner {
