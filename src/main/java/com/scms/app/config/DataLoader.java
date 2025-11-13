@@ -39,16 +39,19 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         long count = programRepository.count();
 
-        // 정확히 50개이고 특정 샘플 데이터가 있으면 초기화 완료로 간주
+        // 정확히 50개이고 썸네일이 있는 샘플 데이터가 있으면 초기화 완료로 간주
         if (count == 50) {
-            // 샘플 데이터 중 하나가 존재하는지 확인
-            boolean hasSampleData = programRepository.findAll().stream()
-                    .anyMatch(p -> "학습전략 워크샵".equals(p.getTitle()) ||
-                                   "취업 특강 시리즈".equals(p.getTitle()));
+            // 샘플 데이터 중 하나가 존재하고 thumbnailUrl이 있는지 확인
+            boolean hasSampleDataWithThumbnail = programRepository.findAll().stream()
+                    .anyMatch(p -> ("학습전략 워크샵".equals(p.getTitle()) ||
+                                   "취업 특강 시리즈".equals(p.getTitle())) &&
+                                   p.getThumbnailUrl() != null && !p.getThumbnailUrl().isEmpty());
 
-            if (hasSampleData) {
+            if (hasSampleDataWithThumbnail) {
                 log.info("샘플 데이터 50개가 이미 로드되어 있습니다. 초기화를 건너뜁니다.");
                 return;
+            } else {
+                log.warn("기존 데이터에 썸네일 URL이 없습니다. 데이터를 새로 초기화합니다.");
             }
         }
 
