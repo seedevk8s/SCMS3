@@ -31,24 +31,18 @@
             width: 100%;
             height: 360px;
             border-radius: 8px;
-            object-fit: cover;
+            overflow: hidden;
             background: #e9ecef;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #6c757d;
-            font-size: 18px;
         }
 
-        /* 썸네일 배경색 (8가지 gradient 순환) */
-        .program-thumbnail[data-color="0"] { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .program-thumbnail[data-color="1"] { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .program-thumbnail[data-color="2"] { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .program-thumbnail[data-color="3"] { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .program-thumbnail[data-color="4"] { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-        .program-thumbnail[data-color="5"] { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
-        .program-thumbnail[data-color="6"] { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
-        .program-thumbnail[data-color="7"] { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .program-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         .program-info-right {
             display: flex;
@@ -420,8 +414,11 @@
         <!-- 프로그램 헤더 -->
         <div class="program-header-section" th:if="${program != null}">
             <div class="program-header-content">
-                <!-- 썸네일 (gradient 배경색) -->
-                <div class="program-thumbnail" th:attr="data-color=${program.programId % 8}">
+                <!-- 썸네일 이미지 -->
+                <div class="program-thumbnail">
+                    <img th:src="'https://picsum.photos/seed/' + ${program.programId} + '/560/360'"
+                         th:alt="${program.title}"
+                         loading="lazy">
                 </div>
 
                 <!-- 우측 정보 -->
