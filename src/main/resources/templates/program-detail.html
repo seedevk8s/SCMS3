@@ -294,6 +294,326 @@
             font-size: 14px;
         }
 
+        /* 후기 섹션 */
+        .review-section {
+            padding: 0;
+        }
+
+        .review-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            color: white;
+        }
+
+        .average-rating-container {
+            text-align: center;
+        }
+
+        .average-rating-number {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .average-rating-stars {
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        .review-count {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .btn-write-review {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-write-review:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-write-review i {
+            margin-right: 8px;
+        }
+
+        .review-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .review-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .review-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .review-author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .review-author-name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .review-date {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-stars {
+            color: #ffd700;
+            font-size: 18px;
+        }
+
+        .review-content {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+        }
+
+        .review-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .btn-review-edit,
+        .btn-review-delete {
+            padding: 6px 12px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .btn-review-edit:hover {
+            background: #f8f9fa;
+            border-color: #1976d2;
+            color: #1976d2;
+        }
+
+        .btn-review-delete:hover {
+            background: #f8f9fa;
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        /* 후기 모달 */
+        .review-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .review-modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .review-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 24px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .review-modal-header h3 {
+            margin: 0;
+            font-size: 20px;
+            color: #212529;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #6c757d;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+        }
+
+        .btn-close-modal:hover {
+            color: #212529;
+        }
+
+        .review-modal-body {
+            padding: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .rating-input {
+            display: flex;
+            gap: 8px;
+            font-size: 32px;
+        }
+
+        .rating-input .star {
+            cursor: pointer;
+            color: #dee2e6;
+            transition: all 0.2s;
+        }
+
+        .rating-input .star:hover,
+        .rating-input .star.active {
+            color: #ffd700;
+            transform: scale(1.2);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .review-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 24px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn-secondary,
+        .btn-primary {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-primary {
+            background: #1976d2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1565c0;
+        }
+
+        .review-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .review-empty i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
         /* 신청 버튼 */
         .apply-section {
             background: white;
@@ -492,6 +812,7 @@
             <div class="tab-menu">
                 <button class="tab-button" onclick="showTab(event, 'application-status')">나의 신청내역</button>
                 <button class="tab-button active" onclick="showTab(event, 'detail')">세부내용</button>
+                <button class="tab-button" onclick="showTab(event, 'reviews')">후기</button>
             </div>
         </div>
 
@@ -556,6 +877,71 @@
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #dee2e6;">
                 <div th:text="${program.content}" style="white-space: pre-wrap;">
                     프로그램 상세 내용이 여기에 표시됩니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 후기 탭 -->
+        <div id="reviews" class="detail-section tab-pane">
+            <div class="review-section">
+                <!-- 후기 요약 -->
+                <div class="review-summary">
+                    <div class="review-summary-left">
+                        <div class="average-rating-container">
+                            <div class="average-rating-number" id="avgRatingNumber">0.0</div>
+                            <div class="average-rating-stars" id="avgRatingStars">
+                                ☆☆☆☆☆
+                            </div>
+                            <div class="review-count" id="reviewCountText">0개의 후기</div>
+                        </div>
+                    </div>
+                    <div class="review-summary-right">
+                        <button class="btn-write-review" id="btnWriteReview" onclick="openReviewModal()" style="display: none;">
+                            <i class="fas fa-pen"></i> 후기 작성하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 후기 목록 -->
+                <div class="review-list" id="reviewList">
+                    <div class="review-loading" style="text-align: center; padding: 40px; color: #6c757d;">
+                        <i class="fas fa-spinner fa-spin"></i> 로딩 중...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 후기 작성/수정 모달 -->
+        <div id="reviewModal" class="review-modal" style="display: none;">
+            <div class="review-modal-content">
+                <div class="review-modal-header">
+                    <h3 id="reviewModalTitle">후기 작성</h3>
+                    <button class="btn-close-modal" onclick="closeReviewModal()">&times;</button>
+                </div>
+                <div class="review-modal-body">
+                    <div class="form-group">
+                        <label>평점 <span style="color: #dc3545;">*</span></label>
+                        <div class="rating-input">
+                            <span class="star" data-rating="1" onclick="selectRating(1)">☆</span>
+                            <span class="star" data-rating="2" onclick="selectRating(2)">☆</span>
+                            <span class="star" data-rating="3" onclick="selectRating(3)">☆</span>
+                            <span class="star" data-rating="4" onclick="selectRating(4)">☆</span>
+                            <span class="star" data-rating="5" onclick="selectRating(5)">☆</span>
+                        </div>
+                        <input type="hidden" id="reviewRating" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>후기 내용 <span style="color: #dc3545;">*</span></label>
+                        <textarea id="reviewContent" rows="6" maxlength="1000"
+                                  placeholder="프로그램에 대한 솔직한 후기를 남겨주세요. (최대 1000자)"></textarea>
+                        <div class="char-count">
+                            <span id="charCount">0</span> / 1000
+                        </div>
+                    </div>
+                </div>
+                <div class="review-modal-footer">
+                    <button class="btn-secondary" onclick="closeReviewModal()">취소</button>
+                    <button class="btn-primary" id="btnSubmitReview" onclick="submitReview()">등록</button>
                 </div>
             </div>
         </div>
@@ -851,6 +1237,296 @@
                 alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
+
+        // ==================== 후기 기능 ====================
+
+        let currentReviewId = null; // 수정 중인 후기 ID
+        let reviews = []; // 후기 목록
+
+        // 후기 목록 로드
+        async function loadReviews() {
+            try {
+                const response = await fetch(`/api/programs/${programId}/reviews`);
+                const data = await response.json();
+
+                // 평균 평점 표시
+                document.getElementById('avgRatingNumber').textContent = data.averageRating.toFixed(1);
+                document.getElementById('avgRatingStars').innerHTML = getStarsHTML(data.averageRating);
+                document.getElementById('reviewCountText').textContent = `${data.reviewCount}개의 후기`;
+
+                // 후기 작성 버튼 표시 여부
+                if (data.canWriteReview) {
+                    document.getElementById('btnWriteReview').style.display = 'block';
+                }
+
+                // 후기 목록 표시
+                reviews = data.reviews;
+                displayReviews(reviews);
+
+            } catch (error) {
+                console.error('후기 목록 조회 실패:', error);
+                document.getElementById('reviewList').innerHTML = `
+                    <div class="review-empty">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>후기를 불러오는데 실패했습니다.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 후기 목록 표시
+        function displayReviews(reviewList) {
+            const container = document.getElementById('reviewList');
+
+            if (reviewList.length === 0) {
+                container.innerHTML = `
+                    <div class="review-empty">
+                        <i class="fas fa-comment-slash"></i>
+                        <p>아직 작성된 후기가 없습니다.</p>
+                        <p style="font-size: 14px; margin-top: 8px;">첫 번째 후기를 작성해보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = reviewList.map(review => `
+                <div class="review-card">
+                    <div class="review-header">
+                        <div class="review-author">
+                            <div class="review-author-avatar">
+                                ${review.userName.substring(0, 1)}
+                            </div>
+                            <div class="review-author-info">
+                                <div class="review-author-name">${review.userName}</div>
+                                <div class="review-date">${formatDate(review.createdAt)}</div>
+                            </div>
+                        </div>
+                        <div class="review-rating">
+                            <div class="review-stars">${getStarsHTML(review.rating)}</div>
+                        </div>
+                    </div>
+                    <div class="review-content">${escapeHtml(review.content)}</div>
+                    ${review.isEditable ? `
+                        <div class="review-actions">
+                            <button class="btn-review-edit" onclick="editReview(${review.reviewId})">
+                                <i class="fas fa-edit"></i> 수정
+                            </button>
+                            <button class="btn-review-delete" onclick="deleteReview(${review.reviewId})">
+                                <i class="fas fa-trash"></i> 삭제
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // 별점 HTML 생성
+        function getStarsHTML(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 >= 0.5;
+            let html = '';
+
+            for (let i = 0; i < fullStars; i++) {
+                html += '★';
+            }
+            if (hasHalfStar) {
+                html += '★';
+            }
+            for (let i = Math.ceil(rating); i < 5; i++) {
+                html += '☆';
+            }
+
+            return html;
+        }
+
+        // 날짜 포맷팅
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diff = now - date;
+            const diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) {
+                const diffHours = Math.floor(diff / (1000 * 60 * 60));
+                if (diffHours === 0) {
+                    const diffMinutes = Math.floor(diff / (1000 * 60));
+                    return `${diffMinutes}분 전`;
+                }
+                return `${diffHours}시간 전`;
+            } else if (diffDays < 7) {
+                return `${diffDays}일 전`;
+            } else {
+                return date.toLocaleDateString('ko-KR', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
+        }
+
+        // HTML 이스케이프
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 후기 작성 모달 열기
+        function openReviewModal() {
+            currentReviewId = null;
+            document.getElementById('reviewModalTitle').textContent = '후기 작성';
+            document.getElementById('reviewRating').value = '0';
+            document.getElementById('reviewContent').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('btnSubmitReview').textContent = '등록';
+
+            // 별점 초기화
+            document.querySelectorAll('.rating-input .star').forEach(star => {
+                star.classList.remove('active');
+            });
+
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        // 후기 수정 모달 열기
+        function editReview(reviewId) {
+            const review = reviews.find(r => r.reviewId === reviewId);
+            if (!review) return;
+
+            currentReviewId = reviewId;
+            document.getElementById('reviewModalTitle').textContent = '후기 수정';
+            document.getElementById('reviewRating').value = review.rating;
+            document.getElementById('reviewContent').value = review.content;
+            document.getElementById('charCount').textContent = review.content.length;
+            document.getElementById('btnSubmitReview').textContent = '수정';
+
+            // 별점 표시
+            selectRating(review.rating);
+
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        // 후기 작성 모달 닫기
+        function closeReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+            currentReviewId = null;
+        }
+
+        // 별점 선택
+        function selectRating(rating) {
+            document.getElementById('reviewRating').value = rating;
+            const stars = document.querySelectorAll('.rating-input .star');
+
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // 글자 수 카운트
+        document.getElementById('reviewContent')?.addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        // 후기 제출
+        async function submitReview() {
+            const rating = parseInt(document.getElementById('reviewRating').value);
+            const content = document.getElementById('reviewContent').value.trim();
+
+            // 유효성 검증
+            if (rating === 0) {
+                alert('평점을 선택해주세요.');
+                return;
+            }
+
+            if (content === '') {
+                alert('후기 내용을 입력해주세요.');
+                return;
+            }
+
+            if (content.length > 1000) {
+                alert('후기는 1000자 이내로 작성해주세요.');
+                return;
+            }
+
+            const requestBody = {
+                rating: rating,
+                content: content
+            };
+
+            try {
+                let response;
+                if (currentReviewId) {
+                    // 수정
+                    response = await fetch(`/api/programs/${programId}/reviews/${currentReviewId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                } else {
+                    // 작성
+                    response = await fetch(`/api/programs/${programId}/reviews`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                }
+
+                if (response.ok) {
+                    alert(currentReviewId ? '후기가 수정되었습니다.' : '후기가 등록되었습니다.');
+                    closeReviewModal();
+                    loadReviews(); // 후기 목록 새로고침
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '후기 처리에 실패했습니다.');
+                }
+
+            } catch (error) {
+                console.error('후기 처리 실패:', error);
+                alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+        }
+
+        // 후기 삭제
+        async function deleteReview(reviewId) {
+            if (!confirm('후기를 삭제하시겠습니까?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/programs/${programId}/reviews/${reviewId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('후기가 삭제되었습니다.');
+                    loadReviews(); // 후기 목록 새로고침
+                } else {
+                    const data = await response.json();
+                    alert(data.error || '후기 삭제에 실패했습니다.');
+                }
+
+            } catch (error) {
+                console.error('후기 삭제 실패:', error);
+                alert('서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            }
+        }
+
+        // 후기 탭 클릭 시 로드
+        const originalShowTab = showTab;
+        showTab = function(event, tabName) {
+            originalShowTab(event, tabName);
+            if (tabName === 'reviews') {
+                loadReviews();
+            }
+        };
     </script>
 </div>
 </body>
