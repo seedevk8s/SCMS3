@@ -39,15 +39,18 @@ public class DataLoader implements CommandLineRunner {
     public void run(String... args) throws Exception {
         long count = programRepository.count();
 
-        // 정확히 50개이고 샘플 데이터가 있으면 초기화 완료로 간주
+        // 정확히 50개이고 새로운 다양한 상태의 샘플 데이터가 있으면 초기화 완료로 간주
+        // Note: 2025-11-14 업데이트 - 다양한 신청 상태 (OPEN/SCHEDULED/CLOSED) 데이터로 변경
         if (count == 50) {
-            // 샘플 데이터 중 하나가 존재하는지 확인
-            boolean hasSampleData = programRepository.findAll().stream()
-                    .anyMatch(p -> "학습전략 워크샵".equals(p.getTitle()) ||
-                                   "취업 특강 시리즈".equals(p.getTitle()));
+            // 새로운 샘플 데이터가 로드되었는지 확인 (OPEN 상태 프로그램 존재 여부)
+            boolean hasUpdatedData = programRepository.findAll().stream()
+                    .anyMatch(p -> p.getStatus() != null &&
+                                   "OPEN".equals(p.getStatus().name()) &&
+                                   p.getApplicationStartDate() != null &&
+                                   p.getApplicationStartDate().getYear() == 2025);
 
-            if (hasSampleData) {
-                log.info("샘플 데이터 50개가 이미 로드되어 있습니다. 초기화를 건너뜁니다.");
+            if (hasUpdatedData) {
+                log.info("업데이트된 샘플 데이터 50개가 이미 로드되어 있습니다. 초기화를 건너뜁니다.");
                 return;
             }
         }
