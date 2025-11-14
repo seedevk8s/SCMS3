@@ -714,14 +714,21 @@
                              th:alt="${program.title}"
                              loading="lazy">
 
-                        <!-- D-day 배지 -->
-                        <div th:if="${program.dDay != null}"
+                        <!-- 상태 배지 -->
+                        <!-- 신청 마감 -->
+                        <div th:if="${program.status.name() == 'CLOSED'}" class="program-dday closed">마감</div>
+                        <!-- 신청 예정 -->
+                        <div th:if="${program.status.name() == 'SCHEDULED'}" class="program-dday blue">접수예정</div>
+                        <!-- 신청 중 - D-day 표시 -->
+                        <div th:if="${program.status.name() == 'OPEN' && program.dDay != null}"
                              th:class="${program.dDay <= 2 ? 'program-dday urgent' : program.dDay <= 7 ? 'program-dday blue' : 'program-dday green'}">
                             <span th:if="${program.dDay == 0}">D-Day</span>
                             <span th:if="${program.dDay == 1}">입박</span>
                             <span th:if="${program.dDay > 1}" th:text="'D-' + ${program.dDay}"></span>
                         </div>
-                        <div th:if="${program.dDay == null}" class="program-dday closed" th:text="${program.status.description}"></div>
+                        <!-- 기타 상태 -->
+                        <div th:if="${program.status.name() == 'OPEN' && program.dDay == null}" class="program-dday closed">마감</div>
+                        <div th:if="${program.status.name() == 'FULL'}" class="program-dday closed">정원마감</div>
 
                         <div class="program-favorite">⭐</div>
                         <div class="program-hits"><span th:text="${program.hits}"></span> HITS</div>
