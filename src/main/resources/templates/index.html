@@ -254,6 +254,55 @@
                 font-weight: 600;
             }
 
+            /* 상태 범례 */
+            .status-legend {
+                max-width: 1400px;
+                margin: 0 auto 24px;
+                padding: 0 24px;
+            }
+
+            .status-legend-box {
+                background: #f8f9fa;
+                padding: 12px 20px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 20px;
+                flex-wrap: wrap;
+                font-size: 13px;
+            }
+
+            .status-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .status-legend-badge {
+                padding: 3px 10px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: 600;
+                color: white;
+            }
+
+            .status-legend-badge.green {
+                background: #36B37E;
+            }
+
+            .status-legend-badge.urgent {
+                background: #8B5CF6;
+            }
+
+            .status-legend-badge.blue {
+                background: #0052CC;
+            }
+
+            .status-legend-badge.closed {
+                background: #6B7280;
+            }
+
             /* 프로그램 카드 섹션 */
             .program-section {
                 max-width: 1400px;
@@ -693,6 +742,27 @@
             </div>
         </div>
 
+        <!-- 상태 범례 -->
+        <div class="status-legend">
+            <div class="status-legend-box">
+                <div class="status-legend-item">
+                    <span class="status-legend-badge blue">접수예정</span>
+                </div>
+                <div class="status-legend-item">
+                    <span class="status-legend-badge green">접수중</span>
+                </div>
+                <div class="status-legend-item">
+                    <span class="status-legend-badge urgent">마감임박</span>
+                </div>
+                <div class="status-legend-item">
+                    <span class="status-legend-badge closed">마감</span>
+                </div>
+                <div class="status-legend-item">
+                    <span class="status-legend-badge closed">정원마감</span>
+                </div>
+            </div>
+        </div>
+
         <!-- 프로그램 카드 캐러셀 -->
         <div class="program-section">
             <div class="program-carousel-wrapper">
@@ -719,13 +789,12 @@
                         <div th:if="${program.status.name() == 'CLOSED'}" class="program-dday closed">마감</div>
                         <!-- 신청 예정 -->
                         <div th:if="${program.status.name() == 'SCHEDULED'}" class="program-dday blue">접수예정</div>
-                        <!-- 신청 중 - D-day 표시 -->
-                        <div th:if="${program.status.name() == 'OPEN' && program.dDay != null}"
-                             th:class="${program.dDay <= 2 ? 'program-dday urgent' : program.dDay <= 7 ? 'program-dday blue' : 'program-dday green'}">
-                            <span th:if="${program.dDay == 0}">D-Day</span>
-                            <span th:if="${program.dDay == 1}">입박</span>
-                            <span th:if="${program.dDay > 1}" th:text="'D-' + ${program.dDay}"></span>
-                        </div>
+                        <!-- 신청 중 - 마감임박 (7일 이내) -->
+                        <div th:if="${program.status.name() == 'OPEN' && program.dDay != null && program.dDay <= 7}"
+                             class="program-dday urgent">마감임박</div>
+                        <!-- 신청 중 - 접수중 (7일 초과) -->
+                        <div th:if="${program.status.name() == 'OPEN' && program.dDay != null && program.dDay > 7}"
+                             class="program-dday green">접수중</div>
                         <!-- 기타 상태 -->
                         <div th:if="${program.status.name() == 'OPEN' && program.dDay == null}" class="program-dday closed">마감</div>
                         <div th:if="${program.status.name() == 'FULL'}" class="program-dday closed">정원마감</div>
