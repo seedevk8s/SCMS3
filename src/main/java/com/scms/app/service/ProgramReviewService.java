@@ -47,7 +47,7 @@ public class ProgramReviewService {
                 .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
 
         // 프로그램 조회
-        Program program = programRepository.findByIdAndNotDeleted(programId)
+        Program program = programRepository.findByIdNotDeleted(programId)
                 .orElseThrow(() -> new IllegalStateException("프로그램을 찾을 수 없습니다."));
 
         // 참여 완료 여부 확인
