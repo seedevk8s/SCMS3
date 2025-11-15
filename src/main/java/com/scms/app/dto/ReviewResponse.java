@@ -34,13 +34,16 @@ public class ReviewResponse {
      * Entity를 DTO로 변환
      */
     public static ReviewResponse from(ProgramReview review) {
+        Integer studentNum = review.getUser().getStudentNum();
+        String studentNumStr = studentNum != null ? studentNum.toString() : null;
+
         return ReviewResponse.builder()
                 .reviewId(review.getReviewId())
                 .programId(review.getProgram().getProgramId())
                 .programTitle(review.getProgram().getTitle())
                 .userId(review.getUser().getUserId())
                 .userName(review.getUser().getName())
-                .userStudentNum(review.getUser().getStudentNum())
+                .userStudentNum(studentNumStr)
                 .rating(review.getRating())
                 .content(review.getContent())
                 .imageUrl(review.getImageUrl())
