@@ -234,11 +234,7 @@ public class ProgramApplicationController {
 
         try {
             // 프로그램 정보 조회
-            Program program = programService.getProgramById(programId);
-            if (program == null) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "프로그램을 찾을 수 없습니다."));
-            }
+            Program program = programService.getProgram(programId);
 
             // 신청 내역 조회
             List<ProgramApplication> applications = applicationService.getProgramApplications(programId);
