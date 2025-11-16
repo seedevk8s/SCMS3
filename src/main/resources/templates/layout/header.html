@@ -40,6 +40,8 @@
             <a href="#" class="header-link">외부취업가점</a>
             <span class="header-divider">|</span>
             <span th:if="${session.name}" class="header-link" th:text="${session.name} + '님'"></span>
+            <span th:if="${session.userId != null}" class="header-divider">|</span>
+            <a th:if="${session.userId != null}" href="/mypage" class="header-link">마이페이지</a>
             <span th:if="${session.isAdmin == true}" class="header-divider">|</span>
             <a th:if="${session.isAdmin == true}" href="/admin/programs" class="btn-admin">관리</a>
             <span th:if="${session.userId == null}" class="header-divider">|</span>

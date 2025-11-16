@@ -1200,6 +1200,16 @@
             if (tabId === 'application-status' && userId) {
                 loadApplicationStatus();
             }
+
+            // 후기 탭 클릭 시 데이터 로드
+            if (tabId === 'reviews') {
+                loadReviews();
+            }
+
+            // 관리자 탭 클릭 시 데이터 로드
+            if (tabId === 'admin-applications') {
+                loadAdminApplications();
+            }
         }
 
         // 신청 상태 로드
@@ -1895,18 +1905,6 @@
             }
         }
 
-        // ==================== 탭 전환 ====================
-
-        // 후기 탭과 관리자 탭 클릭 시 로드
-        const originalShowTab = showTab;
-        showTab = function(event, tabName) {
-            originalShowTab(event, tabName);
-            if (tabName === 'reviews') {
-                loadReviews();
-            } else if (tabName === 'admin-applications') {
-                loadAdminApplications();
-            }
-        };
     </script>
 </div>
 </body>
