@@ -836,6 +836,16 @@
 </head>
 <body>
 <div layout:fragment="content">
+    <!-- 디버그: 세션 정보 출력 (개발용, 배포 시 제거) -->
+    <div style="background: #fff3cd; padding: 10px; margin: 10px; border: 1px solid #ffc107; border-radius: 4px;" th:if="${session.userId != null}">
+        <strong>🔍 디버그 정보:</strong><br/>
+        userId: <span th:text="${session.userId}">N/A</span><br/>
+        name: <span th:text="${session.name}">N/A</span><br/>
+        role: <span th:text="${session.role}">N/A</span><br/>
+        isAdmin: <span th:text="${session.isAdmin}">N/A</span><br/>
+        isAdmin==true: <span th:text="${session.isAdmin == true}">N/A</span>
+    </div>
+
     <div class="program-detail-container">
         <!-- 뒤로가기 버튼 -->
         <a href="javascript:history.back()" class="back-button">
