@@ -396,4 +396,56 @@ public class ProgramApplicationController {
                     .body(Map.of("error", "서버 오류가 발생했습니다."));
         }
     }
+
+    /**
+     * 프로그램별 신청 통계 조회 (관리자용)
+     */
+    @GetMapping("/{programId}/applications/stats")
+    public ResponseEntity<?> getApplicationStats(
+            @PathVariable Integer programId,
+            HttpSession session) {
+
+        // 관리자 확인
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (isAdmin == null || !isAdmin) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "관리자 권한이 필요합니다."));
+        }
+
+        try {
+            List<ProgramApplication> applications = applicationService.getProgramApplications(programId);
+
+            // 상태별 카운트
+            long pendingCount = applications.stream()
+                    .filter(app -> app.getStatus() == com.scms.app.model.ApplicationStatus.PENDING)
+                    .count();
+            long approvedCount = applications.stream()
+                    .filter(app -> app.getStatus() == com.scms.app.model.ApplicationStatus.APPROVED)
+                    .count();
+            long rejectedCount = applications.stream()
+                    .filter(app -> app.getStatus() == com.scms.app.model.ApplicationStatus.REJECTED)
+                    .count();
+            long cancelledCount = applications.stream()
+                    .filter(app -> app.getStatus() == com.scms.app.model.ApplicationStatus.CANCELLED)
+                    .count();
+            long completedCount = applications.stream()
+                    .filter(app -> app.getStatus() == com.scms.app.model.ApplicationStatus.COMPLETED)
+                    .count();
+
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("total", applications.size());
+            stats.put("pending", pendingCount);
+            stats.put("approved", approvedCount);
+            stats.put("rejected", rejectedCount);
+            stats.put("cancelled", cancelledCount);
+            stats.put("completed", completedCount);
+
+            return ResponseEntity.ok(stats);
+
+        } catch (Exception e) {
+            log.error("신청 통계 조회 실패: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "서버 오류가 발생했습니다."));
+        }
+    }
 }

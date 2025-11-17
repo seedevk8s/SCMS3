@@ -76,7 +76,7 @@
 #### 📖 개발 로그
 - [프로그램 기능 개발](./doc/development-logs/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md)
 - [프로그램 신청 기능](./doc/development-logs/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md)
-- [관리자 탭 & 클릭 가능한 제목](./doc/development-logs/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md) ⭐ 최신
+- [관리자 신청 관리 기능](./doc/development-logs/13_ADMIN_APPLICATION_MANAGEMENT_DEVELOPMENT_LOG.md) ⭐ 최신
 - [전체 문서 목록](./doc/README.md) - 모든 문서 인덱스
 
 #### 🔄 세션 재개

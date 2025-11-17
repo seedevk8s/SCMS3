@@ -575,7 +575,8 @@
         }
 
         .btn-secondary,
-        .btn-primary {
+        .btn-primary,
+        .btn-danger {
             padding: 10px 24px;
             border: none;
             border-radius: 8px;
@@ -600,6 +601,15 @@
 
         .btn-primary:hover {
             background: #1565c0;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
         }
 
         .review-empty {
@@ -1145,6 +1155,31 @@
                 <div class="review-modal-footer">
                     <button class="btn-secondary" onclick="closeReviewModal()">취소</button>
                     <button class="btn-primary" id="btnSubmitReview" onclick="submitReview()">등록</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 거부 사유 입력 모달 -->
+        <div id="rejectModal" class="review-modal" style="display: none;">
+            <div class="review-modal-content">
+                <div class="review-modal-header">
+                    <h3>신청 거부 사유 입력</h3>
+                    <button class="btn-close-modal" onclick="closeRejectModal()">&times;</button>
+                </div>
+                <div class="review-modal-body">
+                    <div class="form-group">
+                        <label>거부 사유 <span style="color: #dc3545;">*</span></label>
+                        <textarea id="rejectReason" rows="5" maxlength="500"
+                                  placeholder="신청을 거부하는 사유를 입력해주세요. (최대 500자)"></textarea>
+                        <div class="char-count">
+                            <span id="rejectCharCount">0</span> / 500
+                        </div>
+                    </div>
+                    <input type="hidden" id="rejectApplicationId" value="">
+                </div>
+                <div class="review-modal-footer">
+                    <button class="btn-secondary" onclick="closeRejectModal()">취소</button>
+                    <button class="btn-danger" id="btnConfirmReject" onclick="confirmRejectApplication()">거부</button>
                 </div>
             </div>
         </div>
@@ -1884,12 +1919,33 @@
             }
         }
 
-        // 신청 거부
-        async function rejectApplication(applicationId) {
-            const reason = prompt('거부 사유를 입력해주세요:');
+        // 신청 거부 (모달 열기)
+        function rejectApplication(applicationId) {
+            document.getElementById('rejectApplicationId').value = applicationId;
+            document.getElementById('rejectReason').value = '';
+            document.getElementById('rejectCharCount').textContent = '0';
+            document.getElementById('rejectModal').style.display = 'flex';
+        }
 
-            if (reason === null) {
-                return; // 취소
+        // 거부 모달 닫기
+        function closeRejectModal() {
+            document.getElementById('rejectModal').style.display = 'none';
+            document.getElementById('rejectApplicationId').value = '';
+            document.getElementById('rejectReason').value = '';
+        }
+
+        // 거부 확인
+        async function confirmRejectApplication() {
+            const applicationId = document.getElementById('rejectApplicationId').value;
+            const reason = document.getElementById('rejectReason').value.trim();
+
+            if (!reason) {
+                alert('거부 사유를 입력해주세요.');
+                return;
+            }
+
+            if (!confirm('이 신청을 거부하시겠습니까?')) {
+                return;
             }
 
             try {
@@ -1899,7 +1955,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        reason: reason || '관리자에 의해 거부됨'
+                        reason: reason
                     })
                 });
 
@@ -1907,6 +1963,7 @@
 
                 if (response.ok) {
                     alert(data.message || '신청이 거부되었습니다.');
+                    closeRejectModal();
                     loadAdminApplications();
                 } else {
                     alert(data.error || '거부에 실패했습니다.');
@@ -1917,6 +1974,16 @@
                 alert('서버 오류가 발생했습니다.');
             }
         }
+
+        // 거부 사유 글자 수 카운터
+        document.addEventListener('DOMContentLoaded', function() {
+            const rejectReasonTextarea = document.getElementById('rejectReason');
+            if (rejectReasonTextarea) {
+                rejectReasonTextarea.addEventListener('input', function() {
+                    document.getElementById('rejectCharCount').textContent = this.value.length;
+                });
+            }
+        });
 
         // 참여 완료 처리
         async function completeApplication(applicationId) {
