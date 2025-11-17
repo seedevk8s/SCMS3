@@ -1,7 +1,7 @@
 package com.scms.app.config;
 
-import com.scms.app.model.User;
-import com.scms.app.model.UserRole;
+import com.scms.app.model.*;
+import com.scms.app.repository.ProgramApplicationRepository;
 import com.scms.app.repository.ProgramRepository;
 import com.scms.app.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -36,15 +38,19 @@ public class DataLoader implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
     private final ProgramRepository programRepository;
     private final UserRepository userRepository;
+    private final ProgramApplicationRepository applicationRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         // 1. 사용자 데이터 초기화
         initializeUsers();
-        
+
         // 2. 프로그램 데이터 초기화
         initializePrograms();
+
+        // 3. 테스트 신청 데이터 초기화
+        initializeTestApplications();
     }
 
     /**
@@ -197,5 +203,120 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.error("초기 프로그램 데이터 로드 중 오류 발생", e);
         }
+    }
+
+    /**
+     * 테스트용 프로그램 신청 데이터 생성
+     * - 관리자 기능 테스트를 위한 다양한 상태의 신청 데이터 생성
+     */
+    private void initializeTestApplications() {
+        long count = applicationRepository.count();
+
+        if (count > 0) {
+            log.info("프로그램 신청 데이터가 이미 존재합니다 ({}건). 초기화를 건너뜁니다.", count);
+            return;
+        }
+
+        log.info("테스트용 프로그램 신청 데이터를 생성합니다...");
+
+        try {
+            // 첫 번째 OPEN 프로그램 찾기
+            List<Program> openPrograms = programRepository.findAll().stream()
+                    .filter(p -> p.getStatus() == ProgramStatus.OPEN)
+                    .limit(3)
+                    .collect(Collectors.toList());
+
+            if (openPrograms.isEmpty()) {
+                log.warn("OPEN 상태의 프로그램이 없어서 신청 데이터를 생성하지 않습니다.");
+                return;
+            }
+
+            // 모든 학생 계정 조회
+            List<User> students = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == UserRole.STUDENT)
+                    .collect(Collectors.toList());
+
+            if (students.size() < 8) {
+                log.warn("학생 계정이 부족하여 신청 데이터를 생성하지 않습니다.");
+                return;
+            }
+
+            // 첫 번째 프로그램에 다양한 상태의 신청 생성
+            Program program1 = openPrograms.get(0);
+
+            // PENDING (대기 중) 신청 3건
+            createApplication(program1, students.get(0), ApplicationStatus.PENDING, null);
+            createApplication(program1, students.get(1), ApplicationStatus.PENDING, null);
+            createApplication(program1, students.get(2), ApplicationStatus.PENDING, null);
+
+            // APPROVED (승인됨) 신청 2건
+            createApplication(program1, students.get(3), ApplicationStatus.APPROVED, null);
+            createApplication(program1, students.get(4), ApplicationStatus.APPROVED, null);
+
+            // REJECTED (거부됨) 신청 1건
+            createApplication(program1, students.get(5), ApplicationStatus.REJECTED, "정원 초과로 인한 거부");
+
+            // CANCELLED (취소됨) 신청 1건
+            createApplication(program1, students.get(6), ApplicationStatus.CANCELLED, null);
+
+            // COMPLETED (참여 완료) 신청 1건
+            createApplication(program1, students.get(7), ApplicationStatus.COMPLETED, null);
+
+            // 두 번째 프로그램에 신청 몇 건 추가
+            if (openPrograms.size() > 1) {
+                Program program2 = openPrograms.get(1);
+                createApplication(program2, students.get(0), ApplicationStatus.PENDING, null);
+                createApplication(program2, students.get(1), ApplicationStatus.APPROVED, null);
+            }
+
+            // 세 번째 프로그램에 신청 몇 건 추가
+            if (openPrograms.size() > 2) {
+                Program program3 = openPrograms.get(2);
+                createApplication(program3, students.get(0), ApplicationStatus.PENDING, null);
+            }
+
+            long afterCount = applicationRepository.count();
+            log.info("✅ 테스트 신청 데이터 생성 완료: {}건", afterCount);
+            log.info("📊 첫 번째 프로그램(ID: {})에 8건의 다양한 상태 신청 생성됨", program1.getProgramId());
+
+        } catch (Exception e) {
+            log.error("테스트 신청 데이터 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * 프로그램 신청 생성
+     */
+    private void createApplication(Program program, User user, ApplicationStatus status, String rejectionReason) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime appliedAt = now.minusDays(10); // 10일 전 신청
+
+        ProgramApplication application = ProgramApplication.builder()
+                .program(program)
+                .user(user)
+                .status(status)
+                .appliedAt(appliedAt)
+                .build();
+
+        // 상태에 따라 추가 필드 설정
+        switch (status) {
+            case APPROVED:
+                application.setApprovedAt(appliedAt.plusDays(1));
+                break;
+            case REJECTED:
+                application.setRejectedAt(appliedAt.plusDays(1));
+                application.setRejectionReason(rejectionReason);
+                break;
+            case CANCELLED:
+                application.setCancelledAt(appliedAt.plusDays(2));
+                break;
+            case COMPLETED:
+                application.setApprovedAt(appliedAt.plusDays(1));
+                application.setCompletedAt(appliedAt.plusDays(8));
+                break;
+        }
+
+        applicationRepository.save(application);
+        log.debug("신청 생성: {} - {} ({})", user.getName(), program.getTitle(), status);
     }
 }
