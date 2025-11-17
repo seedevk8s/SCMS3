@@ -285,8 +285,15 @@
     // 페이지 로드 시 알림 목록 가져오기
     function loadNotifications() {
         fetch('/api/notifications')
-            .then(response => response.json())
+            .then(response => {
+                console.log('API 응답 상태:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('알림 데이터:', data);
                 notifications = data;
                 renderNotifications();
             })
@@ -295,7 +302,7 @@
                 document.getElementById('notificationsList').innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-text">알림을 불러올 수 없습니다.</div>
-                        <div class="empty-state-subtext">잠시 후 다시 시도해주세요.</div>
+                        <div class="empty-state-subtext">에러: ${error.message}</div>
                     </div>
                 `;
             });
