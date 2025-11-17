@@ -19,6 +19,7 @@ public interface ProgramFileRepository extends JpaRepository<ProgramFile, Intege
      * 프로그램별 첨부파일 조회 (삭제되지 않은 것만, 업로드 날짜 순)
      */
     @Query("SELECT pf FROM ProgramFile pf " +
+           "LEFT JOIN FETCH pf.uploadedBy " +
            "WHERE pf.program.programId = :programId " +
            "AND pf.deletedAt IS NULL " +
            "ORDER BY pf.uploadedAt DESC")
@@ -28,6 +29,7 @@ public interface ProgramFileRepository extends JpaRepository<ProgramFile, Intege
      * 파일 ID로 조회 (삭제되지 않은 것만)
      */
     @Query("SELECT pf FROM ProgramFile pf " +
+           "LEFT JOIN FETCH pf.uploadedBy " +
            "WHERE pf.fileId = :fileId " +
            "AND pf.deletedAt IS NULL")
     Optional<ProgramFile> findByIdAndDeletedAtIsNull(@Param("fileId") Integer fileId);
