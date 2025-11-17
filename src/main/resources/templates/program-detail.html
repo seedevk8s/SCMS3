@@ -1221,14 +1221,6 @@
             </div>
         </div>
 
-        <!-- 첨부파일 -->
-        <div class="attachment-section">
-            <h3>첨부파일</h3>
-            <div class="attachment-item" style="background: #f8f9fa; color: #6c757d; justify-content: center;">
-                첨부파일이 없습니다.
-            </div>
-        </div>
-
         <!-- 상세일정 및 신청하기 -->
         <div class="apply-section">
             <h3>상세일정 및 신청하기</h3>
@@ -2080,12 +2072,15 @@
 
         // 첨부파일 목록 로드
         async function loadAttachments() {
-            const programId = /*[[${program.programId}]]*/ 0;
             const fileListContent = document.getElementById('fileListContent');
 
             try {
                 const response = await fetch(`/api/programs/${programId}/files`);
                 const data = await response.json();
+
+                console.log('파일 목록 응답:', data);
+                console.log('files 배열:', data.files);
+                console.log('files 길이:', data.files ? data.files.length : 'undefined');
 
                 if (data.files && data.files.length > 0) {
                     // 파일 통계 업데이트
@@ -2198,7 +2193,6 @@
         document.getElementById('fileUploadForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const programId = /*[[${program.programId}]]*/ 0;
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
 
@@ -2239,7 +2233,6 @@
 
         // 파일 다운로드
         function downloadFile(fileId) {
-            const programId = /*[[${program.programId}]]*/ 0;
             const downloadUrl = `/api/programs/${programId}/files/${fileId}/download`;
 
             const link = document.createElement('a');
@@ -2257,8 +2250,6 @@
             if (!confirm(`'${fileName}' 파일을 삭제하시겠습니까?`)) {
                 return;
             }
-
-            const programId = /*[[${program.programId}]]*/ 0;
 
             try {
                 const response = await fetch(`/api/programs/${programId}/files/${fileId}`, {
