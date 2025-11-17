@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
  * (재시작 시 데이터가 중복 생성되는 것을 방지하기 위함)
  */
 @Component
+@org.springframework.core.annotation.Order(2)  // DatabaseMigration 이후 실행
 @RequiredArgsConstructor
 @Slf4j
 public class DataLoader implements CommandLineRunner {
@@ -214,47 +215,8 @@ public class DataLoader implements CommandLineRunner {
             long afterCount = programRepository.count();
             log.info("✅ 초기 프로그램 데이터 로드 완료: {}개 INSERT 문 실행, {}개 프로그램 생성됨", insertCount, afterCount);
 
-            // 프로그램 실행 날짜 설정
-            updateProgramExecutionDates();
-
         } catch (Exception e) {
             log.error("초기 프로그램 데이터 로드 중 오류 발생", e);
-        }
-    }
-
-    /**
-     * 프로그램 실행 날짜 설정
-     * - programStartDate: applicationEndDate + 1일
-     * - programEndDate: programStartDate + 14일 (2주)
-     */
-    private void updateProgramExecutionDates() {
-        log.info("프로그램 실행 날짜를 설정합니다...");
-
-        try {
-            List<Program> programs = programRepository.findAll();
-            int updateCount = 0;
-
-            for (Program program : programs) {
-                if (program.getProgramStartDate() == null || program.getProgramEndDate() == null) {
-                    // 프로그램 시작일 = 신청 마감일 + 1일
-                    LocalDateTime programStartDate = program.getApplicationEndDate().plusDays(1);
-
-                    // 프로그램 종료일 = 프로그램 시작일 + 14일 (2주)
-                    LocalDateTime programEndDate = programStartDate.plusDays(14);
-
-                    program.setProgramStartDate(programStartDate);
-                    program.setProgramEndDate(programEndDate);
-                    programRepository.save(program);
-                    updateCount++;
-                }
-            }
-
-            if (updateCount > 0) {
-                log.info("✅ 프로그램 실행 날짜 설정 완료: {}개 프로그램 업데이트됨", updateCount);
-            }
-
-        } catch (Exception e) {
-            log.error("프로그램 실행 날짜 설정 중 오류 발생", e);
         }
     }
 
