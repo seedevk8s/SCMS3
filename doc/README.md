@@ -44,7 +44,8 @@ doc/
 | 09 | `09_IMAGE_STRATEGY_PICSUM_PHOTOS.md` | 이미지 전략 (picsum.photos) |
 | 10 | `10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md` | 프로그램 신청 기능 |
 | 11 | `11_NEXT_IMPLEMENTATION_PLAN.md` | 다음 구현 계획 |
-| 12 | `12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md` | 관리자 탭 및 클릭 가능한 제목 ⭐ NEW |
+| 12 | `12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md` | 관리자 탭 및 클릭 가능한 제목 |
+| 13 | `13_ADMIN_APPLICATION_MANAGEMENT_DEVELOPMENT_LOG.md` | 관리자 신청 관리 기능 ⭐ NEW |
 
 ---
 
@@ -89,7 +90,7 @@ UI 디자인 참고 자료 및 버전별 화면 설계
 ### 특정 기능 개발 참고
 - **프로그램 관리**: [`development-logs/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md`](./development-logs/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md)
 - **프로그램 신청**: [`development-logs/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md`](./development-logs/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md)
-- **관리자 기능**: [`development-logs/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md`](./development-logs/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md) ⭐ 최신
+- **관리자 기능**: [`development-logs/13_ADMIN_APPLICATION_MANAGEMENT_DEVELOPMENT_LOG.md`](./development-logs/13_ADMIN_APPLICATION_MANAGEMENT_DEVELOPMENT_LOG.md) ⭐ 최신
 - **UI/UX**: [`development-logs/06_FILTER_AND_CAROUSEL_DEVELOPMENT_LOG.md`](./development-logs/06_FILTER_AND_CAROUSEL_DEVELOPMENT_LOG.md), [`development-logs/08_PROGRAM_DETAIL_AND_IMAGES_DEVELOPMENT_LOG.md`](./development-logs/08_PROGRAM_DETAIL_AND_IMAGES_DEVELOPMENT_LOG.md)
 
 ---
@@ -98,7 +99,7 @@ UI 디자인 참고 자료 및 버전별 화면 설계
 
 ### 개발 로그 작성 규칙 (development-logs/)
 1. **파일명**: `{번호}_FEATURE_NAME_DEVELOPMENT_LOG.md`
-2. **번호**: 순차적으로 증가 (다음은 13번)
+2. **번호**: 순차적으로 증가 (다음은 14번)
 3. **위치**: `doc/development-logs/` 폴더
 4. **내용 포함 사항**:
    - 작업 개요
@@ -126,10 +127,10 @@ UI 디자인 참고 자료 및 버전별 화면 설계
 
 | 카테고리 | 개수 | 위치 |
 |----------|------|------|
-| 📝 개발 로그 | 12개 | `development-logs/` |
+| 📝 개발 로그 | 13개 | `development-logs/` |
 | 📖 가이드 | 5개 | `guides/` |
 | 🎨 UI 자료 | 16개 | `ui/` |
-| **합계** | **33개** | - |
+| **합계** | **34개** | - |
 
 **마지막 업데이트**: 2025-11-17
 
