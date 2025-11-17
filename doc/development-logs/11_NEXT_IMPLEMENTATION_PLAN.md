@@ -230,9 +230,10 @@ public class ProgramReviewController {
 
 ---
 
-### 옵션 3: 첨부파일 관리 ⭐⭐
+### ✅ 옵션 3: 첨부파일 관리 - 완료 (2025-11-17)
 
 **관련도**: 중간 - 프로그램 관련 자료 제공
+**상태**: ✅ 구현 완료
 
 #### 주요 기능
 - 프로그램 자료 첨부 (관리자)
@@ -573,11 +574,17 @@ public class NotificationScheduler {
 
 ---
 
-### 🎯 다음 우선순위: 첨부파일 관리 ⭐⭐
-**추천 이유**:
-- 프로그램 자료 제공에 유용
-- 파일 업로드/다운로드 학습 기회
-- 다소 복잡한 구현 (파일 시스템, 보안)
+### ✅ 4순위: 첨부파일 관리 - 완료 (2025-11-17)
+**완료된 내용**:
+- ✅ ProgramFile Entity (UUID 파일명, Soft Delete)
+- ✅ ProgramFileRepository (LEFT JOIN FETCH)
+- ✅ ProgramFileService (파일 업로드/다운로드/삭제, 유효성 검사)
+- ✅ ProgramFileController (REST API)
+- ✅ Frontend (관리자 업로드 폼, 파일 목록, 다운로드/삭제)
+- ✅ 한글 파일명 UTF-8 인코딩 지원
+- ✅ 트러블슈팅 (3가지 주요 문제 해결)
+
+**문서**: `15_PROGRAM_FILE_ATTACHMENT_DEVELOPMENT_LOG.md`
 
 ---
 
