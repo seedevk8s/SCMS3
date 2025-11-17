@@ -436,6 +436,17 @@
                 min-height: 44px;
             }
 
+            .program-title a {
+                color: #172B4D;
+                text-decoration: none;
+                transition: color 0.3s ease;
+            }
+
+            .program-title a:hover {
+                color: #2C5F5D;
+                text-decoration: underline;
+            }
+
             .program-category {
                 display: inline-block;
                 background: #E3F2FD;
@@ -776,8 +787,7 @@
                 <div class="program-carousel-container" id="programCarousel">
                     <!-- JavaScript로 동적으로 페이지 생성 -->
                     <div th:each="program, iterStat : ${programs}" class="program-card"
-                         th:attr="data-index=${iterStat.index}"
-                         th:onclick="'location.href=\'/programs/' + ${program.programId} + '\''">
+                         th:attr="data-index=${iterStat.index}">
                     <!-- 프로그램 이미지 -->
                     <div class="program-image">
                         <img th:src="'https://picsum.photos/seed/' + ${program.programId} + '/400/200'"
@@ -804,7 +814,9 @@
                     </div>
                     <div class="program-content">
                         <div class="program-department" th:text="${program.department}"></div>
-                        <div class="program-title" th:text="${program.title}"></div>
+                        <div class="program-title">
+                            <a th:href="@{/programs/{id}(id=${program.programId})}" th:text="${program.title}"></a>
+                        </div>
                         <div class="program-category" th:text="${program.subCategory != null ? program.subCategory : program.category}"></div>
                         <div class="program-dates">
                             <span th:text="'📅 신청: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span><br>

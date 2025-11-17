@@ -253,7 +253,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             overflow: hidden;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
         }
 
         .program-card:hover {
@@ -337,6 +336,17 @@
             margin-bottom: 8px;
             line-height: 1.4;
             min-height: 44px;
+        }
+
+        .program-title a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .program-title a:hover {
+            color: #2C5F5D;
+            text-decoration: underline;
         }
 
         .program-category {
@@ -611,8 +621,7 @@
 
         <!-- 프로그램 그리드 -->
         <div class="programs-grid" th:if="${programs.size() > 0}">
-            <div th:each="program, iterStat : ${programs}" class="program-card"
-                 th:onclick="'location.href=\'/programs/' + ${program.programId} + '\''">
+            <div th:each="program, iterStat : ${programs}" class="program-card">
                 <!-- 프로그램 이미지 -->
                 <div class="program-image">
                     <img th:src="'https://picsum.photos/seed/' + ${program.programId} + '/360/180'"
@@ -639,7 +648,9 @@
                 </div>
                 <div class="program-content">
                     <div class="program-department" th:text="${program.department}"></div>
-                    <div class="program-title" th:text="${program.title}"></div>
+                    <div class="program-title">
+                        <a th:href="@{/programs/{id}(id=${program.programId})}" th:text="${program.title}"></a>
+                    </div>
                     <div class="program-category" th:text="${program.subCategory != null ? program.subCategory : program.category}"></div>
                     <div class="program-dates">
                         <span th:text="'📅 신청: ' + ${#temporals.format(program.applicationStartDate, 'yyyy.MM.dd(E)')} + ' ~ ' + ${#temporals.format(program.applicationEndDate, 'yyyy.MM.dd(E)')}"></span><br>
