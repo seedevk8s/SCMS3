@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>마일리지 관리</title>
+    <th:block layout:fragment="css">
+        <style>
+            .admin-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+
+            .admin-header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #172B4D;
+            }
+
+            .btn-primary {
+                background: #2C5F5D;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s;
+            }
+
+            .btn-primary:hover {
+                background: #1a3d3b;
+            }
+
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 13px;
+                cursor: pointer;
+                margin-right: 5px;
+            }
+
+            .btn-danger {
+                background: #dc3545;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 13px;
+                cursor: pointer;
+            }
+
+            .tabs {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 30px;
+                border-bottom: 2px solid #DFE1E6;
+            }
+
+            .tab-button {
+                padding: 12px 24px;
+                background: none;
+                border: none;
+                border-bottom: 3px solid transparent;
+                color: #6B778C;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .tab-button:hover {
+                color: #2C5F5D;
+            }
+
+            .tab-button.active {
+                color: #2C5F5D;
+                border-bottom-color: #2C5F5D;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            .data-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+
+            .data-table thead {
+                background: #F4F5F7;
+            }
+
+            .data-table th {
+                padding: 16px;
+                text-align: left;
+                font-size: 14px;
+                font-weight: 600;
+                color: #172B4D;
+                border-bottom: 2px solid #DFE1E6;
+            }
+
+            .data-table td {
+                padding: 16px;
+                border-bottom: 1px solid #DFE1E6;
+                color: #42526E;
+            }
+
+            .data-table tr:hover {
+                background-color: #F4F5F7;
+            }
+
+            .badge {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+
+            .badge-active {
+                background: #E3FCEF;
+                color: #006644;
+            }
+
+            .badge-inactive {
+                background: #FFEBE6;
+                color: #BF2600;
+            }
+
+            .modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+            }
+
+            .modal.active {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                max-width: 500px;
+                width: 90%;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            }
+
+            .modal-header {
+                font-size: 20px;
+                font-weight: 700;
+                color: #172B4D;
+                margin-bottom: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 20px;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                color: #172B4D;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #DFE1E6;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+
+            .form-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .alert {
+                padding: 16px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            .alert-success {
+                background: #E3FCEF;
+                border: 1px solid #36B37E;
+                color: #006644;
+            }
+
+            .alert-error {
+                background: #FFEBE6;
+                border: 1px solid #DE350B;
+                color: #BF2600;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="admin-header">
+        <h1>🏆 CHAMP 마일리지 관리</h1>
+        <div>
+            <button class="btn-primary" onclick="openCreateRuleModal()">+ 새 규칙 추가</button>
+            <button class="btn-primary" onclick="openAwardModal()">+ 마일리지 지급</button>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <!-- 탭 메뉴 -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="switchTab('rules')">마일리지 규칙</button>
+        <button class="tab-button" onclick="switchTab('ranking')">학생 랭킹</button>
+    </div>
+
+    <!-- 탭: 마일리지 규칙 -->
+    <div id="tab-rules" class="tab-content active">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>활동 타입</th>
+                <th>활동명</th>
+                <th>포인트</th>
+                <th>설명</th>
+                <th>상태</th>
+                <th>생성일</th>
+                <th>관리</th>
+            </tr>
+            </thead>
+            <tbody id="rules-table-body">
+            <tr th:each="rule : ${rules}">
+                <td th:text="${rule.activityType}">PROGRAM</td>
+                <td th:text="${rule.activityName}">프로그램 참여 완료</td>
+                <td><strong th:text="${rule.points} + 'P'">100P</strong></td>
+                <td th:text="${rule.description}">프로그램 참여를 완료한 경우</td>
+                <td>
+                    <span th:class="${rule.isActive ? 'badge badge-active' : 'badge badge-inactive'}"
+                          th:text="${rule.isActive ? '활성' : '비활성'}">활성</span>
+                </td>
+                <td th:text="${#temporals.format(rule.createdAt, 'yyyy-MM-dd')}">2025-01-01</td>
+                <td>
+                    <button class="btn-secondary" th:onclick="'editRule(' + ${rule.ruleId} + ')'">수정</button>
+                    <button class="btn-danger" th:onclick="'deleteRule(' + ${rule.ruleId} + ')'">삭제</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 탭: 학생 랭킹 -->
+    <div id="tab-ranking" class="tab-content">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>순위</th>
+                <th>학번</th>
+                <th>이름</th>
+                <th>학과</th>
+                <th>총 마일리지</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ranking : ${rankings}">
+                <td><strong th:text="${ranking.rank}">1</strong></td>
+                <td th:text="${ranking.userId}">2024001</td>
+                <td th:text="${ranking.name}">홍길동</td>
+                <td th:text="${ranking.department}">컴퓨터공학과</td>
+                <td><strong th:text="${ranking.totalPoints} + 'P'">1000P</strong></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 모달: 규칙 생성 -->
+    <div id="modal-create-rule" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">새 마일리지 규칙 추가</div>
+            <form id="form-create-rule" onsubmit="createRule(event)">
+                <div class="form-group">
+                    <label>활동 타입</label>
+                    <select name="activityType" required>
+                        <option value="PROGRAM">프로그램</option>
+                        <option value="COUNSELING">상담</option>
+                        <option value="SURVEY">설문조사</option>
+                        <option value="MANUAL">수동</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>활동명</label>
+                    <input type="text" name="activityName" required placeholder="예: 프로그램 참여 완료">
+                </div>
+                <div class="form-group">
+                    <label>포인트</label>
+                    <input type="number" name="points" required placeholder="예: 100">
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea name="description" rows="3" placeholder="규칙 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-create-rule')">취소</button>
+                    <button type="submit" class="btn-primary">생성</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 모달: 마일리지 지급 -->
+    <div id="modal-award" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">마일리지 수동 지급</div>
+            <form id="form-award" onsubmit="awardMileage(event)">
+                <div class="form-group">
+                    <label>학생 ID (학번)</label>
+                    <input type="number" name="userId" required placeholder="예: 2024001">
+                </div>
+                <div class="form-group">
+                    <label>포인트 (음수 입력시 차감)</label>
+                    <input type="number" name="points" required placeholder="예: 100">
+                </div>
+                <div class="form-group">
+                    <label>활동명</label>
+                    <input type="text" name="activityName" required placeholder="예: 특별 활동 참여">
+                </div>
+                <div class="form-group">
+                    <label>사유</label>
+                    <textarea name="description" rows="3" required placeholder="지급/차감 사유를 입력하세요"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeModal('modal-award')">취소</button>
+                    <button type="submit" class="btn-primary">지급</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function openCreateRuleModal() {
+            document.getElementById('modal-create-rule').classList.add('active');
+        }
+
+        function openAwardModal() {
+            document.getElementById('modal-award').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        async function createRule(event) {
+            event.preventDefault();
+            const form = event.target;
+            const data = {
+                activityType: form.activityType.value,
+                activityName: form.activityName.value,
+                points: parseInt(form.points.value),
+                description: form.description.value
+            };
+
+            try {
+                const response = await fetch('/admin/mileage/api/rules', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showAlert('마일리지 규칙이 생성되었습니다.', 'success');
+                    closeModal('modal-create-rule');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert('규칙 생성에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                showAlert('오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function awardMileage(event) {
+            event.preventDefault();
+            const form = event.target;
+            const data = {
+                userId: parseInt(form.userId.value),
+                points: parseInt(form.points.value),
+                activityName: form.activityName.value,
+                description: form.description.value
+            };
+
+            try {
+                const response = await fetch('/admin/mileage/api/award', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showAlert('마일리지가 지급되었습니다.', 'success');
+                    closeModal('modal-award');
+                    form.reset();
+                } else {
+                    const error = await response.json();
+                    showAlert(error.error || '마일리지 지급에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                showAlert('오류가 발생했습니다.', 'error');
+            }
+        }
+
+        async function deleteRule(ruleId) {
+            if (!confirm('이 규칙을 삭제하시겠습니까?')) return;
+
+            try {
+                const response = await fetch(`/admin/mileage/api/rules/${ruleId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('규칙이 삭제되었습니다.', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showAlert('규칙 삭제에 실패했습니다.', 'error');
+                }
+            } catch (error) {
+                showAlert('오류가 발생했습니다.', 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            alertContainer.appendChild(alert);
+
+            setTimeout(() => alert.remove(), 3000);
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -30,6 +30,7 @@ public class ProgramApplicationService {
     private final UserRepository userRepository;
     private final ProgramService programService;
     private final NotificationService notificationService;
+    private final MileageService mileageService;
 
     /**
      * 프로그램 신청
@@ -230,6 +231,32 @@ public class ProgramApplicationService {
 
         application.complete();
         applicationRepository.save(application);
+
+        // 마일리지 자동 지급 (프로그램 참여 완료 시)
+        try {
+            // 기본 프로그램 완료 마일리지 100점 지급
+            // 실제로는 MileageRule에서 조회하여 동적으로 지급할 수도 있음
+            Integer points = 100; // 기본 프로그램 참여 완료 포인트
+            String activityName = application.getProgram().getTitle() + " 참여 완료";
+            String description = "프로그램 '" + application.getProgram().getTitle() + "' 참여 완료";
+
+            mileageService.awardMileage(
+                    application.getUser().getUserId(),
+                    "PROGRAM",
+                    application.getProgram().getProgramId().longValue(),
+                    activityName,
+                    points,
+                    description
+            );
+
+            log.info("프로그램 완료 마일리지 자동 지급: userId={}, programId={}, points={}",
+                    application.getUser().getUserId(), application.getProgram().getProgramId(), points);
+        } catch (Exception e) {
+            // 마일리지 지급 실패 시에도 완료 처리는 진행
+            // 중복 지급 방지로 인한 예외는 로그만 남김
+            log.warn("마일리지 지급 실패 (이미 지급되었거나 오류 발생): applicationId={}, error={}",
+                    applicationId, e.getMessage());
+        }
 
         log.info("프로그램 참여 완료 처리: 신청 ID {}, 사용자 {}",
                 applicationId, application.getUser().getName());
