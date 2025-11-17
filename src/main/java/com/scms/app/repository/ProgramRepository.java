@@ -128,20 +128,12 @@ public interface ProgramRepository extends JpaRepository<Program, Integer> {
     List<Program> findTop8NotDeleted();
 
     /**
-     * 특정 날짜에 시작하는 프로그램 조회 (스케줄러용)
+     * 특정 날짜에 신청이 마감되는 프로그램 조회 (스케줄러용 - D-3 알림)
+     * applicationEndDate를 기준으로 조회
      */
     @Query("SELECT p FROM Program p WHERE " +
-           "DATE(p.programStartDate) = :date " +
+           "CAST(p.applicationEndDate AS date) = :date " +
+           "AND p.status = 'OPEN' " +
            "AND p.deletedAt IS NULL")
-    List<Program> findProgramsStartingOn(@Param("date") LocalDate date);
-
-    /**
-     * 특정 기간에 신청 마감되는 프로그램 조회 (스케줄러용)
-     */
-    @Query("SELECT p FROM Program p WHERE " +
-           "DATE(p.applicationEndDate) BETWEEN :startDate AND :endDate " +
-           "AND p.deletedAt IS NULL")
-    List<Program> findProgramsEndingBetween(
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
+    List<Program> findProgramsWithDeadlineOn(@Param("date") LocalDate date);
 }
