@@ -40,7 +40,7 @@ public class DatabaseMigration implements CommandLineRunner {
     }
 
     /**
-     * notifications 테이블 생성 (존재하지 않는 경우)
+     * notifications 테이블 생성 및 스키마 수정
      */
     private void createNotificationsTableIfNotExists() {
         try {
@@ -73,10 +73,50 @@ public class DatabaseMigration implements CommandLineRunner {
                 jdbcTemplate.execute(createTableSql);
                 log.info("✅ notifications 테이블 생성 완료");
             } else {
-                log.info("notifications 테이블이 이미 존재합니다.");
+                log.info("notifications 테이블이 이미 존재합니다. 스키마를 확인합니다...");
+                fixNotificationsTableSchema();
             }
         } catch (Exception e) {
             log.error("notifications 테이블 생성 실패: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * notifications 테이블 스키마 수정
+     * Hibernate ddl-auto로 생성된 잘못된 스키마 수정
+     */
+    private void fixNotificationsTableSchema() {
+        try {
+            // content 컬럼이 NULL 허용인지 확인
+            String checkNullableSql = """
+                SELECT IS_NULLABLE
+                FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = 'scms2'
+                AND TABLE_NAME = 'notifications'
+                AND COLUMN_NAME = 'content'
+                """;
+
+            String isNullable = jdbcTemplate.queryForObject(checkNullableSql, String.class);
+
+            if ("YES".equals(isNullable)) {
+                log.info("content 컬럼이 NULL 허용으로 되어 있습니다. NOT NULL로 변경합니다...");
+
+                // 기존 NULL 데이터 처리 (있으면 기본값 설정)
+                jdbcTemplate.execute(
+                    "UPDATE notifications SET content = '(내용 없음)' WHERE content IS NULL"
+                );
+
+                // content 컬럼을 NOT NULL로 변경
+                jdbcTemplate.execute(
+                    "ALTER TABLE notifications MODIFY COLUMN content TEXT NOT NULL"
+                );
+
+                log.info("✅ content 컬럼을 NOT NULL로 변경 완료");
+            } else {
+                log.info("content 컬럼이 이미 NOT NULL입니다.");
+            }
+        } catch (Exception e) {
+            log.warn("notifications 테이블 스키마 수정 실패 (무시됨): {}", e.getMessage());
         }
     }
 
