@@ -69,19 +69,19 @@
 ### 주요 문서 바로가기
 
 #### 🚀 시작하기
-- [환경 설정 가이드](./doc/90_SETUP_GUIDE.md) - 개발 환경 구축 방법
-- [프로젝트 개요](./doc/01_PROJECT_OVERVIEW.md) - 프로젝트 전체 이해
-- [개발 현황](./doc/91_DEVELOPMENT_STATUS.md) - 현재 구현 상태
+- [환경 설정 가이드](./doc/guides/90_SETUP_GUIDE.md) - 개발 환경 구축 방법
+- [프로젝트 개요](./doc/development-logs/01_PROJECT_OVERVIEW.md) - 프로젝트 전체 이해
+- [개발 현황](./doc/guides/91_DEVELOPMENT_STATUS.md) - 현재 구현 상태
 
 #### 📖 개발 로그
-- [프로그램 기능 개발](./doc/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md)
-- [프로그램 신청 기능](./doc/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md)
-- [관리자 탭 & 클릭 가능한 제목](./doc/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md) ⭐ 최신
+- [프로그램 기능 개발](./doc/development-logs/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md)
+- [프로그램 신청 기능](./doc/development-logs/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md)
+- [관리자 탭 & 클릭 가능한 제목](./doc/development-logs/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md) ⭐ 최신
 - [전체 문서 목록](./doc/README.md) - 모든 문서 인덱스
 
 #### 🔄 세션 재개
-- [세션 재개 가이드](./doc/92_SESSION_RESUME_GUIDE.md) - 작업 재개 방법
-- [다음 구현 계획](./doc/11_NEXT_IMPLEMENTATION_PLAN.md) - 앞으로 해야 할 작업
+- [세션 재개 가이드](./doc/guides/92_SESSION_RESUME_GUIDE.md) - 작업 재개 방법
+- [다음 구현 계획](./doc/development-logs/11_NEXT_IMPLEMENTATION_PLAN.md) - 앞으로 해야 할 작업
 
 ---
 
