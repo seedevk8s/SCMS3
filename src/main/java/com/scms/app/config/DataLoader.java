@@ -342,10 +342,9 @@ public class DataLoader implements CommandLineRunner {
         log.info("테스트용 프로그램 후기 데이터를 생성합니다...");
 
         try {
-            // COMPLETED 상태의 신청 조회
-            List<ProgramApplication> completedApplications = applicationRepository.findAll().stream()
-                    .filter(app -> app.getStatus() == ApplicationStatus.COMPLETED)
-                    .collect(Collectors.toList());
+            // COMPLETED 상태의 신청 조회 (JOIN FETCH로 User와 Program 함께 로드)
+            List<ProgramApplication> completedApplications =
+                    applicationRepository.findByStatus(ApplicationStatus.COMPLETED);
 
             if (completedApplications.isEmpty()) {
                 log.warn("COMPLETED 상태의 신청이 없어서 후기 데이터를 생성하지 않습니다.");

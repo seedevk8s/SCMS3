@@ -100,4 +100,14 @@ public interface ProgramApplicationRepository extends JpaRepository<ProgramAppli
            "AND pa.status = 'APPROVED' " +
            "AND pa.deletedAt IS NULL")
     Long countApprovedApplicationsByProgramId(@Param("programId") Integer programId);
+
+    /**
+     * 특정 상태의 모든 신청 조회 (User와 Program JOIN FETCH)
+     */
+    @Query("SELECT pa FROM ProgramApplication pa " +
+           "JOIN FETCH pa.program " +
+           "JOIN FETCH pa.user " +
+           "WHERE pa.status = :status " +
+           "AND pa.deletedAt IS NULL")
+    List<ProgramApplication> findByStatus(@Param("status") ApplicationStatus status);
 }
