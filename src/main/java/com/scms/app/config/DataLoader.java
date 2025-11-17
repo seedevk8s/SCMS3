@@ -1,10 +1,12 @@
 package com.scms.app.config;
 
 import com.scms.app.model.*;
+import com.scms.app.repository.NotificationRepository;
 import com.scms.app.repository.ProgramApplicationRepository;
 import com.scms.app.repository.ProgramRepository;
 import com.scms.app.repository.ProgramReviewRepository;
 import com.scms.app.repository.UserRepository;
+import com.scms.app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -43,6 +45,8 @@ public class DataLoader implements CommandLineRunner {
     private final UserRepository userRepository;
     private final ProgramApplicationRepository applicationRepository;
     private final ProgramReviewRepository reviewRepository;
+    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -58,6 +62,9 @@ public class DataLoader implements CommandLineRunner {
 
         // 4. 테스트 후기 데이터 초기화
         initializeTestReviews();
+
+        // 5. 테스트 알림 데이터 초기화
+        initializeTestNotifications();
     }
 
     /**
@@ -401,5 +408,111 @@ public class DataLoader implements CommandLineRunner {
 
         reviewRepository.save(review);
         log.debug("후기 생성: {} - {} ({}점)", user.getName(), program.getTitle(), rating);
+    }
+
+    /**
+     * 테스트용 알림 데이터 생성
+     * - 다양한 타입의 알림 생성
+     */
+    private void initializeTestNotifications() {
+        long count = notificationRepository.count();
+
+        if (count > 0) {
+            log.info("알림 데이터가 이미 존재합니다 ({}건). 초기화를 건너뜁니다.", count);
+            return;
+        }
+
+        log.info("테스트용 알림 데이터를 생성합니다...");
+
+        try {
+            // 모든 학생 계정 조회
+            List<User> students = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == UserRole.STUDENT)
+                    .collect(Collectors.toList());
+
+            if (students.isEmpty()) {
+                log.warn("학생 계정이 없어서 알림 데이터를 생성하지 않습니다.");
+                return;
+            }
+
+            // 첫 번째 OPEN 프로그램 찾기
+            Program program = programRepository.findAll().stream()
+                    .filter(p -> p.getStatus() == ProgramStatus.OPEN)
+                    .findFirst()
+                    .orElse(null);
+
+            if (program == null) {
+                log.warn("OPEN 상태의 프로그램이 없어서 알림 데이터를 생성하지 않습니다.");
+                return;
+            }
+
+            // 첫 번째 학생(김철수)에게 다양한 알림 생성
+            User student1 = students.get(0);
+            String programUrl = "/programs/" + program.getProgramId();
+
+            // 1. 신청 승인 알림 (읽지 않음)
+            notificationService.createNotificationByType(
+                    student1.getUserId(),
+                    NotificationType.APPLICATION_APPROVED,
+                    program.getTitle(),
+                    programUrl
+            );
+
+            // 2. 마감 임박 알림 (읽음)
+            Notification deadlineNotif = notificationService.createNotificationByType(
+                    student1.getUserId(),
+                    NotificationType.DEADLINE_APPROACHING,
+                    program.getTitle(),
+                    programUrl
+            );
+            deadlineNotif.markAsRead();
+            notificationRepository.save(deadlineNotif);
+
+            // 3. 프로그램 시작 알림 (읽지 않음)
+            notificationService.createNotificationByType(
+                    student1.getUserId(),
+                    NotificationType.PROGRAM_STARTING,
+                    program.getTitle(),
+                    programUrl
+            );
+
+            // 두 번째 학생(이영희)에게 알림 생성
+            if (students.size() > 1) {
+                User student2 = students.get(1);
+
+                // 신청 거부 알림
+                String content = "'" + program.getTitle() + "' 프로그램 신청이 거부되었습니다.\n사유: 정원 초과";
+                notificationService.createNotification(
+                        student2.getUserId(),
+                        NotificationType.APPLICATION_REJECTED.getTitle(),
+                        content,
+                        NotificationType.APPLICATION_REJECTED,
+                        programUrl
+                );
+            }
+
+            // 세 번째 학생(박민수)에게 알림 생성
+            if (students.size() > 2) {
+                User student3 = students.get(2);
+
+                // 신청 취소 알림 (읽음)
+                Notification cancelNotif = notificationService.createNotificationByType(
+                        student3.getUserId(),
+                        NotificationType.APPLICATION_CANCELLED,
+                        program.getTitle(),
+                        programUrl
+                );
+                cancelNotif.markAsRead();
+                notificationRepository.save(cancelNotif);
+            }
+
+            long afterCount = notificationRepository.count();
+            log.info("✅ 테스트 알림 데이터 생성 완료: {}건", afterCount);
+            log.info("📬 첫 번째 학생({})에게 {}건의 알림 생성됨 (읽지 않음: 2건, 읽음: 1건)",
+                    student1.getName(), 3);
+
+        } catch (Exception e) {
+            log.error("테스트 알림 데이터 생성 중 오류 발생", e);
+        }
     }
 }

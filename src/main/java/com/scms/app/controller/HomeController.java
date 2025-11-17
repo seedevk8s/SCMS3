@@ -211,4 +211,25 @@ public class HomeController {
         model.addAttribute("pageTitle", "비밀번호 찾기");
         return "password-reset";
     }
+
+    /**
+     * 알림 페이지
+     */
+    @GetMapping("/notifications")
+    public String notifications(HttpSession session, Model model) {
+        Integer userId = (Integer) session.getAttribute("userId");
+        if (userId == null) {
+            return "redirect:/login";
+        }
+
+        model.addAttribute("userName", session.getAttribute("name"));
+        UserRole role = (UserRole) session.getAttribute("role");
+        model.addAttribute("userRole", role);
+        if (session.getAttribute("isAdmin") == null && role != null) {
+            session.setAttribute("isAdmin", role == UserRole.ADMIN);
+        }
+
+        model.addAttribute("pageTitle", "알림");
+        return "notifications";
+    }
 }

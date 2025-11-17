@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -125,4 +126,22 @@ public interface ProgramRepository extends JpaRepository<Program, Integer> {
     @Query(value = "SELECT p FROM Program p WHERE p.deletedAt IS NULL ORDER BY p.createdAt DESC",
            nativeQuery = false)
     List<Program> findTop8NotDeleted();
+
+    /**
+     * 특정 날짜에 시작하는 프로그램 조회 (스케줄러용)
+     */
+    @Query("SELECT p FROM Program p WHERE " +
+           "DATE(p.programStartDate) = :date " +
+           "AND p.deletedAt IS NULL")
+    List<Program> findProgramsStartingOn(@Param("date") LocalDate date);
+
+    /**
+     * 특정 기간에 신청 마감되는 프로그램 조회 (스케줄러용)
+     */
+    @Query("SELECT p FROM Program p WHERE " +
+           "DATE(p.applicationEndDate) BETWEEN :startDate AND :endDate " +
+           "AND p.deletedAt IS NULL")
+    List<Program> findProgramsEndingBetween(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }

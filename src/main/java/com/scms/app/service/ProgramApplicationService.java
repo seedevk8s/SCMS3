@@ -1,6 +1,7 @@
 package com.scms.app.service;
 
 import com.scms.app.model.ApplicationStatus;
+import com.scms.app.model.NotificationType;
 import com.scms.app.model.Program;
 import com.scms.app.model.ProgramApplication;
 import com.scms.app.model.User;
@@ -28,6 +29,7 @@ public class ProgramApplicationService {
     private final ProgramRepository programRepository;
     private final UserRepository userRepository;
     private final ProgramService programService;
+    private final NotificationService notificationService;
 
     /**
      * 프로그램 신청
@@ -102,6 +104,20 @@ public class ProgramApplicationService {
         // 프로그램 참가자 수 감소
         programService.decrementParticipants(application.getProgram().getProgramId());
 
+        // 취소 알림 생성 (선택 사항 - 사용자가 직접 취소했으므로 알림이 필요없을 수 있음)
+        // 하지만 기록을 위해 알림 생성
+        try {
+            String relatedUrl = "/programs/" + application.getProgram().getProgramId();
+            notificationService.createNotificationByType(
+                    userId,
+                    NotificationType.APPLICATION_CANCELLED,
+                    application.getProgram().getTitle(),
+                    relatedUrl
+            );
+        } catch (Exception e) {
+            log.error("취소 알림 생성 실패: applicationId={}, error={}", applicationId, e.getMessage());
+        }
+
         log.info("프로그램 신청 취소 완료: 사용자 {}, 신청 ID {}",
                 application.getUser().getName(), applicationId);
     }
@@ -143,6 +159,19 @@ public class ProgramApplicationService {
         application.approve();
         applicationRepository.save(application);
 
+        // 승인 알림 생성
+        try {
+            String relatedUrl = "/programs/" + application.getProgram().getProgramId();
+            notificationService.createNotificationByType(
+                    application.getUser().getUserId(),
+                    NotificationType.APPLICATION_APPROVED,
+                    application.getProgram().getTitle(),
+                    relatedUrl
+            );
+        } catch (Exception e) {
+            log.error("승인 알림 생성 실패: applicationId={}, error={}", applicationId, e.getMessage());
+        }
+
         log.info("프로그램 신청 승인 완료: 신청 ID {}, 사용자 {}",
                 applicationId, application.getUser().getName());
     }
@@ -164,6 +193,24 @@ public class ProgramApplicationService {
 
         // 프로그램 참가자 수 감소
         programService.decrementParticipants(application.getProgram().getProgramId());
+
+        // 거부 알림 생성
+        try {
+            String relatedUrl = "/programs/" + application.getProgram().getProgramId();
+            String content = "'" + application.getProgram().getTitle() + "' 프로그램 신청이 거부되었습니다.";
+            if (reason != null && !reason.isEmpty()) {
+                content += "\n사유: " + reason;
+            }
+            notificationService.createNotification(
+                    application.getUser().getUserId(),
+                    NotificationType.APPLICATION_REJECTED.getTitle(),
+                    content,
+                    NotificationType.APPLICATION_REJECTED,
+                    relatedUrl
+            );
+        } catch (Exception e) {
+            log.error("거부 알림 생성 실패: applicationId={}, error={}", applicationId, e.getMessage());
+        }
 
         log.info("프로그램 신청 거부 완료: 신청 ID {}, 사용자 {}, 사유: {}",
                 applicationId, application.getUser().getName(), reason);
