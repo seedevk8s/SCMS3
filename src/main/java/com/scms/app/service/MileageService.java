@@ -133,7 +133,8 @@ public class MileageService {
      * 사용자의 최근 N개 마일리지 내역 조회
      */
     public List<MileageHistory> getRecentMileageHistory(Integer userId, int limit) {
-        return mileageHistoryRepository.findRecentByUserId(userId, limit);
+        List<MileageHistory> allHistory = mileageHistoryRepository.findRecentByUserId(userId);
+        return allHistory.stream().limit(limit).toList();
     }
 
     /**

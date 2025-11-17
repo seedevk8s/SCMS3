@@ -83,11 +83,8 @@ public interface MileageHistoryRepository extends JpaRepository<MileageHistory, 
     @Query("SELECT h FROM MileageHistory h " +
            "LEFT JOIN FETCH h.user " +
            "WHERE h.user.userId = :userId " +
-           "ORDER BY h.earnedAt DESC " +
-           "LIMIT :limit")
-    List<MileageHistory> findRecentByUserId(
-            @Param("userId") Integer userId,
-            @Param("limit") int limit);
+           "ORDER BY h.earnedAt DESC")
+    List<MileageHistory> findRecentByUserId(@Param("userId") Integer userId);
 
     /**
      * 특정 활동에 대한 마일리지 지급 여부 확인
@@ -111,14 +108,4 @@ public interface MileageHistoryRepository extends JpaRepository<MileageHistory, 
            "ORDER BY YEAR(h.earnedAt) DESC, MONTH(h.earnedAt) DESC")
     List<Object[]> getMonthlyStatistics(@Param("userId") Integer userId);
 
-    /**
-     * 사용자의 현재 순위 조회
-     */
-    @Query("SELECT COUNT(DISTINCT h2.user.userId) + 1 " +
-           "FROM MileageHistory h1, MileageHistory h2 " +
-           "WHERE h1.user.userId = :userId " +
-           "AND h2.user.deletedAt IS NULL " +
-           "GROUP BY h1.user.userId, h2.user.userId " +
-           "HAVING SUM(h2.points) > (SELECT SUM(h3.points) FROM MileageHistory h3 WHERE h3.user.userId = :userId)")
-    Long getUserRank(@Param("userId") Integer userId);
 }
