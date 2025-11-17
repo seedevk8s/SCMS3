@@ -944,6 +944,7 @@
             <div class="tab-menu">
                 <button class="tab-button" onclick="showTab(event, 'application-status')">나의 신청내역</button>
                 <button class="tab-button active" onclick="showTab(event, 'detail')">세부내용</button>
+                <button class="tab-button" onclick="showTab(event, 'attachments')">첨부파일</button>
                 <button class="tab-button" onclick="showTab(event, 'reviews')">후기</button>
                 <button class="tab-button" th:if="${session.isAdmin == true}" onclick="showTab(event, 'admin-applications')">
                     <i class="fas fa-user-shield"></i> 신청 관리 (관리자)
@@ -1012,6 +1013,42 @@
                 <hr style="margin: 20px 0; border: none; border-top: 1px solid #dee2e6;">
                 <div th:text="${program.content}" style="white-space: pre-wrap;">
                     프로그램 상세 내용이 여기에 표시됩니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 첨부파일 탭 -->
+        <div id="attachments" class="detail-section tab-pane">
+            <div class="attachments-section">
+                <!-- 파일 업로드 폼 (관리자만 표시) -->
+                <div class="file-upload-container" th:if="${session.isAdmin}" style="margin-bottom: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px; font-size: 16px; font-weight: 600;">파일 업로드</h3>
+                    <form id="fileUploadForm" enctype="multipart/form-data" style="display: flex; gap: 10px; align-items: center;">
+                        <input type="file" id="fileInput" name="file" accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.zip,.hwp,.txt,.jpg,.jpeg,.png" style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <button type="submit" class="btn-primary" style="padding: 10px 20px; white-space: nowrap;">
+                            <i class="fas fa-upload"></i> 업로드
+                        </button>
+                    </form>
+                    <div style="margin-top: 10px; font-size: 12px; color: #6c757d;">
+                        허용 형식: PDF, DOC/DOCX, PPT/PPTX, XLS/XLSX, ZIP, HWP, TXT, JPG, PNG (최대 10MB)
+                    </div>
+                </div>
+
+                <!-- 파일 목록 -->
+                <div class="file-list-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin: 0;">첨부파일</h3>
+                        <div id="fileStats" style="font-size: 14px; color: #6c757d;">
+                            총 <span id="fileCount">0</span>개 파일 (<span id="totalSize">0 MB</span>)
+                        </div>
+                    </div>
+
+                    <!-- 파일 목록 테이블 -->
+                    <div id="fileListContent">
+                        <div class="file-loading" style="text-align: center; padding: 40px; color: #6c757d;">
+                            <i class="fas fa-spinner fa-spin"></i> 파일 목록을 불러오는 중...
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1278,6 +1315,11 @@
             // 후기 탭 클릭 시 데이터 로드
             if (tabId === 'reviews') {
                 loadReviews();
+            }
+
+            // 첨부파일 탭 클릭 시 데이터 로드
+            if (tabId === 'attachments') {
+                loadAttachments();
             }
 
             // 관리자 탭 클릭 시 데이터 로드
@@ -2030,6 +2072,211 @@
             document.body.removeChild(link);
 
             console.log('Excel 다운로드 시작: 프로그램 ID', programId);
+        }
+
+        // ============================================
+        // 첨부파일 관리 함수
+        // ============================================
+
+        // 첨부파일 목록 로드
+        async function loadAttachments() {
+            const programId = /*[[${program.programId}]]*/ 0;
+            const fileListContent = document.getElementById('fileListContent');
+
+            try {
+                const response = await fetch(`/api/programs/${programId}/files`);
+                const data = await response.json();
+
+                if (data.files && data.files.length > 0) {
+                    // 파일 통계 업데이트
+                    document.getElementById('fileCount').textContent = data.totalCount || 0;
+                    document.getElementById('totalSize').textContent = (data.totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+
+                    // 파일 목록 테이블 생성
+                    let html = `
+                        <table class="file-table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+                                    <th style="padding: 12px; text-align: left; width: 45%;">파일명</th>
+                                    <th style="padding: 12px; text-align: center; width: 15%;">크기</th>
+                                    <th style="padding: 12px; text-align: center; width: 15%;">업로드일</th>
+                                    <th style="padding: 12px; text-align: center; width: 15%;">업로드자</th>
+                                    <th style="padding: 12px; text-align: center; width: 10%;">다운로드</th>
+                    `;
+
+                    // 관리자인 경우 삭제 컬럼 추가
+                    const isAdmin = /*[[${session.isAdmin}]]*/ false;
+                    if (isAdmin) {
+                        html += `<th style="padding: 12px; text-align: center; width: 10%;">삭제</th>`;
+                    }
+
+                    html += `
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.files.forEach(file => {
+                        const uploadDate = new Date(file.uploadedAt).toLocaleDateString('ko-KR', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                        });
+
+                        html += `
+                            <tr style="border-bottom: 1px solid #dee2e6;">
+                                <td style="padding: 12px;">
+                                    <i class="fas fa-file-${getFileIcon(file.fileExtension)}" style="margin-right: 8px; color: #6c757d;"></i>
+                                    ${file.originalFileName}
+                                </td>
+                                <td style="padding: 12px; text-align: center;">${file.fileSizeInKB}</td>
+                                <td style="padding: 12px; text-align: center;">${uploadDate}</td>
+                                <td style="padding: 12px; text-align: center;">${file.uploadedBy || '-'}</td>
+                                <td style="padding: 12px; text-align: center;">
+                                    <button onclick="downloadFile(${file.fileId})" class="btn-icon" title="다운로드" style="padding: 6px 12px; border: 1px solid #dee2e6; background: white; border-radius: 4px; cursor: pointer;">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </td>
+                        `;
+
+                        if (isAdmin) {
+                            html += `
+                                <td style="padding: 12px; text-align: center;">
+                                    <button onclick="deleteFile(${file.fileId}, '${file.originalFileName}')" class="btn-icon" title="삭제" style="padding: 6px 12px; border: 1px solid #dc3545; background: white; color: #dc3545; border-radius: 4px; cursor: pointer;">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                        }
+
+                        html += `</tr>`;
+                    });
+
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+
+                    fileListContent.innerHTML = html;
+                } else {
+                    // 파일이 없을 때
+                    document.getElementById('fileCount').textContent = '0';
+                    document.getElementById('totalSize').textContent = '0 MB';
+                    fileListContent.innerHTML = `
+                        <div style="text-align: center; padding: 60px; color: #6c757d; background: #f8f9fa; border-radius: 8px;">
+                            <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"></i>
+                            <p style="margin: 0; font-size: 16px;">등록된 파일이 없습니다.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('파일 목록 로드 실패:', error);
+                fileListContent.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #dc3545;">
+                        <i class="fas fa-exclamation-circle"></i> 파일 목록을 불러오는데 실패했습니다.
+                    </div>
+                `;
+            }
+        }
+
+        // 파일 확장자에 따른 아이콘 반환
+        function getFileIcon(extension) {
+            const iconMap = {
+                'pdf': 'pdf',
+                'doc': 'word', 'docx': 'word',
+                'xls': 'excel', 'xlsx': 'excel',
+                'ppt': 'powerpoint', 'pptx': 'powerpoint',
+                'zip': 'archive',
+                'jpg': 'image', 'jpeg': 'image', 'png': 'image',
+                'txt': 'alt',
+                'hwp': 'alt'
+            };
+            return iconMap[extension.toLowerCase()] || 'file';
+        }
+
+        // 파일 업로드 처리
+        document.getElementById('fileUploadForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const programId = /*[[${program.programId}]]*/ 0;
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('파일을 선택해주세요.');
+                return;
+            }
+
+            // 파일 크기 확인 (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('파일 크기는 10MB를 초과할 수 없습니다.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`/api/programs/${programId}/files`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert(data.message || '파일이 업로드되었습니다.');
+                    fileInput.value = ''; // 파일 입력 초기화
+                    loadAttachments(); // 목록 새로고침
+                } else {
+                    alert(data.error || '파일 업로드에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('파일 업로드 실패:', error);
+                alert('파일 업로드 중 오류가 발생했습니다.');
+            }
+        });
+
+        // 파일 다운로드
+        function downloadFile(fileId) {
+            const programId = /*[[${program.programId}]]*/ 0;
+            const downloadUrl = `/api/programs/${programId}/files/${fileId}/download`;
+
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            console.log('파일 다운로드 시작:', fileId);
+        }
+
+        // 파일 삭제
+        async function deleteFile(fileId, fileName) {
+            if (!confirm(`'${fileName}' 파일을 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            const programId = /*[[${program.programId}]]*/ 0;
+
+            try {
+                const response = await fetch(`/api/programs/${programId}/files/${fileId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alert(data.message || '파일이 삭제되었습니다.');
+                    loadAttachments(); // 목록 새로고침
+                } else {
+                    alert(data.error || '파일 삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('파일 삭제 실패:', error);
+                alert('파일 삭제 중 오류가 발생했습니다.');
+            }
         }
 
     </script>
