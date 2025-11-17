@@ -67,9 +67,18 @@
         <script th:if="${session.userId != null}">
             // 페이지 로드 시 알림 개수 가져오기
             function updateNotificationCount() {
+                console.log('[알림] API 호출 시작:', new Date().toLocaleTimeString());
+
                 fetch('/api/notifications/unread-count')
-                    .then(response => response.json())
+                    .then(response => {
+                        console.log('[알림] 응답 상태:', response.status);
+                        if (!response.ok) {
+                            throw new Error('HTTP ' + response.status);
+                        }
+                        return response.json();
+                    })
                     .then(data => {
+                        console.log('[알림] 응답 데이터:', data);
                         const badge = document.getElementById('notificationBadge');
                         if (data.count > 0) {
                             badge.textContent = data.count;
@@ -78,10 +87,14 @@
                             badge.style.display = 'none';
                         }
                     })
-                    .catch(error => console.error('알림 개수 조회 실패:', error));
+                    .catch(error => {
+                        console.error('[알림] 오류 발생:', error);
+                        console.error('[알림] 오류 상세:', error.message, error.stack);
+                    });
             }
 
             // 페이지 로드 시 실행
+            console.log('[알림] 스크립트 로드됨, userId:', '[[${session.userId}]]');
             updateNotificationCount();
 
             // 30초마다 알림 개수 업데이트
