@@ -24,7 +24,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false
+    open-in-view: true
 
   # Thymeleaf Configuration
   thymeleaf:
