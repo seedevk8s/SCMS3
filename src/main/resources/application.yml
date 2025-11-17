@@ -32,7 +32,7 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
     validate-on-migrate: true
-    baseline-version: 0
+    baseline-version: 2  # V2까지는 이미 실행됨 (JPA ddl-auto로 컬럼 생성됨)
     out-of-order: false
 
   # Thymeleaf Configuration
