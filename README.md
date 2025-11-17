@@ -62,28 +62,41 @@
 
 ---
 
-## 1) 핵심 문서 링크
+## 📚 프로젝트 문서
 
-- 📄 **프로젝트 수행 계획서**  
-  https://docs.google.com/document/d/1LPxYcGUIk_J7sn4BlCQeZrpfCZGavj8dZMRhIfEAAh4/edit?tab=t.0
+모든 프로젝트 문서는 **[`doc/`](./doc/)** 폴더에 체계적으로 정리되어 있습니다.
 
-- 📊 **요구사항 정리 문서 (스프레드시트)**  
-  https://docs.google.com/spreadsheets/d/104q5eTg701of5WxGEBqalPelumekEeqCLGjKmC2mPG4/edit?gid=1838870076#gid=1838870076
+### 주요 문서 바로가기
 
-> 🔐 접근 불가 시: 권한 요청 후 진행하거나, 연락처(아래)로 문의해 주세요.
+#### 🚀 시작하기
+- [환경 설정 가이드](./doc/90_SETUP_GUIDE.md) - 개발 환경 구축 방법
+- [프로젝트 개요](./doc/01_PROJECT_OVERVIEW.md) - 프로젝트 전체 이해
+- [개발 현황](./doc/91_DEVELOPMENT_STATUS.md) - 현재 구현 상태
+
+#### 📖 개발 로그
+- [프로그램 기능 개발](./doc/04_PROGRAM_FEATURE_DEVELOPMENT_LOG.md)
+- [프로그램 신청 기능](./doc/10_PROGRAM_APPLICATION_FEATURE_DEVELOPMENT_LOG.md)
+- [관리자 탭 & 클릭 가능한 제목](./doc/12_ADMIN_TAB_AND_CLICKABLE_TITLES_DEVELOPMENT_LOG.md) ⭐ 최신
+- [전체 문서 목록](./doc/README.md) - 모든 문서 인덱스
+
+#### 🔄 세션 재개
+- [세션 재개 가이드](./doc/92_SESSION_RESUME_GUIDE.md) - 작업 재개 방법
+- [다음 구현 계획](./doc/11_NEXT_IMPLEMENTATION_PLAN.md) - 앞으로 해야 할 작업
 
 ---
 
-## 2) 화면 UI 레퍼런스
+## 🌐 외부 참고 자료
 
-- 🌐 **참고 사이트 1: 푸름대학교 학생성장지원센터 CHAMP**  
-  https://champ.woosuk.ac.kr/ko/  
-  - 만약 접근이 안 되면 **사용자에게 문의**해 주세요.  
-  - 화면 구성을 참고할 수 있도록 **캡처 제공 가능**합니다. 아래 캡처 가이드를 참고하세요.
+### 핵심 문서
+- 📄 [프로젝트 수행 계획서](https://docs.google.com/document/d/1LPxYcGUIk_J7sn4BlCQeZrpfCZGavj8dZMRhIfEAAh4/edit?tab=t.0)
+- 📊 [요구사항 정리 문서](https://docs.google.com/spreadsheets/d/104q5eTg701of5WxGEBqalPelumekEeqCLGjKmC2mPG4/edit?gid=1838870076#gid=1838870076)
 
-- 🧰 **참고 사이트 2: TOAST UI**  
-  https://ui.toast.com/  
-  - 만약 접근이 안 되면 **사용자에게 문의**해 주세요.
+### UI 레퍼런스
+- 🌐 [푸름대학교 학생성장지원센터 CHAMP](https://champ.woosuk.ac.kr/ko/)
+- 🧰 [TOAST UI](https://ui.toast.com/)
+- 📁 [UI 디자인 파일들](./doc/ui/) - 프로젝트 내 UI 참고 자료
+
+> 💡 외부 링크 접근 불가 시 프로젝트 담당자에게 문의하세요.
 
 ---
 
