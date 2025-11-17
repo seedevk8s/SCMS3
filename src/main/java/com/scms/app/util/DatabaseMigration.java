@@ -26,9 +26,67 @@ public class DatabaseMigration implements CommandLineRunner {
         log.info("데이터베이스 마이그레이션 시작...");
 
         try {
-            // program_start_date 컬럼이 존재하는지 확인
-            boolean hasStartDate = checkColumnExists("program_start_date");
-            boolean hasEndDate = checkColumnExists("program_end_date");
+            // 1. notifications 테이블 생성
+            createNotificationsTableIfNotExists();
+
+            // 2. program_start_date, program_end_date 컬럼 추가
+            addProgramExecutionDateColumns();
+
+            log.info("✅ 데이터베이스 마이그레이션 완료!");
+        } catch (Exception e) {
+            log.error("데이터베이스 마이그레이션 실패: {}", e.getMessage(), e);
+            // 실패해도 애플리케이션은 계속 실행
+        }
+    }
+
+    /**
+     * notifications 테이블 생성 (존재하지 않는 경우)
+     */
+    private void createNotificationsTableIfNotExists() {
+        try {
+            boolean tableExists = checkTableExists("notifications");
+
+            if (!tableExists) {
+                log.info("notifications 테이블을 생성합니다...");
+
+                String createTableSql = """
+                    CREATE TABLE notifications (
+                        notification_id INT AUTO_INCREMENT PRIMARY KEY,
+                        user_id INT NOT NULL,
+                        title VARCHAR(200) NOT NULL,
+                        content TEXT NOT NULL,
+                        type VARCHAR(50) NOT NULL,
+                        is_read BOOLEAN NOT NULL DEFAULT FALSE,
+                        related_url VARCHAR(500),
+                        created_at DATETIME NOT NULL,
+                        read_at DATETIME,
+                        deleted_at DATETIME,
+                        CONSTRAINT fk_notification_user FOREIGN KEY (user_id)
+                            REFERENCES users(user_id) ON DELETE CASCADE,
+                        INDEX idx_user_id (user_id),
+                        INDEX idx_is_read (is_read),
+                        INDEX idx_deleted_at (deleted_at),
+                        INDEX idx_created_at (created_at)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                    """;
+
+                jdbcTemplate.execute(createTableSql);
+                log.info("✅ notifications 테이블 생성 완료");
+            } else {
+                log.info("notifications 테이블이 이미 존재합니다.");
+            }
+        } catch (Exception e) {
+            log.error("notifications 테이블 생성 실패: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * programs 테이블에 실행 날짜 컬럼 추가
+     */
+    private void addProgramExecutionDateColumns() {
+        try {
+            boolean hasStartDate = checkColumnExists("programs", "program_start_date");
+            boolean hasEndDate = checkColumnExists("programs", "program_end_date");
 
             if (!hasStartDate || !hasEndDate) {
                 log.info("프로그램 실행 날짜 컬럼을 추가합니다...");
@@ -70,30 +128,50 @@ public class DatabaseMigration implements CommandLineRunner {
                     );
                 }
                 log.info("✅ NOT NULL 제약 조건 추가 완료");
-
-                log.info("✅ 데이터베이스 마이그레이션 완료!");
             } else {
-                log.info("프로그램 실행 날짜 컬럼이 이미 존재합니다. 마이그레이션을 건너뜁니다.");
+                log.info("프로그램 실행 날짜 컬럼이 이미 존재합니다.");
             }
         } catch (Exception e) {
-            log.error("데이터베이스 마이그레이션 실패: {}", e.getMessage(), e);
-            // 실패해도 애플리케이션은 계속 실행
+            log.error("프로그램 실행 날짜 컬럼 추가 실패: {}", e.getMessage(), e);
         }
     }
 
-    private boolean checkColumnExists(String columnName) {
+    /**
+     * 테이블 존재 여부 확인
+     */
+    private boolean checkTableExists(String tableName) {
+        try {
+            Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM information_schema.TABLES " +
+                "WHERE TABLE_SCHEMA = 'scms2' " +
+                "AND TABLE_NAME = ?",
+                Integer.class,
+                tableName
+            );
+            return count != null && count > 0;
+        } catch (Exception e) {
+            log.warn("테이블 존재 확인 실패 ({}): {}", tableName, e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * 컬럼 존재 여부 확인
+     */
+    private boolean checkColumnExists(String tableName, String columnName) {
         try {
             Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM information_schema.COLUMNS " +
                 "WHERE TABLE_SCHEMA = 'scms2' " +
-                "AND TABLE_NAME = 'programs' " +
+                "AND TABLE_NAME = ? " +
                 "AND COLUMN_NAME = ?",
                 Integer.class,
+                tableName,
                 columnName
             );
             return count != null && count > 0;
         } catch (Exception e) {
-            log.warn("컬럼 존재 확인 실패 ({}): {}", columnName, e.getMessage());
+            log.warn("컬럼 존재 확인 실패 ({}.{}): {}", tableName, columnName, e.getMessage());
             return false;
         }
     }
