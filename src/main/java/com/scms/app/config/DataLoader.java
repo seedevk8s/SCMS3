@@ -64,8 +64,8 @@ public class DataLoader implements CommandLineRunner {
         // 4. 테스트 후기 데이터 초기화
         initializeTestReviews();
 
-        // 5. 테스트 알림 데이터 초기화 (임시로 비활성화)
-        // initializeTestNotifications();
+        // 5. 테스트 알림 데이터 초기화
+        initializeTestNotifications();
     }
 
     /**
