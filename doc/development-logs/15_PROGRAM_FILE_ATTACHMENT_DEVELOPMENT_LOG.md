@@ -1009,4 +1009,161 @@ spring:
 
 ---
 
-**개발 로그 작성 완료일**: 2025-11-17
+## 실제 구현 중 발생한 문제 및 해결
+
+### 문제 1: LazyInitializationException 발생
+
+**증상**:
+```
+org.hibernate.LazyInitializationException: could not initialize proxy [User#X] - no Session
+```
+파일 목록 조회 시 `uploadedBy` 정보에 접근할 때 LazyInitializationException 발생
+
+**원인**:
+ProgramFileRepository에서 ProgramFile 조회 시 연관된 User 엔티티를 LAZY 로딩으로 설정했으나, 세션이 종료된 후 접근 시도
+
+**해결**:
+```java
+// ProgramFileRepository.java
+@Query("SELECT pf FROM ProgramFile pf " +
+       "LEFT JOIN FETCH pf.uploadedBy " +  // 추가
+       "WHERE pf.program.programId = :programId " +
+       "AND pf.deletedAt IS NULL " +
+       "ORDER BY pf.uploadedAt DESC")
+List<ProgramFile> findByProgramIdAndDeletedAtIsNull(@Param("programId") Integer programId);
+```
+
+`LEFT JOIN FETCH`를 추가하여 User 정보를 즉시 로딩하도록 수정
+
+**커밋**: 326d459 - Fix LazyInitializationException in file upload by adding JOIN FETCH for uploadedBy
+
+---
+
+### 문제 2: 파일 업로드 후 목록에 표시되지 않음
+
+**증상**:
+- 파일 업로드 성공 메시지는 나오지만
+- `loadAttachments()` 호출 후에도 파일 목록이 비어있음
+- "등록된 파일이 없습니다" 메시지만 표시됨
+
+**원인**:
+각 JavaScript 함수 내부에서 `programId`를 로컬 변수로 재선언하여 전역 변수를 사용하지 않음
+
+```javascript
+// 문제 코드
+async function loadAttachments() {
+    const programId = /*[[${program.programId}]]*/ 0;  // 로컬 변수 재선언
+    // ...
+}
+```
+
+**해결**:
+전역 `programId` 변수를 사용하도록 모든 함수 수정
+
+```javascript
+// 수정 코드
+async function loadAttachments() {
+    // const programId 선언 제거
+    const fileListContent = document.getElementById('fileListContent');
+    // programId는 전역 변수 사용
+    const response = await fetch(`/api/programs/${programId}/files`);
+}
+```
+
+**수정된 함수**:
+- `loadAttachments()`
+- 파일 업로드 이벤트 리스너
+- `downloadFile()`
+- `deleteFile()`
+
+**커밋**: 12d52dc - Fix file attachment list by using global programId variable
+
+---
+
+### 문제 3: "첨부파일이 없습니다" 메시지 중복 표시
+
+**증상**:
+- 파일 목록이 정상적으로 표시되는데도
+- 화면 하단에 "첨부파일이 없습니다" 메시지가 계속 표시됨
+- 탭 시스템과 무관하게 항상 보임
+
+**원인**:
+구 버전의 첨부파일 섹션이 HTML에 하드코딩되어 있었음
+
+```html
+<!-- 문제 코드 (1224-1230번 라인) -->
+<div class="attachment-section">
+    <h3>첨부파일</h3>
+    <div class="attachment-item" style="background: #f8f9fa; color: #6c757d; justify-content: center;">
+        첨부파일이 없습니다.
+    </div>
+</div>
+```
+
+이 섹션이 메인 컨텐츠 영역에 항상 표시되어, 새로운 탭 시스템과 별도로 렌더링됨
+
+**해결**:
+구 버전 첨부파일 섹션 완전 제거
+
+```html
+<!-- 제거 완료 -->
+```
+
+새로운 탭 시스템의 `#attachments` 탭에서만 파일 목록 표시
+
+**커밋**: db79685 - Remove hardcoded attachment section causing duplicate display
+
+---
+
+### 문제 4: 디버깅 로그 추가
+
+**추가 사항**:
+문제 진단을 위해 `loadAttachments()` 함수에 콘솔 로그 추가
+
+```javascript
+console.log('파일 목록 응답:', data);
+console.log('files 배열:', data.files);
+console.log('files 길이:', data.files ? data.files.length : 'undefined');
+```
+
+**커밋**: feb169b - Add debug logging for file attachment list loading
+
+**참고**: 프로덕션 배포 전 디버그 로그 제거 권장
+
+---
+
+## 최종 테스트 결과
+
+### 테스트 환경
+- 브라우저: Chrome (시크릿 모드)
+- 계정: 관리자 (9999999 / admin123)
+- 테스트 파일: PDF, DOCX, JPG
+
+### 테스트 결과
+- ✅ 파일 업로드 성공
+- ✅ 파일 목록 정상 표시 (파일명, 크기, 업로드일, 업로드자)
+- ✅ 파일 다운로드 성공 (한글 파일명 정상 처리)
+- ✅ 파일 삭제 성공 (Soft Delete)
+- ✅ 관리자/일반 사용자 권한 분리 정상 작동
+- ✅ 파일 크기 제한 (10MB) 정상 작동
+- ✅ 확장자 검증 정상 작동
+
+---
+
+## 개발 완료 체크리스트
+
+- ✅ Backend 구현 완료
+- ✅ Frontend 구현 완료
+- ✅ LazyInitializationException 해결
+- ✅ 파일 목록 로드 문제 해결
+- ✅ UI 중복 표시 문제 해결
+- ✅ 전체 기능 테스트 완료
+- ✅ 개발 문서 작성 완료
+- ✅ Git 커밋 및 푸시 완료
+- ⏳ PR 생성 (사용자가 직접 생성 예정)
+
+---
+
+**개발 로그 최종 업데이트**: 2025-11-17
+**최종 커밋**: db79685
+**브랜치**: claude/fix-admin-tab-display-01Tc8o3kAmdBzuhJ6mKaD15V
