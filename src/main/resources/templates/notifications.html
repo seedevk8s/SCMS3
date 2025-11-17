@@ -279,7 +279,8 @@
     </div>
 </div>
 
-<script layout:fragment="script">
+<th:block layout:fragment="script">
+    <script>
     let notifications = [];
 
     // 페이지 로드 시 알림 목록 가져오기
@@ -539,6 +540,7 @@
 
     // 페이지 로드 시 실행
     loadNotifications();
-</script>
+    </script>
+</th:block>
 </body>
 </html>
