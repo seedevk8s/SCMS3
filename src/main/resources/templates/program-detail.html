@@ -2087,6 +2087,10 @@
                 const response = await fetch(`/api/programs/${programId}/files`);
                 const data = await response.json();
 
+                console.log('파일 목록 응답:', data);
+                console.log('files 배열:', data.files);
+                console.log('files 길이:', data.files ? data.files.length : 'undefined');
+
                 if (data.files && data.files.length > 0) {
                     // 파일 통계 업데이트
                     document.getElementById('fileCount').textContent = data.totalCount || 0;
