@@ -273,7 +273,7 @@ public class DataLoader implements CommandLineRunner {
             if (openPrograms.size() > 1) {
                 Program program2 = openPrograms.get(1);
                 createApplication(program2, students.get(0), ApplicationStatus.PENDING, null);
-                createApplication(program2, students.get(1), ApplicationStatus.APPROVED, null);
+                createApplication(program2, students.get(1), ApplicationStatus.COMPLETED, null); // 이영희 - 후기 작성 가능
             }
 
             // 세 번째 프로그램에 신청 몇 건 추가
