@@ -41,11 +41,12 @@ public interface ConsultationSessionRepository extends JpaRepository<Consultatio
 
     /**
      * 상담사의 모든 상담 세션 조회 (삭제되지 않은 것만, 최신순)
+     * - 자신에게 배정된 상담 + 미배정 상담(PENDING 상태)
      */
     @Query("SELECT cs FROM ConsultationSession cs " +
            "LEFT JOIN FETCH cs.student " +
            "LEFT JOIN FETCH cs.counselor " +
-           "WHERE cs.counselor.counselorId = :counselorId " +
+           "WHERE (cs.counselor.counselorId = :counselorId OR (cs.counselor IS NULL AND cs.status = 'PENDING')) " +
            "AND cs.deletedAt IS NULL " +
            "ORDER BY cs.createdAt DESC")
     List<ConsultationSession> findByCounselorId(@Param("counselorId") Integer counselorId);
@@ -66,11 +67,12 @@ public interface ConsultationSessionRepository extends JpaRepository<Consultatio
 
     /**
      * 상담사의 특정 상태 상담 세션 조회
+     * - 자신에게 배정된 상담 + 미배정 PENDING 상담
      */
     @Query("SELECT cs FROM ConsultationSession cs " +
            "LEFT JOIN FETCH cs.student " +
            "LEFT JOIN FETCH cs.counselor " +
-           "WHERE cs.counselor.counselorId = :counselorId " +
+           "WHERE (cs.counselor.counselorId = :counselorId OR (cs.counselor IS NULL AND cs.status = 'PENDING')) " +
            "AND cs.status = :status " +
            "AND cs.deletedAt IS NULL " +
            "ORDER BY cs.createdAt DESC")

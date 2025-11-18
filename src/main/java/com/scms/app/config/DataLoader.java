@@ -228,15 +228,13 @@ public class DataLoader implements CommandLineRunner {
 
         User savedCounselor1 = userRepository.save(counselor1);
 
-        // 상담사 1 프로필 생성
-        // @MapsId 사용 시 counselorId를 직접 설정하지 않음 (user에서 자동으로 가져옴)
-        Counselor counselorProfile1 = Counselor.builder()
-                .user(savedCounselor1)
-                .specialty("진로상담, 학업상담")
-                .introduction("전문상담사 2급 자격을 보유하고 있으며, 학생들의 진로와 학업 고민을 함께 해결합니다.")
-                .build();
-
-        counselorRepository.save(counselorProfile1);
+        // 상담사 1 프로필 생성 (JDBC 사용 - Hibernate cascade 문제 회피)
+        jdbcTemplate.update(
+            "INSERT INTO counselors (counselor_id, special, intro, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+            savedCounselor1.getUserId(),
+            "진로상담, 학업상담",
+            "전문상담사 2급 자격을 보유하고 있으며, 학생들의 진로와 학업 고민을 함께 해결합니다."
+        );
         log.info("상담사 계정 생성: 김상담 (학번: 8000001, 비밀번호: counselor123)");
 
         // 상담사 2: 이상담
@@ -256,15 +254,13 @@ public class DataLoader implements CommandLineRunner {
 
         User savedCounselor2 = userRepository.save(counselor2);
 
-        // 상담사 2 프로필 생성
-        // @MapsId 사용 시 counselorId를 직접 설정하지 않음 (user에서 자동으로 가져옴)
-        Counselor counselorProfile2 = Counselor.builder()
-                .user(savedCounselor2)
-                .specialty("심리상담, 대인관계")
-                .introduction("임상심리사 2급 자격을 보유하고 있으며, 심리 및 대인관계 상담을 전문으로 합니다.")
-                .build();
-
-        counselorRepository.save(counselorProfile2);
+        // 상담사 2 프로필 생성 (JDBC 사용 - Hibernate cascade 문제 회피)
+        jdbcTemplate.update(
+            "INSERT INTO counselors (counselor_id, special, intro, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())",
+            savedCounselor2.getUserId(),
+            "심리상담, 대인관계",
+            "임상심리사 2급 자격을 보유하고 있으며, 심리 및 대인관계 상담을 전문으로 합니다."
+        );
         log.info("상담사 계정 생성: 이상담 (학번: 8000002, 비밀번호: counselor123)");
     }
 
