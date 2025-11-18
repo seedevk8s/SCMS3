@@ -1,11 +1,15 @@
 package com.scms.app.config;
 
 import com.scms.app.model.*;
+import com.scms.app.repository.CompetencyCategoryRepository;
+import com.scms.app.repository.CompetencyRepository;
 import com.scms.app.repository.CounselorRepository;
 import com.scms.app.repository.NotificationRepository;
 import com.scms.app.repository.ProgramApplicationRepository;
 import com.scms.app.repository.ProgramRepository;
 import com.scms.app.repository.ProgramReviewRepository;
+import com.scms.app.repository.StudentCompetencyAssessmentRepository;
+import com.scms.app.repository.StudentRepository;
 import com.scms.app.repository.UserRepository;
 import com.scms.app.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -45,12 +49,16 @@ public class DataLoader implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
     private final ProgramRepository programRepository;
     private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
     private final CounselorRepository counselorRepository;
     private final ProgramApplicationRepository applicationRepository;
     private final ProgramReviewRepository reviewRepository;
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final PasswordEncoder passwordEncoder;
+    private final CompetencyCategoryRepository competencyCategoryRepository;
+    private final CompetencyRepository competencyRepository;
+    private final StudentCompetencyAssessmentRepository assessmentRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -71,6 +79,9 @@ public class DataLoader implements CommandLineRunner {
 
         // 5. 테스트 알림 데이터 초기화
         initializeTestNotifications();
+
+        // 6. 역량 데이터 초기화
+        initializeCompetencies();
     }
 
     /**
@@ -615,5 +626,207 @@ public class DataLoader implements CommandLineRunner {
         } catch (Exception e) {
             log.error("테스트 알림 데이터 생성 중 오류 발생", e);
         }
+    }
+
+    /**
+     * 역량 데이터 초기화
+     * - 역량 카테고리 3개
+     * - 역량 12개
+     * - 학생 평가 샘플 데이터
+     */
+    private void initializeCompetencies() {
+        long categoryCount = competencyCategoryRepository.count();
+
+        if (categoryCount > 0) {
+            log.info("역량 데이터가 이미 존재합니다 ({}개 카테고리). 초기화를 건너뜁니다.", categoryCount);
+            return;
+        }
+
+        log.info("초기 역량 데이터를 생성합니다...");
+
+        try {
+            // 1. 역량 카테고리 생성
+            CompetencyCategory category1 = CompetencyCategory.builder()
+                    .name("전공역량")
+                    .description("전공 관련 핵심 역량")
+                    .build();
+            competencyCategoryRepository.save(category1);
+
+            CompetencyCategory category2 = CompetencyCategory.builder()
+                    .name("일반역량")
+                    .description("모든 학생이 갖춰야 할 기본 역량")
+                    .build();
+            competencyCategoryRepository.save(category2);
+
+            CompetencyCategory category3 = CompetencyCategory.builder()
+                    .name("리더십역량")
+                    .description("리더십 및 대인관계 능력")
+                    .build();
+            competencyCategoryRepository.save(category3);
+
+            log.info("✅ 역량 카테고리 3개 생성 완료");
+
+            // 2. 역량 생성 (카테고리별 4개씩, 총 12개)
+            // 전공역량
+            Competency comp1 = Competency.builder()
+                    .category(category1)
+                    .name("프로그래밍 능력")
+                    .description("Java, Python 등 프로그래밍 언어 활용 능력")
+                    .build();
+            competencyRepository.save(comp1);
+
+            Competency comp2 = Competency.builder()
+                    .category(category1)
+                    .name("데이터베이스 능력")
+                    .description("관계형 데이터베이스 설계 및 구현 능력")
+                    .build();
+            competencyRepository.save(comp2);
+
+            Competency comp3 = Competency.builder()
+                    .category(category1)
+                    .name("시스템 설계 능력")
+                    .description("소프트웨어 아키텍처 설계 및 구현 능력")
+                    .build();
+            competencyRepository.save(comp3);
+
+            Competency comp4 = Competency.builder()
+                    .category(category1)
+                    .name("문제 해결 능력")
+                    .description("복잡한 기술적 문제를 분석하고 해결하는 능력")
+                    .build();
+            competencyRepository.save(comp4);
+
+            // 일반역량
+            Competency comp5 = Competency.builder()
+                    .category(category2)
+                    .name("의사소통 능력")
+                    .description("효과적인 의사소통 능력")
+                    .build();
+            competencyRepository.save(comp5);
+
+            Competency comp6 = Competency.builder()
+                    .category(category2)
+                    .name("창의적 사고")
+                    .description("새로운 아이디어를 창출하고 혁신하는 능력")
+                    .build();
+            competencyRepository.save(comp6);
+
+            Competency comp7 = Competency.builder()
+                    .category(category2)
+                    .name("비판적 사고")
+                    .description("정보를 분석하고 평가하는 능력")
+                    .build();
+            competencyRepository.save(comp7);
+
+            Competency comp8 = Competency.builder()
+                    .category(category2)
+                    .name("자기관리 능력")
+                    .description("시간과 자원을 효율적으로 관리하는 능력")
+                    .build();
+            competencyRepository.save(comp8);
+
+            // 리더십역량
+            Competency comp9 = Competency.builder()
+                    .category(category3)
+                    .name("팀 리더십")
+                    .description("팀을 이끌어가는 능력")
+                    .build();
+            competencyRepository.save(comp9);
+
+            Competency comp10 = Competency.builder()
+                    .category(category3)
+                    .name("협업 능력")
+                    .description("타인과 협력하여 목표를 달성하는 능력")
+                    .build();
+            competencyRepository.save(comp10);
+
+            Competency comp11 = Competency.builder()
+                    .category(category3)
+                    .name("갈등 관리")
+                    .description("갈등 상황을 효과적으로 해결하는 능력")
+                    .build();
+            competencyRepository.save(comp11);
+
+            Competency comp12 = Competency.builder()
+                    .category(category3)
+                    .name("동기부여")
+                    .description("타인에게 동기를 부여하고 영감을 주는 능력")
+                    .build();
+            competencyRepository.save(comp12);
+
+            log.info("✅ 역량 12개 생성 완료");
+
+            // 3. 샘플 학생 평가 데이터 생성 (첫 3명 학생)
+            List<Student> students = studentRepository.findAll();
+            if (students.size() >= 3) {
+                Student student1 = students.get(0);
+                Student student2 = students.get(1);
+                Student student3 = students.get(2);
+
+                // 학생 1 평가 (우수 학생)
+                createAssessment(student1, comp1, 95, "프로그래밍 실력이 뛰어남");
+                createAssessment(student1, comp2, 90, "데이터베이스 설계 능력 우수");
+                createAssessment(student1, comp3, 88, "시스템 설계 능력 양호");
+                createAssessment(student1, comp4, 92, "문제 해결 능력 탁월");
+                createAssessment(student1, comp5, 85, "의사소통 능력 우수");
+                createAssessment(student1, comp6, 87, "창의적 사고 능력 양호");
+                createAssessment(student1, comp7, 90, "비판적 사고 능력 우수");
+                createAssessment(student1, comp8, 88, "자기관리 능력 양호");
+                createAssessment(student1, comp9, 82, "리더십 발휘 가능");
+                createAssessment(student1, comp10, 90, "협업 능력 우수");
+                createAssessment(student1, comp11, 85, "갈등 관리 능력 양호");
+                createAssessment(student1, comp12, 83, "동기부여 능력 양호");
+
+                // 학생 2 평가 (중간 수준)
+                createAssessment(student2, comp1, 75, "프로그래밍 능력 보통");
+                createAssessment(student2, comp2, 70, "데이터베이스 능력 보통");
+                createAssessment(student2, comp3, 68, "시스템 설계 능력 보통");
+                createAssessment(student2, comp4, 72, "문제 해결 능력 보통");
+                createAssessment(student2, comp5, 80, "의사소통 능력 우수");
+                createAssessment(student2, comp6, 75, "창의적 사고 능력 보통");
+                createAssessment(student2, comp7, 73, "비판적 사고 능력 보통");
+                createAssessment(student2, comp8, 78, "자기관리 능력 양호");
+                createAssessment(student2, comp9, 82, "리더십 발휘 가능");
+                createAssessment(student2, comp10, 85, "협업 능력 우수");
+                createAssessment(student2, comp11, 80, "갈등 관리 능력 양호");
+                createAssessment(student2, comp12, 77, "동기부여 능력 보통");
+
+                // 학생 3 평가 (개선 필요)
+                createAssessment(student3, comp1, 55, "프로그래밍 능력 개선 필요");
+                createAssessment(student3, comp2, 60, "데이터베이스 능력 개선 필요");
+                createAssessment(student3, comp3, 50, "시스템 설계 능력 부족");
+                createAssessment(student3, comp4, 58, "문제 해결 능력 개선 필요");
+                createAssessment(student3, comp5, 70, "의사소통 능력 보통");
+                createAssessment(student3, comp6, 65, "창의적 사고 능력 개선 필요");
+                createAssessment(student3, comp7, 62, "비판적 사고 능력 개선 필요");
+                createAssessment(student3, comp8, 68, "자기관리 능력 보통");
+                createAssessment(student3, comp9, 60, "리더십 개선 필요");
+                createAssessment(student3, comp10, 72, "협업 능력 보통");
+                createAssessment(student3, comp11, 65, "갈등 관리 능력 개선 필요");
+                createAssessment(student3, comp12, 63, "동기부여 능력 개선 필요");
+
+                log.info("✅ 학생 평가 샘플 데이터 생성 완료 (학생 3명 x 역량 12개 = 36건)");
+            }
+
+            log.info("✅ 역량 데이터 초기화 완료");
+
+        } catch (Exception e) {
+            log.error("역량 데이터 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * 학생 역량 평가 생성 헬퍼 메서드
+     */
+    private void createAssessment(Student student, Competency competency, int score, String notes) {
+        StudentCompetencyAssessment assessment = StudentCompetencyAssessment.builder()
+                .student(student)
+                .competency(competency)
+                .score(score)
+                .assessmentDate(LocalDate.now())
+                .assessor("시스템 관리자")
+                .notes(notes)
+                .build();
+        assessmentRepository.save(assessment);
     }
 }

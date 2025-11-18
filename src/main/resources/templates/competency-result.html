@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>역량진단 결과 - SCMS</title>
+    <th:block layout:fragment="css">
+        <style>
+            .assessment-result-container {
+                max-width: 1200px;
+                margin: 40px auto;
+                padding: 0 24px;
+            }
+
+            .result-header {
+                background: linear-gradient(135deg, #2C5F5D 0%, #3B7573 100%);
+                color: white;
+                padding: 40px;
+                border-radius: 12px;
+                margin-bottom: 30px;
+                text-align: center;
+            }
+
+            .result-header h1 {
+                font-size: 32px;
+                font-weight: 700;
+                margin-bottom: 16px;
+            }
+
+            .result-header .student-info {
+                font-size: 18px;
+                opacity: 0.9;
+            }
+
+            .result-header .overall-score {
+                font-size: 48px;
+                font-weight: 700;
+                margin: 20px 0 10px;
+            }
+
+            .result-header .overall-grade {
+                font-size: 24px;
+                font-weight: 600;
+                padding: 8px 20px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 20px;
+                display: inline-block;
+            }
+
+            .chart-section {
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 24px;
+            }
+
+            .chart-title {
+                font-size: 20px;
+                font-weight: 700;
+                color: #2C5F5D;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
+                border-bottom: 2px solid #e8ecf1;
+            }
+
+            .chart-container {
+                position: relative;
+                height: 400px;
+                margin: 20px 0;
+            }
+
+            .category-scores {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .category-card {
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .category-card h3 {
+                font-size: 18px;
+                font-weight: 700;
+                color: #2C5F5D;
+                margin-bottom: 16px;
+            }
+
+            .category-score {
+                font-size: 36px;
+                font-weight: 700;
+                color: #3B7573;
+                margin-bottom: 8px;
+            }
+
+            .category-grade {
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .grade-A { background: #d4edda; color: #155724; }
+            .grade-B { background: #cfe2ff; color: #084298; }
+            .grade-C { background: #fff3cd; color: #664d03; }
+            .grade-D { background: #f8d7da; color: #842029; }
+            .grade-F { background: #f8d7da; color: #842029; }
+
+            .competency-list {
+                margin-top: 16px;
+            }
+
+            .competency-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 12px 0;
+                border-bottom: 1px solid #e8ecf1;
+            }
+
+            .competency-item:last-child {
+                border-bottom: none;
+            }
+
+            .competency-name {
+                font-size: 14px;
+                color: #495057;
+            }
+
+            .competency-score {
+                font-size: 16px;
+                font-weight: 600;
+                color: #2C5F5D;
+            }
+
+            .insights-section {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+
+            .insight-card {
+                background: white;
+                padding: 24px;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .insight-card h3 {
+                font-size: 18px;
+                font-weight: 700;
+                margin-bottom: 16px;
+            }
+
+            .insight-card.strengths h3 {
+                color: #155724;
+            }
+
+            .insight-card.weaknesses h3 {
+                color: #842029;
+            }
+
+            .insight-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .insight-list li {
+                padding: 12px;
+                margin-bottom: 8px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .insight-list li .score {
+                font-weight: 700;
+                font-size: 18px;
+            }
+
+            .action-buttons {
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                margin-top: 30px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                border: none;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-block;
+                transition: all 0.3s;
+            }
+
+            .btn-primary {
+                background: #2C5F5D;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #3B7573;
+            }
+
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+
+            .loading {
+                text-align: center;
+                padding: 60px 20px;
+                font-size: 18px;
+                color: #6c757d;
+            }
+
+            @media print {
+                .action-buttons {
+                    display: none;
+                }
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content" class="assessment-result-container">
+        <!-- 로딩 상태 -->
+        <div id="loading" class="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">로딩 중...</span>
+            </div>
+            <p>역량 평가 결과를 불러오는 중입니다...</p>
+        </div>
+
+        <!-- 결과 컨테이너 -->
+        <div id="resultContainer" style="display: none;">
+            <!-- 헤더 -->
+            <div class="result-header">
+                <h1>역량 평가 결과</h1>
+                <div class="student-info">
+                    <span id="studentName">-</span> (<span id="studentNumber">-</span>)
+                </div>
+                <div class="overall-score" id="overallScore">0.0</div>
+                <div class="overall-grade" id="overallGrade">-</div>
+            </div>
+
+            <!-- 카테고리별 점수 -->
+            <div class="category-scores" id="categoryScores"></div>
+
+            <!-- 레이더 차트 -->
+            <div class="chart-section">
+                <h2 class="chart-title">역량 프로필</h2>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 강점/약점 분석 -->
+            <div class="insights-section">
+                <div class="insight-card strengths">
+                    <h3>🌟 주요 강점 (Top 3)</h3>
+                    <ul class="insight-list" id="strengthsList"></ul>
+                </div>
+                <div class="insight-card weaknesses">
+                    <h3>📈 개선 필요 (Bottom 3)</h3>
+                    <ul class="insight-list" id="weaknessesList"></ul>
+                </div>
+            </div>
+
+            <!-- 액션 버튼 -->
+            <div class="action-buttons">
+                <a href="/programs" class="btn btn-primary">추천 프로그램 보기</a>
+                <button onclick="window.print()" class="btn btn-secondary">결과 인쇄</button>
+                <a href="/mypage" class="btn btn-secondary">마이페이지로 이동</a>
+            </div>
+        </div>
+    </div>
+
+    <th:block layout:fragment="script">
+        <!-- Chart.js -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script th:inline="javascript">
+            // 세션에서 studentId 가져오기
+            const studentId = /*[[${session.userId}]]*/ null;
+
+            // 페이지 로드 시 데이터 조회
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!studentId) {
+                    alert('로그인이 필요합니다.');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                loadAssessmentReport(studentId);
+            });
+
+            // 평가 리포트 조회
+            async function loadAssessmentReport(studentId) {
+                try {
+                    const response = await fetch(`/api/assessments/students/${studentId}/report`);
+
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            throw new Error('평가 데이터가 없습니다. 먼저 역량 진단을 실시해주세요.');
+                        }
+                        throw new Error('평가 결과를 불러오는데 실패했습니다.');
+                    }
+
+                    const report = await response.json();
+                    displayReport(report);
+
+                } catch (error) {
+                    console.error('Error loading report:', error);
+                    document.getElementById('loading').innerHTML =
+                        `<div class="alert alert-danger">${error.message}</div>
+                         <div class="action-buttons">
+                             <a href="/competency-assessment" class="btn btn-primary">역량 진단 시작하기</a>
+                             <a href="/" class="btn btn-secondary">홈으로 돌아가기</a>
+                         </div>`;
+                }
+            }
+
+            // 리포트 표시
+            function displayReport(report) {
+                // 로딩 숨기기, 결과 표시
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('resultContainer').style.display = 'block';
+
+                // 학생 정보
+                document.getElementById('studentName').textContent = report.studentName;
+                document.getElementById('studentNumber').textContent = report.studentNumber;
+
+                // 전체 점수
+                document.getElementById('overallScore').textContent = report.totalScore.toFixed(1);
+                document.getElementById('overallGrade').textContent = `등급: ${report.overallGrade}`;
+
+                // 카테고리별 점수 카드
+                displayCategoryScores(report.categoryScores);
+
+                // 레이더 차트
+                displayRadarChart(report.categoryScores);
+
+                // 강점/약점
+                displayStrengths(report.strengths);
+                displayWeaknesses(report.weaknesses);
+            }
+
+            // 카테고리별 점수 카드
+            function displayCategoryScores(categoryScores) {
+                const container = document.getElementById('categoryScores');
+                container.innerHTML = '';
+
+                categoryScores.forEach(category => {
+                    const card = document.createElement('div');
+                    card.className = 'category-card';
+
+                    let competenciesHTML = '';
+                    category.competencies.forEach(comp => {
+                        competenciesHTML += `
+                            <div class="competency-item">
+                                <span class="competency-name">${comp.competencyName}</span>
+                                <span class="competency-score">${comp.score}점</span>
+                            </div>
+                        `;
+                    });
+
+                    card.innerHTML = `
+                        <h3>${category.categoryName}</h3>
+                        <div class="category-score">${category.averageScore.toFixed(1)}점</div>
+                        <span class="category-grade grade-${category.grade}">등급: ${category.grade}</span>
+                        <div class="competency-list">${competenciesHTML}</div>
+                    `;
+
+                    container.appendChild(card);
+                });
+            }
+
+            // 레이더 차트
+            function displayRadarChart(categoryScores) {
+                const ctx = document.getElementById('radarChart').getContext('2d');
+
+                const labels = categoryScores.map(c => c.categoryName);
+                const data = categoryScores.map(c => c.averageScore);
+
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '역량 점수',
+                            data: data,
+                            fill: true,
+                            backgroundColor: 'rgba(44, 95, 93, 0.2)',
+                            borderColor: 'rgb(44, 95, 93)',
+                            pointBackgroundColor: 'rgb(44, 95, 93)',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: 'rgb(44, 95, 93)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    display: true
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                                ticks: {
+                                    stepSize: 20
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 강점 표시
+            function displayStrengths(strengths) {
+                const list = document.getElementById('strengthsList');
+                list.innerHTML = '';
+
+                strengths.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${item.competencyName}</span>
+                        <span class="score" style="color: #155724;">${item.score}점</span>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+
+            // 약점 표시
+            function displayWeaknesses(weaknesses) {
+                const list = document.getElementById('weaknessesList');
+                list.innerHTML = '';
+
+                weaknesses.forEach(item => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${item.competencyName}</span>
+                        <span class="score" style="color: #842029;">${item.score}점</span>
+                    `;
+                    list.appendChild(li);
+                });
+            }
+        </script>
+    </th:block>
+</body>
+</html>
