@@ -40,6 +40,53 @@ public class Portfolio {
     @Column(name = "template_type", length = 50)
     private String templateType;
 
+    // 프로필 정보
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
+    @Column(name = "about_me", columnDefinition = "TEXT")
+    private String aboutMe;
+
+    @Column(name = "career_goal", length = 500)
+    private String careerGoal;
+
+    // 연락처 정보
+    @Column(name = "contact_email", length = 100)
+    private String contactEmail;
+
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    // SNS & 링크
+    @Column(name = "github_url", length = 200)
+    private String githubUrl;
+
+    @Column(name = "blog_url", length = 200)
+    private String blogUrl;
+
+    @Column(name = "linkedin_url", length = 200)
+    private String linkedinUrl;
+
+    @Column(name = "website_url", length = 200)
+    private String websiteUrl;
+
+    // 역량 정보
+    @Column(name = "skills", columnDefinition = "TEXT")
+    private String skills;
+
+    @Column(name = "interests", columnDefinition = "TEXT")
+    private String interests;
+
+    // 학력 정보
+    @Column(name = "major", length = 100)
+    private String major;
+
+    @Column(name = "grade")
+    private Integer grade;
+
+    @Column(name = "gpa")
+    private Double gpa;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
