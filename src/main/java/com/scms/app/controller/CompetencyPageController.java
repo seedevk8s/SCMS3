@@ -1,5 +1,9 @@
 package com.scms.app.controller;
 
+import com.scms.app.model.Student;
+import com.scms.app.model.User;
+import com.scms.app.repository.StudentRepository;
+import com.scms.app.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +19,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Slf4j
 public class CompetencyPageController {
 
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+
     /**
      * 역량진단 결과 페이지
      */
@@ -27,7 +34,26 @@ public class CompetencyPageController {
             return "redirect:/login";
         }
 
-        log.info("역량진단 결과 페이지 접근: userId={}", userId);
+        // User 정보로 Student 찾기
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("역량진단 결과 페이지 접근 실패: 사용자를 찾을 수 없음 userId={}", userId);
+            return "redirect:/login";
+        }
+
+        // studentNum(학번)으로 Student 찾기
+        Student student = studentRepository.findByStudentId(String.valueOf(user.getStudentNum())).orElse(null);
+        if (student == null) {
+            log.warn("역량진단 결과 페이지 접근 실패: 학생 정보를 찾을 수 없음 studentNum={}", user.getStudentNum());
+            model.addAttribute("error", "학생 정보를 찾을 수 없습니다. 관리자에게 문의하세요.");
+            return "error";
+        }
+
+        // Student ID를 모델에 추가
+        model.addAttribute("studentId", student.getId());
+
+        log.info("역량진단 결과 페이지 접근: userId={}, studentId={}, studentNum={}",
+                userId, student.getId(), user.getStudentNum());
         return "competency-result";
     }
 

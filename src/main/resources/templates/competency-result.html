@@ -298,14 +298,14 @@
         <!-- Chart.js -->
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script th:inline="javascript">
-            // 세션에서 studentId 가져오기
-            const studentId = /*[[${session.userId}]]*/ null;
+            // 모델에서 studentId 가져오기 (User ID가 아닌 Student ID)
+            const studentId = /*[[${studentId}]]*/ null;
 
             // 페이지 로드 시 데이터 조회
             document.addEventListener('DOMContentLoaded', function() {
                 if (!studentId) {
-                    alert('로그인이 필요합니다.');
-                    window.location.href = '/login';
+                    alert('학생 정보를 찾을 수 없습니다.');
+                    window.location.href = '/';
                     return;
                 }
 
