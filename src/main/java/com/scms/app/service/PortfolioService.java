@@ -99,6 +99,25 @@ public class PortfolioService {
                 .description(request.getDescription())
                 .visibility(request.getVisibility() != null ? request.getVisibility() : PortfolioVisibility.PRIVATE)
                 .templateType(request.getTemplateType())
+                // 프로필 정보
+                .profileImageUrl(request.getProfileImageUrl())
+                .aboutMe(request.getAboutMe())
+                .careerGoal(request.getCareerGoal())
+                // 연락처
+                .contactEmail(request.getContactEmail())
+                .contactPhone(request.getContactPhone())
+                // SNS & 링크
+                .githubUrl(request.getGithubUrl())
+                .blogUrl(request.getBlogUrl())
+                .linkedinUrl(request.getLinkedinUrl())
+                .websiteUrl(request.getWebsiteUrl())
+                // 역량
+                .skills(request.getSkills())
+                .interests(request.getInterests())
+                // 학력
+                .major(request.getMajor())
+                .grade(request.getGrade())
+                .gpa(request.getGpa())
                 .build();
 
         Portfolio savedPortfolio = portfolioRepository.save(portfolio);
@@ -121,6 +140,30 @@ public class PortfolioService {
             portfolio.setVisibility(request.getVisibility());
         }
         portfolio.setTemplateType(request.getTemplateType());
+
+        // 프로필 정보
+        portfolio.setProfileImageUrl(request.getProfileImageUrl());
+        portfolio.setAboutMe(request.getAboutMe());
+        portfolio.setCareerGoal(request.getCareerGoal());
+
+        // 연락처
+        portfolio.setContactEmail(request.getContactEmail());
+        portfolio.setContactPhone(request.getContactPhone());
+
+        // SNS & 링크
+        portfolio.setGithubUrl(request.getGithubUrl());
+        portfolio.setBlogUrl(request.getBlogUrl());
+        portfolio.setLinkedinUrl(request.getLinkedinUrl());
+        portfolio.setWebsiteUrl(request.getWebsiteUrl());
+
+        // 역량
+        portfolio.setSkills(request.getSkills());
+        portfolio.setInterests(request.getInterests());
+
+        // 학력
+        portfolio.setMajor(request.getMajor());
+        portfolio.setGrade(request.getGrade());
+        portfolio.setGpa(request.getGpa());
 
         Portfolio updatedPortfolio = portfolioRepository.save(portfolio);
         log.info("포트폴리오 수정 완료: ID={}", portfolioId);
