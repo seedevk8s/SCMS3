@@ -73,7 +73,9 @@ public class ExternalUserService {
             log.info("이메일 인증 메일 발송 완료: {}", savedUser.getEmail());
         } catch (Exception e) {
             log.error("이메일 인증 메일 발송 실패: {}", savedUser.getEmail(), e);
-            // 이메일 발송 실패해도 회원가입은 성공 처리
+            // 이메일 발송 실패 시 생성된 계정 삭제
+            externalUserRepository.delete(savedUser);
+            throw new RuntimeException("이메일 발송에 실패했습니다. 잠시 후 다시 시도해주세요.", e);
         }
 
         log.info("외부회원 가입 완료: {} ({})", savedUser.getName(), savedUser.getEmail());

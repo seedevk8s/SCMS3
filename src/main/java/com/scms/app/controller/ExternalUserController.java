@@ -52,7 +52,7 @@ public class ExternalUserController {
             log.error("회원가입 중 오류 발생", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
-            errorResponse.put("message", "회원가입 중 오류가 발생했습니다");
+            errorResponse.put("message", e.getMessage() != null ? e.getMessage() : "회원가입 중 오류가 발생했습니다");
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
