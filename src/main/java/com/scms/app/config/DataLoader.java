@@ -6,6 +6,7 @@ import com.scms.app.repository.CompetencyRepository;
 import com.scms.app.repository.CounselorRepository;
 import com.scms.app.repository.NotificationRepository;
 import com.scms.app.repository.ProgramApplicationRepository;
+import com.scms.app.repository.ProgramCompetencyRepository;
 import com.scms.app.repository.ProgramRepository;
 import com.scms.app.repository.ProgramReviewRepository;
 import com.scms.app.repository.StudentCompetencyAssessmentRepository;
@@ -59,6 +60,7 @@ public class DataLoader implements CommandLineRunner {
     private final CompetencyCategoryRepository competencyCategoryRepository;
     private final CompetencyRepository competencyRepository;
     private final StudentCompetencyAssessmentRepository assessmentRepository;
+    private final ProgramCompetencyRepository programCompetencyRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -88,6 +90,9 @@ public class DataLoader implements CommandLineRunner {
 
         // 7. 샘플 평가 데이터 초기화 (Student 동기화 후)
         initializeSampleAssessments();
+
+        // 8. 프로그램-역량 매핑 초기화 (프로그램 추천용)
+        initializeProgramCompetencyMappings();
     }
 
     /**
@@ -939,5 +944,142 @@ public class DataLoader implements CommandLineRunner {
                 .notes(notes)
                 .build();
         assessmentRepository.save(assessment);
+    }
+
+    /**
+     * 프로그램-역량 매핑 초기화
+     * 각 프로그램이 어떤 역량을 향상시키는지 매핑
+     */
+    private void initializeProgramCompetencyMappings() {
+        long mappingCount = programCompetencyRepository.count();
+
+        if (mappingCount > 0) {
+            log.info("프로그램-역량 매핑 데이터가 이미 존재합니다 ({}건). 초기화를 건너뜁니다.", mappingCount);
+            return;
+        }
+
+        log.info("프로그램-역량 매핑 데이터를 생성합니다...");
+
+        try {
+            // 프로그램과 역량 데이터 확인
+            List<Program> programs = programRepository.findAll();
+            List<Competency> competencies = competencyRepository.findAll();
+
+            if (programs.isEmpty() || competencies.isEmpty()) {
+                log.warn("⚠️ 프로그램 또는 역량 데이터가 없습니다. 매핑 생성을 건너뜁니다.");
+                return;
+            }
+
+            log.info("프로그램 {}개, 역량 {}개 발견", programs.size(), competencies.size());
+
+            // 역량 이름으로 매핑 (간단한 키워드 기반 매칭)
+            // 실제로는 관리자가 수동으로 설정하거나 더 정교한 로직 필요
+            int mappingCreated = 0;
+
+            for (Program program : programs) {
+                String title = program.getTitle().toLowerCase();
+                String description = (program.getDescription() != null ? program.getDescription().toLowerCase() : "");
+                String category = program.getCategory().toLowerCase();
+
+                // 프로그래밍/알고리즘 관련
+                if (title.contains("프로그래밍") || title.contains("코딩") || title.contains("알고리즘") ||
+                    title.contains("개발") || title.contains("sw") || category.contains("sw")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "프로그래밍 능력", 10);
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "문제 해결 능력", 8);
+                }
+
+                // 데이터베이스 관련
+                if (title.contains("데이터베이스") || title.contains("db") || title.contains("sql")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "데이터베이스 능력", 10);
+                }
+
+                // 시스템 설계 관련
+                if (title.contains("설계") || title.contains("아키텍처") || title.contains("시스템")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "시스템 설계 능력", 10);
+                }
+
+                // 발표/프레젠테이션 관련
+                if (title.contains("발표") || title.contains("프레젠테이션") || title.contains("PT")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "의사소통 능력", 10);
+                }
+
+                // 창의/아이디어 관련
+                if (title.contains("창의") || title.contains("아이디어") || title.contains("혁신")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "창의적 사고", 10);
+                }
+
+                // 리더십 관련
+                if (title.contains("리더") || title.contains("멘토") || category.contains("리더십")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "팀 리더십", 10);
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "동기부여", 8);
+                }
+
+                // 팀프로젝트 관련
+                if (title.contains("팀") || title.contains("협업") || title.contains("프로젝트")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "협업 능력", 10);
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "갈등 관리", 7);
+                }
+
+                // 멘토링/튜터링
+                if (title.contains("멘토링") || title.contains("튜터")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "의사소통 능력", 9);
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "동기부여", 9);
+                }
+
+                // 비판적 사고 관련
+                if (title.contains("분석") || title.contains("연구") || title.contains("토론")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "비판적 사고", 9);
+                }
+
+                // 자기계발 관련
+                if (title.contains("자기계발") || title.contains("성장") || title.contains("습관")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "자기관리 능력", 10);
+                }
+
+                // 기본 매핑: 모든 프로그램은 최소한 문제 해결 능력에 기여
+                if (!title.contains("프로그래밍") && !title.contains("코딩")) {
+                    mappingCreated += createProgramCompetencyMapping(program, competencies, "문제 해결 능력", 5);
+                }
+            }
+
+            log.info("✅ 프로그램-역량 매핑 {}건 생성 완료", mappingCreated);
+
+        } catch (Exception e) {
+            log.error("프로그램-역량 매핑 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * 프로그램-역량 매핑 생성 헬퍼 메서드
+     */
+    private int createProgramCompetencyMapping(Program program, List<Competency> competencies,
+                                                String competencyName, int weight) {
+        // 역량 이름으로 찾기
+        Competency competency = competencies.stream()
+                .filter(c -> c.getName().equals(competencyName))
+                .findFirst()
+                .orElse(null);
+
+        if (competency == null) {
+            return 0;
+        }
+
+        // 이미 존재하는지 확인 (중복 방지)
+        List<ProgramCompetency> existing = programCompetencyRepository.findByProgramProgramId(program.getProgramId());
+        boolean alreadyExists = existing.stream()
+                .anyMatch(pc -> pc.getCompetency().getId().equals(competency.getId()));
+
+        if (alreadyExists) {
+            return 0;
+        }
+
+        ProgramCompetency mapping = ProgramCompetency.builder()
+                .program(program)
+                .competency(competency)
+                .weight(weight)
+                .build();
+
+        programCompetencyRepository.save(mapping);
+        return 1;
     }
 }
