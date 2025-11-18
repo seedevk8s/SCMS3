@@ -160,7 +160,7 @@ public class PortfolioItemService {
      * 프로그램 신청으로부터 포트폴리오 항목 자동 생성
      */
     @Transactional
-    public PortfolioItem createFromProgramApplication(Long portfolioId, Integer userId, Long applicationId) {
+    public PortfolioItem createFromProgramApplication(Long portfolioId, Integer userId, Integer applicationId) {
         // 권한 확인
         Portfolio portfolio = portfolioRepository.findByIdAndUserIdNotDeleted(portfolioId, userId)
                 .orElseThrow(() -> new IllegalArgumentException("포트폴리오를 찾을 수 없거나 권한이 없습니다"));
@@ -170,12 +170,12 @@ public class PortfolioItemService {
                 .orElseThrow(() -> new IllegalArgumentException("프로그램 신청을 찾을 수 없습니다"));
 
         // 본인의 신청인지 확인
-        if (!application.getUserId().equals(userId)) {
+        if (!application.getUser().getUserId().equals(userId)) {
             throw new IllegalArgumentException("본인의 프로그램 신청만 추가할 수 있습니다");
         }
 
         // 이미 추가된 프로그램인지 확인
-        portfolioItemRepository.findByProgramApplicationIdNotDeleted(applicationId)
+        portfolioItemRepository.findByProgramApplicationIdNotDeleted(Long.valueOf(applicationId))
                 .ifPresent(item -> {
                     throw new IllegalArgumentException("이미 포트폴리오에 추가된 프로그램입니다");
                 });
@@ -194,7 +194,7 @@ public class PortfolioItemService {
                 .startDate(application.getProgram().getProgramStartDate().toLocalDate())
                 .endDate(application.getProgram().getProgramEndDate().toLocalDate())
                 .displayOrder(displayOrder)
-                .programApplicationId(applicationId)
+                .programApplicationId(Long.valueOf(applicationId))
                 .build();
 
         PortfolioItem savedItem = portfolioItemRepository.save(item);

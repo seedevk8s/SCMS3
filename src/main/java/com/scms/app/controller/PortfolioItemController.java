@@ -189,7 +189,7 @@ public class PortfolioItemController {
     @PostMapping("/from-program/{applicationId}")
     public ResponseEntity<?> createFromProgramApplication(
             @PathVariable Long portfolioId,
-            @PathVariable Long applicationId,
+            @PathVariable Integer applicationId,
             HttpSession session) {
 
         Integer userId = (Integer) session.getAttribute("userId");
