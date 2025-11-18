@@ -63,6 +63,13 @@ public class SecurityConfig {
 
                         // 관리자 전용 경로
                         .requestMatchers("/api/users/**").hasRole("ADMIN")
+                        .requestMatchers("/counseling/admin/**").hasRole("ADMIN")
+
+                        // 상담사 또는 관리자 전용 경로
+                        .requestMatchers("/counseling/manage").hasAnyRole("COUNSELOR", "ADMIN")
+                        .requestMatchers("/api/consultations/*/approve").hasAnyRole("COUNSELOR", "ADMIN")
+                        .requestMatchers("/api/consultations/*/reject").hasAnyRole("COUNSELOR", "ADMIN")
+                        .requestMatchers("/api/consultations/*/record").hasRole("COUNSELOR")
 
                         // 나머지는 인증된 사용자만 접근 가능
                         .anyRequest().authenticated()
