@@ -7,7 +7,7 @@
 CREATE TABLE IF NOT EXISTS consultation_sessions (
     session_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '세션 ID',
     student_id INT NOT NULL COMMENT '학생 ID',
-    counselor_id BIGINT COMMENT '배정된 상담사 ID',
+    counselor_id INT COMMENT '배정된 상담사 ID (= user_id)',
     consultation_type VARCHAR(50) NOT NULL COMMENT '상담 유형 (CAREER, ACADEMIC, PSYCHOLOGICAL, RELATIONSHIP, OTHER)',
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING' COMMENT '상태 (PENDING, APPROVED, REJECTED, COMPLETED, CANCELLED)',
     requested_date DATE NOT NULL COMMENT '희망 상담 날짜',
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS consultation_sessions (
     INDEX idx_requested_date (requested_date),
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (counselor_id) REFERENCES counselors(id) ON DELETE SET NULL
+    FOREIGN KEY (counselor_id) REFERENCES counselors(counselor_id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='상담 세션 (신청 및 예약)';
 
 -- ============================================
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS consultation_sessions (
 CREATE TABLE IF NOT EXISTS consultation_records (
     record_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '기록 ID',
     session_id BIGINT NOT NULL COMMENT '상담 세션 ID',
-    counselor_id BIGINT NOT NULL COMMENT '상담사 ID',
+    counselor_id INT NOT NULL COMMENT '상담사 ID (= user_id)',
     student_id INT NOT NULL COMMENT '학생 ID',
     consultation_date DATETIME NOT NULL COMMENT '실제 상담 일시',
     duration_minutes INT COMMENT '상담 시간 (분)',
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS consultation_records (
     INDEX idx_consultation_date (consultation_date),
     INDEX idx_deleted_at (deleted_at),
     FOREIGN KEY (session_id) REFERENCES consultation_sessions(session_id) ON DELETE CASCADE,
-    FOREIGN KEY (counselor_id) REFERENCES counselors(id) ON DELETE CASCADE,
+    FOREIGN KEY (counselor_id) REFERENCES counselors(counselor_id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='상담 기록';
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS consultation_records (
 -- ============================================
 CREATE TABLE IF NOT EXISTS counselor_schedules (
     schedule_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '일정 ID',
-    counselor_id BIGINT NOT NULL COMMENT '상담사 ID',
+    counselor_id INT NOT NULL COMMENT '상담사 ID (= user_id)',
     day_of_week INT NOT NULL COMMENT '요일 (1=월요일, 7=일요일)',
     start_time TIME NOT NULL COMMENT '시작 시간',
     end_time TIME NOT NULL COMMENT '종료 시간',
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS counselor_schedules (
     INDEX idx_day_of_week (day_of_week),
     INDEX idx_is_available (is_available),
     INDEX idx_deleted_at (deleted_at),
-    FOREIGN KEY (counselor_id) REFERENCES counselors(id) ON DELETE CASCADE,
+    FOREIGN KEY (counselor_id) REFERENCES counselors(counselor_id) ON DELETE CASCADE,
     CONSTRAINT chk_day_of_week CHECK (day_of_week BETWEEN 1 AND 7),
     CONSTRAINT chk_satisfaction CHECK (satisfaction_score IS NULL OR (satisfaction_score BETWEEN 1 AND 5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='상담사 근무 일정';

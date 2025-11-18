@@ -47,15 +47,15 @@ CREATE TABLE IF NOT EXISTS login_history (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='로그인 이력';
 
 -- 상담사 테이블
+-- @MapsId 사용: counselor_id = user_id (1:1 관계)
 CREATE TABLE IF NOT EXISTS counselors (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'ID',
-    user_id INT NOT NULL COMMENT '사용자 ID',
-    specialization VARCHAR(100) COMMENT '전문 분야',
-    license VARCHAR(100) COMMENT '자격증',
-    available TINYINT(1) NOT NULL DEFAULT 1 COMMENT '상담 가능 여부',
+    counselor_id INT PRIMARY KEY COMMENT '상담사 ID (= user_id)',
+    special VARCHAR(100) COMMENT '전문 분야',
+    intro TEXT COMMENT '소개',
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    deleted_at DATETIME COMMENT '삭제일시 (Soft Delete)',
+    FOREIGN KEY (counselor_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='상담사 정보';
 
 -- ============================================

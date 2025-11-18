@@ -179,8 +179,8 @@ public class DataLoader implements CommandLineRunner {
                         counselorUser.getName(), counselorUser.getUserId());
 
                 // Counselor 프로필 생성
+                // @MapsId 사용 시 counselorId를 직접 설정하지 않음 (user에서 자동으로 가져옴)
                 Counselor counselorProfile = Counselor.builder()
-                        .counselorId(counselorUser.getUserId())
                         .user(counselorUser)
                         .specialty("일반상담")
                         .introduction("학생 상담을 담당하고 있습니다.")
@@ -230,8 +230,8 @@ public class DataLoader implements CommandLineRunner {
         User savedCounselor1 = userRepository.save(counselor1);
 
         // 상담사 1 프로필 생성
+        // @MapsId 사용 시 counselorId를 직접 설정하지 않음 (user에서 자동으로 가져옴)
         Counselor counselorProfile1 = Counselor.builder()
-                .counselorId(savedCounselor1.getUserId())
                 .user(savedCounselor1)
                 .specialty("진로상담, 학업상담")
                 .introduction("전문상담사 2급 자격을 보유하고 있으며, 학생들의 진로와 학업 고민을 함께 해결합니다.")
@@ -258,8 +258,8 @@ public class DataLoader implements CommandLineRunner {
         User savedCounselor2 = userRepository.save(counselor2);
 
         // 상담사 2 프로필 생성
+        // @MapsId 사용 시 counselorId를 직접 설정하지 않음 (user에서 자동으로 가져옴)
         Counselor counselorProfile2 = Counselor.builder()
-                .counselorId(savedCounselor2.getUserId())
                 .user(savedCounselor2)
                 .specialty("심리상담, 대인관계")
                 .introduction("임상심리사 2급 자격을 보유하고 있으며, 심리 및 대인관계 상담을 전문으로 합니다.")
