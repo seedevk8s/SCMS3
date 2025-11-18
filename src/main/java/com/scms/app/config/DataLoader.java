@@ -65,7 +65,10 @@ public class DataLoader implements CommandLineRunner {
         // 1. 사용자 데이터 초기화
         initializeUsers();
 
-        // 1-1. 상담사 계정 초기화 (별도로 확인하여 생성)
+        // 1-1. Student 테이블 동기화 (User 테이블에서 복사)
+        syncStudentsFromUsers();
+
+        // 1-2. 상담사 계정 초기화 (별도로 확인하여 생성)
         initializeCounselors();
 
         // 2. 프로그램 데이터 초기화
@@ -118,6 +121,53 @@ public class DataLoader implements CommandLineRunner {
 
         } catch (Exception e) {
             log.error("초기 사용자 데이터 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * User 테이블에서 Student 테이블로 데이터 동기화
+     * User는 있지만 Student가 없는 경우를 위한 메서드
+     */
+    private void syncStudentsFromUsers() {
+        log.info("User → Student 테이블 동기화 시작...");
+
+        try {
+            // User에서 STUDENT 역할을 가진 모든 사용자 조회
+            List<User> students = userRepository.findAll().stream()
+                    .filter(u -> u.getRole() == UserRole.STUDENT)
+                    .toList();
+
+            int syncCount = 0;
+            for (User user : students) {
+                // 이미 Student 테이블에 존재하는지 확인
+                String studentIdStr = String.valueOf(user.getStudentNum());
+                boolean exists = studentRepository.findByStudentId(studentIdStr).isPresent();
+
+                if (!exists) {
+                    // Student 테이블에 없으면 생성
+                    Student studentEntity = new Student();
+                    studentEntity.setStudentId(studentIdStr);
+                    studentEntity.setName(user.getName());
+                    studentEntity.setEmail(user.getEmail());
+                    studentEntity.setPhone(user.getPhone());
+                    studentEntity.setDepartment(user.getDepartment());
+                    studentEntity.setGrade(user.getGrade() != null ? String.valueOf(user.getGrade()) : null);
+                    studentEntity.setStatus("재학");
+
+                    studentRepository.save(studentEntity);
+                    syncCount++;
+                    log.info("Student 동기화: {} (학번: {})", user.getName(), user.getStudentNum());
+                }
+            }
+
+            if (syncCount > 0) {
+                log.info("✅ User → Student 동기화 완료: {}건", syncCount);
+            } else {
+                log.info("✅ Student 테이블이 이미 최신 상태입니다.");
+            }
+
+        } catch (Exception e) {
+            log.error("User → Student 동기화 중 오류 발생", e);
         }
     }
 
