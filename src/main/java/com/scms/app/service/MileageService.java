@@ -326,6 +326,32 @@ public class MileageService {
     }
 
     /**
+     * 상담 완료 시 마일리지 지급
+     *
+     * @param userId 학생 ID
+     * @param sessionId 상담 세션 ID
+     * @param consultationTitle 상담 제목
+     * @return 생성된 마일리지 내역
+     */
+    @Transactional
+    public MileageHistory awardMileageForConsultation(Integer userId, Long sessionId, String consultationTitle) {
+        // COUNSELING 타입의 활성 규칙 조회
+        List<MileageRule> rules = getRulesByActivityType("COUNSELING");
+
+        if (rules.isEmpty()) {
+            // 규칙이 없으면 기본 포인트 (50점) 지급
+            log.warn("상담 마일리지 규칙이 없어 기본 포인트를 지급합니다.");
+            return awardMileage(userId, "COUNSELING", sessionId,
+                    consultationTitle, 50, "개인 상담 완료");
+        }
+
+        // 첫 번째 규칙 사용 (개인 상담 완료)
+        MileageRule rule = rules.get(0);
+        return awardMileage(userId, "COUNSELING", sessionId,
+                consultationTitle, rule.getPoints(), rule.getDescription());
+    }
+
+    /**
      * 활동 타입 한글명 변환
      */
     private String getActivityTypeName(String activityType) {
