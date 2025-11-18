@@ -71,9 +71,9 @@ public class ConsultationService {
         if (counselor != null) {
             notificationService.createNotification(
                     counselor.getUser().getUserId(),
-                    NotificationType.CONSULTATION,
                     "새로운 상담 신청",
-                    student.getName() + "님이 상담을 신청했습니다: " + request.getTitle()
+                    student.getName() + "님이 상담을 신청했습니다: " + request.getTitle(),
+                    NotificationType.CONSULTATION
             );
         }
 
@@ -181,9 +181,9 @@ public class ConsultationService {
         // 학생에게 알림 전송
         notificationService.createNotification(
                 session.getStudent().getUserId(),
-                NotificationType.CONSULTATION,
                 "상담 신청이 승인되었습니다",
-                session.getTitle() + " 상담이 승인되었습니다. 일정: " + request.getScheduledDatetime()
+                session.getTitle() + " 상담이 승인되었습니다. 일정: " + request.getScheduledDatetime(),
+                NotificationType.CONSULTATION
         );
 
         log.info("상담 승인: 세션 ID {}, 상담사 {}, 확정일시 {}",
@@ -219,9 +219,9 @@ public class ConsultationService {
         // 학생에게 알림 전송
         notificationService.createNotification(
                 session.getStudent().getUserId(),
-                NotificationType.CONSULTATION,
                 "상담 신청이 거부되었습니다",
-                session.getTitle() + " 상담이 거부되었습니다. 사유: " + request.getRejectionReason()
+                session.getTitle() + " 상담이 거부되었습니다. 사유: " + request.getRejectionReason(),
+                NotificationType.CONSULTATION
         );
 
         log.info("상담 거부: 세션 ID {}, 상담사 {}, 사유: {}",
@@ -254,9 +254,9 @@ public class ConsultationService {
         if (session.getCounselor() != null) {
             notificationService.createNotification(
                     session.getCounselor().getUser().getUserId(),
-                    NotificationType.CONSULTATION,
                     "상담이 취소되었습니다",
-                    session.getStudent().getName() + "님이 상담을 취소했습니다: " + session.getTitle()
+                    session.getStudent().getName() + "님이 상담을 취소했습니다: " + session.getTitle(),
+                    NotificationType.CONSULTATION
             );
         }
 
