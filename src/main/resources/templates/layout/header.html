@@ -11,8 +11,8 @@
             </div>
         </a>
 
-        <!-- 메인 네비게이션 -->
-        <nav>
+        <!-- 메인 네비게이션 (내부회원만 표시) -->
+        <nav th:if="${session.externalUserId == null}">
             <ul class="header-nav">
                 <li class="header-nav-item">
                     <a href="/programs" class="header-nav-link">CHAMP 비교과 프로그램</a>
@@ -35,10 +35,23 @@
             </ul>
         </nav>
 
+        <!-- 외부회원 네비게이션 -->
+        <nav th:if="${session.externalUserId != null}">
+            <ul class="header-nav">
+                <li class="header-nav-item">
+                    <a href="/" class="header-nav-link">홈</a>
+                </li>
+                <li class="header-nav-item">
+                    <a href="/programs" class="header-nav-link">프로그램 안내</a>
+                </li>
+            </ul>
+        </nav>
+
         <!-- 우측 액션 버튼 -->
         <div class="header-actions">
-            <a href="/external-employment" class="header-link">외부취업가점</a>
-            <span class="header-divider">|</span>
+            <!-- 외부취업가점 (내부회원만) -->
+            <a th:if="${session.externalUserId == null}" href="/external-employment" class="header-link">외부취업가점</a>
+            <span th:if="${session.externalUserId == null}" class="header-divider">|</span>
             <!-- 이름 표시: 내부회원 또는 외부회원 -->
             <span th:if="${session.name != null or session.externalUserName != null}" class="header-link"
                   th:text="${session.name != null ? session.name : session.externalUserName} + '님'"></span>
@@ -50,9 +63,9 @@
                 </svg>
                 <span class="notification-badge" id="notificationBadge" style="display:none;">0</span>
             </a>
-            <!-- 마이페이지 (로그인 시에만 표시) -->
-            <span th:if="${session.userId != null or session.externalUserId != null}" class="header-divider">|</span>
-            <a th:if="${session.userId != null or session.externalUserId != null}" href="/mypage" class="header-link">마이페이지</a>
+            <!-- 마이페이지 (내부회원만) -->
+            <span th:if="${session.userId != null}" class="header-divider">|</span>
+            <a th:if="${session.userId != null}" href="/mypage" class="header-link">마이페이지</a>
             <!-- 상담 관리 (상담사/관리자만) -->
             <span th:if="${session.role != null and (session.role.name() == 'COUNSELOR' or session.role.name() == 'ADMIN')}" class="header-divider">|</span>
             <a th:if="${session.role != null and session.role.name() == 'COUNSELOR'}" href="/counseling/manage" class="btn-admin">상담 관리</a>
