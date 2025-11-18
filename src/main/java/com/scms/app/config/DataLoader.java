@@ -85,6 +85,9 @@ public class DataLoader implements CommandLineRunner {
 
         // 6. 역량 데이터 초기화
         initializeCompetencies();
+
+        // 7. 샘플 평가 데이터 초기화 (Student 동기화 후)
+        initializeSampleAssessments();
     }
 
     /**
@@ -819,63 +822,107 @@ public class DataLoader implements CommandLineRunner {
             competencyRepository.save(comp12);
 
             log.info("✅ 역량 12개 생성 완료");
-
-            // 3. 샘플 학생 평가 데이터 생성 (첫 3명 학생)
-            List<Student> students = studentRepository.findAll();
-            if (students.size() >= 3) {
-                Student student1 = students.get(0);
-                Student student2 = students.get(1);
-                Student student3 = students.get(2);
-
-                // 학생 1 평가 (우수 학생)
-                createAssessment(student1, comp1, 95, "프로그래밍 실력이 뛰어남");
-                createAssessment(student1, comp2, 90, "데이터베이스 설계 능력 우수");
-                createAssessment(student1, comp3, 88, "시스템 설계 능력 양호");
-                createAssessment(student1, comp4, 92, "문제 해결 능력 탁월");
-                createAssessment(student1, comp5, 85, "의사소통 능력 우수");
-                createAssessment(student1, comp6, 87, "창의적 사고 능력 양호");
-                createAssessment(student1, comp7, 90, "비판적 사고 능력 우수");
-                createAssessment(student1, comp8, 88, "자기관리 능력 양호");
-                createAssessment(student1, comp9, 82, "리더십 발휘 가능");
-                createAssessment(student1, comp10, 90, "협업 능력 우수");
-                createAssessment(student1, comp11, 85, "갈등 관리 능력 양호");
-                createAssessment(student1, comp12, 83, "동기부여 능력 양호");
-
-                // 학생 2 평가 (중간 수준)
-                createAssessment(student2, comp1, 75, "프로그래밍 능력 보통");
-                createAssessment(student2, comp2, 70, "데이터베이스 능력 보통");
-                createAssessment(student2, comp3, 68, "시스템 설계 능력 보통");
-                createAssessment(student2, comp4, 72, "문제 해결 능력 보통");
-                createAssessment(student2, comp5, 80, "의사소통 능력 우수");
-                createAssessment(student2, comp6, 75, "창의적 사고 능력 보통");
-                createAssessment(student2, comp7, 73, "비판적 사고 능력 보통");
-                createAssessment(student2, comp8, 78, "자기관리 능력 양호");
-                createAssessment(student2, comp9, 82, "리더십 발휘 가능");
-                createAssessment(student2, comp10, 85, "협업 능력 우수");
-                createAssessment(student2, comp11, 80, "갈등 관리 능력 양호");
-                createAssessment(student2, comp12, 77, "동기부여 능력 보통");
-
-                // 학생 3 평가 (개선 필요)
-                createAssessment(student3, comp1, 55, "프로그래밍 능력 개선 필요");
-                createAssessment(student3, comp2, 60, "데이터베이스 능력 개선 필요");
-                createAssessment(student3, comp3, 50, "시스템 설계 능력 부족");
-                createAssessment(student3, comp4, 58, "문제 해결 능력 개선 필요");
-                createAssessment(student3, comp5, 70, "의사소통 능력 보통");
-                createAssessment(student3, comp6, 65, "창의적 사고 능력 개선 필요");
-                createAssessment(student3, comp7, 62, "비판적 사고 능력 개선 필요");
-                createAssessment(student3, comp8, 68, "자기관리 능력 보통");
-                createAssessment(student3, comp9, 60, "리더십 개선 필요");
-                createAssessment(student3, comp10, 72, "협업 능력 보통");
-                createAssessment(student3, comp11, 65, "갈등 관리 능력 개선 필요");
-                createAssessment(student3, comp12, 63, "동기부여 능력 개선 필요");
-
-                log.info("✅ 학생 평가 샘플 데이터 생성 완료 (학생 3명 x 역량 12개 = 36건)");
-            }
-
-            log.info("✅ 역량 데이터 초기화 완료");
+            log.info("✅ 역량 카테고리 및 역량 데이터 초기화 완료");
 
         } catch (Exception e) {
             log.error("역량 데이터 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * 샘플 평가 데이터 초기화
+     * Student 동기화 후 실행되어야 함
+     */
+    private void initializeSampleAssessments() {
+        long assessmentCount = assessmentRepository.count();
+
+        if (assessmentCount > 0) {
+            log.info("평가 데이터가 이미 존재합니다 ({}건). 초기화를 건너뜁니다.", assessmentCount);
+            return;
+        }
+
+        log.info("샘플 평가 데이터를 생성합니다...");
+
+        try {
+            // Student와 Competency 데이터 확인
+            List<Student> students = studentRepository.findAll();
+            List<Competency> competencies = competencyRepository.findAll();
+
+            if (students.size() < 3) {
+                log.warn("⚠️ Student 테이블에 데이터가 부족합니다 ({}명). 평가 데이터 생성을 건너뜁니다.", students.size());
+                return;
+            }
+
+            if (competencies.size() < 12) {
+                log.warn("⚠️ Competency 데이터가 부족합니다 ({}개). 평가 데이터 생성을 건너뜁니다.", competencies.size());
+                return;
+            }
+
+            Student student1 = students.get(0);
+            Student student2 = students.get(1);
+            Student student3 = students.get(2);
+
+            // 역량 12개 가져오기
+            Competency comp1 = competencies.get(0);
+            Competency comp2 = competencies.get(1);
+            Competency comp3 = competencies.get(2);
+            Competency comp4 = competencies.get(3);
+            Competency comp5 = competencies.get(4);
+            Competency comp6 = competencies.get(5);
+            Competency comp7 = competencies.get(6);
+            Competency comp8 = competencies.get(7);
+            Competency comp9 = competencies.get(8);
+            Competency comp10 = competencies.get(9);
+            Competency comp11 = competencies.get(10);
+            Competency comp12 = competencies.get(11);
+
+            // 학생 1 평가 (우수 학생)
+            createAssessment(student1, comp1, 95, "프로그래밍 실력이 뛰어남");
+            createAssessment(student1, comp2, 90, "데이터베이스 설계 능력 우수");
+            createAssessment(student1, comp3, 88, "시스템 설계 능력 양호");
+            createAssessment(student1, comp4, 92, "문제 해결 능력 탁월");
+            createAssessment(student1, comp5, 85, "의사소통 능력 우수");
+            createAssessment(student1, comp6, 87, "창의적 사고 능력 양호");
+            createAssessment(student1, comp7, 90, "비판적 사고 능력 우수");
+            createAssessment(student1, comp8, 88, "자기관리 능력 양호");
+            createAssessment(student1, comp9, 82, "리더십 발휘 가능");
+            createAssessment(student1, comp10, 90, "협업 능력 우수");
+            createAssessment(student1, comp11, 85, "갈등 관리 능력 양호");
+            createAssessment(student1, comp12, 83, "동기부여 능력 양호");
+
+            // 학생 2 평가 (중간 수준)
+            createAssessment(student2, comp1, 75, "프로그래밍 능력 보통");
+            createAssessment(student2, comp2, 70, "데이터베이스 능력 보통");
+            createAssessment(student2, comp3, 68, "시스템 설계 능력 보통");
+            createAssessment(student2, comp4, 72, "문제 해결 능력 보통");
+            createAssessment(student2, comp5, 80, "의사소통 능력 우수");
+            createAssessment(student2, comp6, 75, "창의적 사고 능력 보통");
+            createAssessment(student2, comp7, 73, "비판적 사고 능력 보통");
+            createAssessment(student2, comp8, 78, "자기관리 능력 양호");
+            createAssessment(student2, comp9, 82, "리더십 발휘 가능");
+            createAssessment(student2, comp10, 85, "협업 능력 우수");
+            createAssessment(student2, comp11, 80, "갈등 관리 능력 양호");
+            createAssessment(student2, comp12, 77, "동기부여 능력 보통");
+
+            // 학생 3 평가 (개선 필요)
+            createAssessment(student3, comp1, 55, "프로그래밍 능력 개선 필요");
+            createAssessment(student3, comp2, 60, "데이터베이스 능력 개선 필요");
+            createAssessment(student3, comp3, 50, "시스템 설계 능력 부족");
+            createAssessment(student3, comp4, 58, "문제 해결 능력 개선 필요");
+            createAssessment(student3, comp5, 70, "의사소통 능력 보통");
+            createAssessment(student3, comp6, 65, "창의적 사고 능력 개선 필요");
+            createAssessment(student3, comp7, 62, "비판적 사고 능력 개선 필요");
+            createAssessment(student3, comp8, 68, "자기관리 능력 보통");
+            createAssessment(student3, comp9, 60, "리더십 개선 필요");
+            createAssessment(student3, comp10, 72, "협업 능력 보통");
+            createAssessment(student3, comp11, 65, "갈등 관리 능력 개선 필요");
+            createAssessment(student3, comp12, 63, "동기부여 능력 개선 필요");
+
+            log.info("✅ 학생 평가 샘플 데이터 생성 완료: 학생 {}명 x 역량 12개 = {}건",
+                    3, assessmentRepository.count());
+
+        } catch (Exception e) {
+            log.error("평가 데이터 생성 중 오류 발생", e);
         }
     }
 
