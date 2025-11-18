@@ -80,9 +80,9 @@ public class ConsultationRecordService {
         // 학생에게 알림 전송
         notificationService.createNotification(
                 session.getStudent().getUserId(),
-                NotificationType.CONSULTATION,
                 "상담이 완료되었습니다",
-                session.getTitle() + " 상담이 완료되었습니다. 피드백을 작성해주세요."
+                session.getTitle() + " 상담이 완료되었습니다. 피드백을 작성해주세요.",
+                NotificationType.CONSULTATION
         );
 
         // 마일리지 적립
