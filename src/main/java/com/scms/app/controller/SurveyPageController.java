@@ -1,7 +1,7 @@
 package com.scms.app.controller;
 
 import com.scms.app.dto.SurveyDetailResponse;
-import com.scms.app.dto.SurveyResponse;
+import com.scms.app.dto.SurveyDTO;
 import com.scms.app.service.SurveyResponseService;
 import com.scms.app.service.SurveyService;
 import jakarta.servlet.http.HttpSession;
@@ -42,11 +42,11 @@ public class SurveyPageController {
 
         try {
             // 응답 가능한 설문 목록
-            List<SurveyResponse> availableSurveys = surveyService.getAvailableSurveysForUser(userId);
+            List<SurveyDTO> availableSurveys = surveyService.getAvailableSurveysForUser(userId);
             model.addAttribute("availableSurveys", availableSurveys);
 
             // 사용자의 응답 내역
-            List<SurveyResponse> myResponses = surveyResponseService.getUserResponses(userId);
+            List<SurveyDTO> myResponses = surveyResponseService.getUserResponses(userId);
             model.addAttribute("myResponses", myResponses);
 
             log.info("설문 목록 페이지: userId={}, 응답 가능={}, 응답 완료={}",
@@ -111,7 +111,7 @@ public class SurveyPageController {
         }
 
         try {
-            Page<SurveyResponse> surveys = surveyService.getActiveSurveys(page, 10, userId);
+            Page<SurveyDTO> surveys = surveyService.getActiveSurveys(page, 10, userId);
             model.addAttribute("surveys", surveys);
             model.addAttribute("currentPage", page);
 

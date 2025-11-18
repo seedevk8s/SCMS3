@@ -32,7 +32,7 @@ public class SurveyService {
      * 설문 생성
      */
     @Transactional
-    public SurveyResponse createSurvey(SurveyCreateRequest request, Integer createdBy) {
+    public SurveyDTO createSurvey(SurveyCreateRequest request, Integer createdBy) {
         log.info("설문 생성 시작: title={}, createdBy={}", request.getTitle(), createdBy);
 
         // 설문 생성
@@ -117,7 +117,7 @@ public class SurveyService {
     /**
      * 활성 설문 목록 조회 (페이징)
      */
-    public Page<SurveyResponse> getActiveSurveys(int page, int size, Integer currentUserId) {
+    public Page<SurveyDTO> getActiveSurveys(int page, int size, Integer currentUserId) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Survey> surveys = surveyRepository.findActivesurveys(pageable);
 
@@ -127,7 +127,7 @@ public class SurveyService {
     /**
      * 진행 중인 설문 목록 조회
      */
-    public List<SurveyResponse> getOngoingSurveys(Integer currentUserId) {
+    public List<SurveyDTO> getOngoingSurveys(Integer currentUserId) {
         LocalDateTime now = LocalDateTime.now();
         List<Survey> surveys = surveyRepository.findOngoingSurveys(now);
 
@@ -139,7 +139,7 @@ public class SurveyService {
     /**
      * 사용자가 응답 가능한 설문 목록
      */
-    public List<SurveyResponse> getAvailableSurveysForUser(Integer userId) {
+    public List<SurveyDTO> getAvailableSurveysForUser(Integer userId) {
         LocalDateTime now = LocalDateTime.now();
         List<Survey> allOngoing = surveyRepository.findOngoingSurveys(now);
 
@@ -175,7 +175,7 @@ public class SurveyService {
      * 설문 수정
      */
     @Transactional
-    public SurveyResponse updateSurvey(Long surveyId, SurveyCreateRequest request, Integer userId) {
+    public SurveyDTO updateSurvey(Long surveyId, SurveyCreateRequest request, Integer userId) {
         Survey survey = surveyRepository.findByIdAndNotDeleted(surveyId)
                 .orElseThrow(() -> new IllegalArgumentException("설문을 찾을 수 없습니다"));
 
@@ -298,13 +298,13 @@ public class SurveyService {
     }
 
     /**
-     * Survey -> SurveyResponse 변환
+     * Survey -> SurveyDTO 변환
      */
-    private SurveyResponse convertToResponse(Survey survey) {
+    private SurveyDTO convertToResponse(Survey survey) {
         return convertToResponse(survey, null);
     }
 
-    private SurveyResponse convertToResponse(Survey survey, Integer currentUserId) {
+    private SurveyDTO convertToResponse(Survey survey, Integer currentUserId) {
         long questionCount = surveyQuestionRepository.countBySurveyId(survey.getSurveyId());
         long responseCount = surveyResponseRepository.countBySurveyId(survey.getSurveyId());
 
@@ -318,7 +318,7 @@ public class SurveyService {
                 .map(User::getName)
                 .orElse("알 수 없음");
 
-        return SurveyResponse.builder()
+        return SurveyDTO.builder()
                 .surveyId(survey.getSurveyId())
                 .title(survey.getTitle())
                 .description(survey.getDescription())
@@ -346,7 +346,7 @@ public class SurveyService {
      * Survey -> SurveyDetailResponse 변환 (질문 포함)
      */
     private SurveyDetailResponse convertToDetailResponse(Survey survey, Integer currentUserId) {
-        SurveyResponse baseResponse = convertToResponse(survey, currentUserId);
+        SurveyDTO baseResponse = convertToResponse(survey, currentUserId);
 
         // 질문 목록 조회
         List<SurveyQuestion> questions = surveyQuestionRepository

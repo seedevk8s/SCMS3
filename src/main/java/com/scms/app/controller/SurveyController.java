@@ -49,7 +49,7 @@ public class SurveyController {
                         .body(createErrorResponse("관리자 권한이 필요합니다"));
             }
 
-            SurveyResponse response = surveyService.createSurvey(request, userId);
+            SurveyDTO response = surveyService.createSurvey(request, userId);
             return ResponseEntity.ok(createSuccessResponse("설문이 생성되었습니다", response));
         } catch (Exception e) {
             log.error("설문 생성 실패", e);
@@ -85,7 +85,7 @@ public class SurveyController {
             HttpSession session) {
         try {
             Integer userId = (Integer) session.getAttribute("userId");
-            Page<SurveyResponse> surveys = surveyService.getActiveSurveys(page, size, userId);
+            Page<SurveyDTO> surveys = surveyService.getActiveSurveys(page, size, userId);
             return ResponseEntity.ok(createSuccessResponse("설문 목록 조회 성공", surveys));
         } catch (Exception e) {
             log.error("설문 목록 조회 실패", e);
@@ -101,7 +101,7 @@ public class SurveyController {
     public ResponseEntity<?> getOngoingSurveys(HttpSession session) {
         try {
             Integer userId = (Integer) session.getAttribute("userId");
-            List<SurveyResponse> surveys = surveyService.getOngoingSurveys(userId);
+            List<SurveyDTO> surveys = surveyService.getOngoingSurveys(userId);
             return ResponseEntity.ok(createSuccessResponse("진행 중인 설문 조회 성공", surveys));
         } catch (Exception e) {
             log.error("진행 중인 설문 조회 실패", e);
@@ -122,7 +122,7 @@ public class SurveyController {
                         .body(createErrorResponse("로그인이 필요합니다"));
             }
 
-            List<SurveyResponse> surveys = surveyService.getAvailableSurveysForUser(userId);
+            List<SurveyDTO> surveys = surveyService.getAvailableSurveysForUser(userId);
             return ResponseEntity.ok(createSuccessResponse("응답 가능한 설문 조회 성공", surveys));
         } catch (Exception e) {
             log.error("응답 가능한 설문 조회 실패", e);
@@ -145,7 +145,7 @@ public class SurveyController {
                         .body(createErrorResponse("로그인이 필요합니다"));
             }
 
-            SurveyResponse response = surveyService.updateSurvey(surveyId, request, userId);
+            SurveyDTO response = surveyService.updateSurvey(surveyId, request, userId);
             return ResponseEntity.ok(createSuccessResponse("설문이 수정되었습니다", response));
         } catch (Exception e) {
             log.error("설문 수정 실패", e);
@@ -262,7 +262,7 @@ public class SurveyController {
                         .body(createErrorResponse("로그인이 필요합니다"));
             }
 
-            List<SurveyResponse> responses = surveyResponseService.getUserResponses(userId);
+            List<SurveyDTO> responses = surveyResponseService.getUserResponses(userId);
             return ResponseEntity.ok(createSuccessResponse("응답 내역 조회 성공", responses));
         } catch (Exception e) {
             log.error("응답 내역 조회 실패", e);

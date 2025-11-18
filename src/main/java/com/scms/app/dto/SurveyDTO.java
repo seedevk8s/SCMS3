@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyResponse {
+public class SurveyDTO {
 
     private Long surveyId;
     private String title;

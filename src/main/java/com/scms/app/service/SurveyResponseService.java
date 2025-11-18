@@ -232,7 +232,7 @@ public class SurveyResponseService {
     /**
      * 사용자의 응답 내역 조회
      */
-    public List<SurveyResponse> getUserResponses(Integer userId) {
+    public List<SurveyDTO> getUserResponses(Integer userId) {
         List<com.scms.app.model.SurveyResponse> responses = surveyResponseRepository
                 .findByUserIdOrderBySubmittedAtDesc(userId);
 
@@ -247,7 +247,7 @@ public class SurveyResponseService {
                     long questionCount = surveyQuestionRepository.countBySurveyId(survey.getSurveyId());
                     long responseCount = surveyResponseRepository.countBySurveyId(survey.getSurveyId());
 
-                    return SurveyResponse.builder()
+                    return SurveyDTO.builder()
                             .surveyId(survey.getSurveyId())
                             .title(survey.getTitle())
                             .description(survey.getDescription())
