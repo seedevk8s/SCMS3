@@ -24,7 +24,7 @@ public class Counselor {
     @Column(name = "counselor_id")
     private Integer counselorId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {})
     @MapsId
     @JoinColumn(name = "counselor_id")
     private User user;
