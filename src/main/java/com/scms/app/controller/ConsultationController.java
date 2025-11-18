@@ -4,10 +4,10 @@ import com.scms.app.dto.*;
 import com.scms.app.model.ConsultationStatus;
 import com.scms.app.model.User;
 import com.scms.app.model.UserRole;
+import com.scms.app.repository.UserRepository;
 import com.scms.app.service.ConsultationRecordService;
 import com.scms.app.service.ConsultationService;
 import com.scms.app.service.CounselorService;
-import com.scms.app.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ public class ConsultationController {
     private final ConsultationService consultationService;
     private final ConsultationRecordService recordService;
     private final CounselorService counselorService;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
     /**
      * 상담 신청
@@ -184,7 +184,8 @@ public class ConsultationController {
         }
 
         try {
-            User user = userService.getUserById(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: ID " + userId));
 
             // 상담사 또는 관리자만 승인 가능
             if (user.getRole() != UserRole.COUNSELOR && user.getRole() != UserRole.ADMIN) {
@@ -233,7 +234,8 @@ public class ConsultationController {
         }
 
         try {
-            User user = userService.getUserById(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: ID " + userId));
 
             // 상담사 또는 관리자만 거부 가능
             if (user.getRole() != UserRole.COUNSELOR && user.getRole() != UserRole.ADMIN) {
@@ -282,7 +284,8 @@ public class ConsultationController {
         }
 
         try {
-            User user = userService.getUserById(userId);
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다: ID " + userId));
 
             if (user.getRole() != UserRole.COUNSELOR) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
