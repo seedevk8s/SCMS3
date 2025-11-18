@@ -124,14 +124,15 @@ public class DataLoader implements CommandLineRunner {
     /**
      * 학생 계정 생성
      */
-    private void createStudent(int studentNum, String name, String email, String phone, 
+    private void createStudent(int studentNum, String name, String email, String phone,
                                LocalDate birthDate, String department, int grade) {
         // 초기 비밀번호: 생년월일 6자리 (YYMMDD)
-        String rawPassword = String.format("%02d%02d%02d", 
-            birthDate.getYear() % 100, 
-            birthDate.getMonthValue(), 
+        String rawPassword = String.format("%02d%02d%02d",
+            birthDate.getYear() % 100,
+            birthDate.getMonthValue(),
             birthDate.getDayOfMonth());
-        
+
+        // User 테이블에 저장
         User student = User.builder()
                 .studentNum(studentNum)
                 .name(name)
@@ -147,6 +148,19 @@ public class DataLoader implements CommandLineRunner {
                 .build();
 
         userRepository.save(student);
+
+        // Student 테이블에도 저장 (역량 평가 등에 사용)
+        Student studentEntity = new Student();
+        studentEntity.setStudentId(String.valueOf(studentNum));
+        studentEntity.setName(name);
+        studentEntity.setEmail(email);
+        studentEntity.setPhone(phone);
+        studentEntity.setDepartment(department);
+        studentEntity.setGrade(String.valueOf(grade));
+        studentEntity.setStatus("재학");
+
+        studentRepository.save(studentEntity);
+
         log.info("학생 계정 생성: {} (학번: {}, 초기 비밀번호: {})", name, studentNum, rawPassword);
     }
 
