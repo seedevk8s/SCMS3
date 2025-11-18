@@ -87,6 +87,8 @@ public class NotificationService {
                 "'" + programTitle + "' 프로그램이 내일 시작됩니다. 준비해주세요!";
             case DEADLINE_APPROACHING ->
                 "'" + programTitle + "' 프로그램 신청 마감이 3일 남았습니다. 서둘러 신청하세요!";
+            case CONSULTATION ->
+                "'" + programTitle + "' 상담 관련 알림입니다.";
         };
     }
 
