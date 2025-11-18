@@ -11,19 +11,23 @@ SELECT user_id, student_num, name, email, role FROM users WHERE role = 'COUNSELO
 INSERT INTO users (student_num, name, email, phone, password, birth_date, department, role, grade, fail_count, locked, created_at)
 VALUES
 (8000001, '김상담', 'counselor1@pureum.ac.kr', '010-1111-2222',
+
  '$2a$10$YyN7zDXqKjF8W3K.Fz5b2eBqXJxQXJQk5xH7Hx8Hx9Hx0Hx1Hx2Hx',
  '1985-03-15', '학생상담센터', 'COUNSELOR', NULL, 0, 0, NOW())
 ON CONFLICT (student_num) DO UPDATE SET
 password = '$2a$10$YyN7zDXqKjF8W3K.Fz5b2eBqXJxQXJQk5xH7Hx8Hx9Hx0Hx1Hx2Hx';
 
+
 -- 상담사 2
 INSERT INTO users (student_num, name, email, phone, password, birth_date, department, role, grade, fail_count, locked, created_at)
 VALUES
 (8000002, '이상담', 'counselor2@pureum.ac.kr', '010-3333-4444',
+
  '$2a$10$YyN7zDXqKjF8W3K.Fz5b2eBqXJxQXJQk5xH7Hx8Hx9Hx0Hx1Hx2Hx',
  '1988-07-20', '학생상담센터', 'COUNSELOR', NULL, 0, 0, NOW())
 ON CONFLICT (student_num) DO UPDATE SET
 password = '$2a$10$YyN7zDXqKjF8W3K.Fz5b2eBqXJxQXJQk5xH7Hx8Hx9Hx0Hx1Hx2Hx';
+
 
 -- Counselor 프로필 추가
 INSERT INTO counselors (user_id, specialization, license, available)
