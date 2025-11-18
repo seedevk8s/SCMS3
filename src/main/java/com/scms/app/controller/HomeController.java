@@ -148,7 +148,7 @@ public class HomeController {
             List<Program> programs = recommendedPrograms.stream()
                 .map(dto -> {
                     try {
-                        return programService.getProgramById(dto.getProgramId());
+                        return programService.getProgram(dto.getProgramId());
                     } catch (Exception e) {
                         log.error("프로그램 조회 실패: programId={}", dto.getProgramId(), e);
                         return null;
