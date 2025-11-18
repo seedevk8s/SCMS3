@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>설문 통계</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 설문 통계</h2>
+            <a href="/survey/admin" class="btn btn-secondary">목록으로</a>
+        </div>
+
+        <div id="statisticsContainer">
+            <div class="text-center py-5">
+                <div class="spinner-border" role="status"></div>
+                <p class="mt-3">통계를 불러오는 중...</p>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const surveyId = [[${surveyId}]];
+
+        fetch(`/api/surveys/${surveyId}/statistics`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayStatistics(data.data);
+                } else {
+                    document.getElementById('statisticsContainer').innerHTML =
+                        `<div class="alert alert-danger">${data.error}</div>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('statisticsContainer').innerHTML =
+                    '<div class="alert alert-danger">통계를 불러올 수 없습니다</div>';
+            });
+
+        function displayStatistics(stats) {
+            let html = `
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h4>${stats.title}</h4>
+                        <div class="row text-center mt-4">
+                            <div class="col-md-4">
+                                <h3 class="text-primary">${stats.totalResponses}</h3>
+                                <p>총 응답 수</p>
+                            </div>
+                            ${stats.targetCount > 0 ? `
+                            <div class="col-md-4">
+                                <h3 class="text-info">${stats.targetCount}</h3>
+                                <p>대상자 수</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="text-success">${stats.responseRate.toFixed(1)}%</h3>
+                                <p>응답률</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 질문별 통계
+            stats.questionStatistics.forEach((q, index) => {
+                html += `
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5>질문 ${index + 1}. ${q.questionText}</h5>
+                            <small class="text-muted">${q.questionType} | 응답 수: ${q.totalAnswers}</small>
+                        </div>
+                        <div class="card-body">
+                `;
+
+                if (q.questionType === 'SINGLE_CHOICE' || q.questionType === 'MULTIPLE_CHOICE') {
+                    // 객관식 통계
+                    q.optionStatistics.forEach(opt => {
+                        html += `
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>${opt.optionText}</span>
+                                    <span><strong>${opt.count}</strong> (${opt.percentage.toFixed(1)}%)</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: ${opt.percentage}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else if (q.questionType === 'SCALE') {
+                    // 척도형 통계
+                    html += `<p><strong>평균:</strong> ${q.averageScale ? q.averageScale.toFixed(2) : 'N/A'}점</p>`;
+                } else {
+                    // 주관식 응답
+                    html += '<div style="max-height: 300px; overflow-y: auto;">';
+                    q.textAnswers.forEach((answer, i) => {
+                        html += `<p class="border-bottom pb-2">${i + 1}. ${answer}</p>`;
+                    });
+                    html += '</div>';
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('statisticsContainer').innerHTML = html;
+        }
+    </script>
+</div>
+</body>
+</html>

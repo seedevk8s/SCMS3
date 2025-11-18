@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>응답 완료</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="card">
+                    <div class="card-body py-5">
+                        <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                        <h2 class="mt-4">설문 응답이 완료되었습니다</h2>
+                        <p class="text-muted">소중한 의견 감사합니다.</p>
+                        <a href="/survey" class="btn btn-primary mt-3">설문 목록으로</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

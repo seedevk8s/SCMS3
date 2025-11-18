@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${isEdit} ? '설문 수정' : '설문 생성'">설문 관리</title>
+    <style>
+        .question-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+        .option-item {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <h2 th:text="${isEdit} ? '📝 설문 수정' : '📝 새 설문 만들기'"></h2>
+
+        <form id="surveyForm">
+            <!-- 기본 정보 -->
+            <div class="card mb-4">
+                <div class="card-header"><h5>기본 정보</h5></div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">제목 *</label>
+                        <input type="text" class="form-control" id="title" required maxlength="200"
+                               placeholder="예: 2024년 학생 만족도 조사">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">설명</label>
+                        <textarea class="form-control" id="description" rows="3" maxlength="5000"
+                                  placeholder="설문에 대한 간단한 설명을 작성하세요"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">시작일시 *</label>
+                            <input type="datetime-local" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">종료일시 *</label>
+                            <input type="datetime-local" class="form-control" id="endDate" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">익명 여부</label>
+                            <select class="form-select" id="isAnonymous">
+                                <option value="false">실명</option>
+                                <option value="true">익명</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">대상 유형</label>
+                            <select class="form-select" id="targetType">
+                                <option value="ALL">전체</option>
+                                <option value="STUDENT">학생</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">중복 응답 허용</label>
+                            <select class="form-select" id="allowMultipleResponses">
+                                <option value="false">불허</option>
+                                <option value="true">허용</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 질문 목록 -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>질문 목록</h5>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addQuestion()">
+                        <i class="fas fa-plus"></i> 질문 추가
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="questionsContainer"></div>
+                </div>
+            </div>
+
+            <!-- 제출 버튼 -->
+            <div class="d-flex justify-content-between">
+                <a href="/survey/admin" class="btn btn-secondary">취소</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> <span th:text="${isEdit} ? '수정 완료' : '생성하기'"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let questionCounter = 0;
+
+        function addQuestion() {
+            const questionId = questionCounter++;
+            const html = `
+                <div class="question-card" id="question-${questionId}">
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>질문 ${questionId + 1}</h6>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeQuestion(${questionId})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">질문 유형</label>
+                        <select class="form-select question-type" data-question-id="${questionId}" onchange="updateQuestionType(${questionId})">
+                            <option value="SINGLE_CHOICE">객관식 단일선택</option>
+                            <option value="MULTIPLE_CHOICE">객관식 복수선택</option>
+                            <option value="SHORT_TEXT">주관식 단답형</option>
+                            <option value="LONG_TEXT">주관식 서술형</option>
+                            <option value="SCALE">척도형 (1-5점)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">질문 내용</label>
+                        <textarea class="form-control question-text" data-question-id="${questionId}" rows="2" required></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input question-required" type="checkbox" data-question-id="${questionId}" checked>
+                        <label class="form-check-label">필수 응답</label>
+                    </div>
+
+                    <div class="options-container" id="options-${questionId}">
+                        <!-- 객관식인 경우 선택지 추가 -->
+                    </div>
+
+                    <button type="button" class="btn btn-sm btn-outline-primary add-option-btn" id="add-option-btn-${questionId}" onclick="addOption(${questionId})">
+                        <i class="fas fa-plus"></i> 선택지 추가
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('questionsContainer').insertAdjacentHTML('beforeend', html);
+            updateQuestionType(questionId);
+        }
+
+        function removeQuestion(questionId) {
+            document.getElementById(`question-${questionId}`).remove();
+        }
+
+        function updateQuestionType(questionId) {
+            const questionType = document.querySelector(`.question-type[data-question-id="${questionId}"]`).value;
+            const optionsContainer = document.getElementById(`options-${questionId}`);
+            const addOptionBtn = document.getElementById(`add-option-btn-${questionId}`);
+
+            if (questionType === 'SINGLE_CHOICE' || questionType === 'MULTIPLE_CHOICE') {
+                optionsContainer.style.display = 'block';
+                addOptionBtn.style.display = 'block';
+                // 기본 선택지 2개 추가
+                if (optionsContainer.children.length === 0) {
+                    addOption(questionId);
+                    addOption(questionId);
+                }
+            } else {
+                optionsContainer.style.display = 'none';
+                addOptionBtn.style.display = 'none';
+            }
+        }
+
+        let optionCounters = {};
+
+        function addOption(questionId) {
+            if (!optionCounters[questionId]) optionCounters[questionId] = 0;
+            const optionId = optionCounters[questionId]++;
+
+            const html = `
+                <div class="option-item d-flex gap-2" id="option-${questionId}-${optionId}">
+                    <input type="text" class="form-control option-text" data-question-id="${questionId}" data-option-id="${optionId}" placeholder="선택지 ${optionId + 1}">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeOption(${questionId}, ${optionId})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+
+            document.getElementById(`options-${questionId}`).insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeOption(questionId, optionId) {
+            document.getElementById(`option-${questionId}-${optionId}`).remove();
+        }
+
+        // 폼 제출
+        document.getElementById('surveyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 질문 데이터 수집
+            const questions = [];
+            document.querySelectorAll('.question-card').forEach((card, index) => {
+                const questionId = card.id.replace('question-', '');
+                const questionType = card.querySelector('.question-type').value;
+                const questionText = card.querySelector('.question-text').value;
+                const isRequired = card.querySelector('.question-required').checked;
+
+                const question = {
+                    questionType: questionType,
+                    questionText: questionText,
+                    isRequired: isRequired,
+                    displayOrder: index,
+                    options: []
+                };
+
+                // 객관식인 경우 선택지 수집
+                if (questionType === 'SINGLE_CHOICE' || questionType === 'MULTIPLE_CHOICE') {
+                    card.querySelectorAll('.option-text').forEach((optionInput, optionIndex) => {
+                        if (optionInput.value.trim()) {
+                            question.options.push({
+                                optionText: optionInput.value.trim(),
+                                displayOrder: optionIndex
+                            });
+                        }
+                    });
+                }
+
+                // 척도형인 경우 기본값 설정
+                if (questionType === 'SCALE') {
+                    question.scaleMin = 1;
+                    question.scaleMax = 5;
+                    question.scaleMinLabel = '매우 낮음';
+                    question.scaleMaxLabel = '매우 높음';
+                }
+
+                questions.push(question);
+            });
+
+            if (questions.length === 0) {
+                alert('최소 1개 이상의 질문을 추가해주세요');
+                return;
+            }
+
+            // 설문 데이터 생성
+            const surveyData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                isAnonymous: document.getElementById('isAnonymous').value === 'true',
+                targetType: document.getElementById('targetType').value,
+                allowMultipleResponses: document.getElementById('allowMultipleResponses').value === 'true',
+                showResults: false,
+                questions: questions
+            };
+
+            const isEdit = [[${isEdit}]] || false;
+            const surveyId = [[${survey?.surveyId}]];
+            const url = isEdit ? `/api/surveys/${surveyId}` : '/api/surveys';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(surveyData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/survey/admin';
+                } else {
+                    alert(data.error || '처리 실패');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('처리 중 오류가 발생했습니다');
+            });
+        });
+
+        // 페이지 로드 시 기본 질문 1개 추가
+        window.addEventListener('DOMContentLoaded', function() {
+            addQuestion();
+        });
+    </script>
+</div>
+</body>
+</html>

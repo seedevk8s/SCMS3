@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>설문조사 관리</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>📊 설문조사 관리</h2>
+            <a href="/survey/admin/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> 새 설문 만들기
+            </a>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- 설문 목록 -->
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${surveys != null and !surveys.isEmpty()}">
+                    <table class="table table-hover">
+                        <thead>
+                        <tr>
+                            <th>제목</th>
+                            <th>기간</th>
+                            <th>상태</th>
+                            <th>응답 수</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="survey : ${surveys.content}">
+                            <td>
+                                <strong th:text="${survey.title}"></strong>
+                                <br>
+                                <small class="text-muted" th:text="${survey.description}"></small>
+                            </td>
+                            <td>
+                                <small th:text="${#temporals.format(survey.startDate, 'yyyy-MM-dd HH:mm')}"></small>
+                                ~
+                                <small th:text="${#temporals.format(survey.endDate, 'yyyy-MM-dd HH:mm')}"></small>
+                            </td>
+                            <td>
+                                <span th:if="${survey.isOngoing}" class="badge bg-success">진행 중</span>
+                                <span th:if="${survey.isExpired}" class="badge bg-secondary">종료</span>
+                                <span th:if="${!survey.isOngoing and !survey.isExpired}" class="badge bg-warning">예정</span>
+                            </td>
+                            <td>
+                                <strong th:text="${survey.responseCount}"></strong> 건
+                            </td>
+                            <td>
+                                <a th:href="@{/survey/admin/{id}/statistics(id=${survey.surveyId})}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-chart-bar"></i> 통계
+                                </a>
+                                <a th:href="@{/survey/admin/{id}/edit(id=${survey.surveyId})}" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-edit"></i> 수정
+                                </a>
+                                <button class="btn btn-sm btn-danger" th:onclick="'deleteSurvey(' + ${survey.surveyId} + ')'">
+                                    <i class="fas fa-trash"></i> 삭제
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 페이징 -->
+                    <nav th:if="${surveys.totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${surveys.first} ? 'disabled'">
+                                <a class="page-link" th:href="@{/survey/admin(page=${currentPage - 1})}">이전</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, surveys.totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{/survey/admin(page=${i})}" th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${surveys.last} ? 'disabled'">
+                                <a class="page-link" th:href="@{/survey/admin(page=${currentPage + 1})}">다음</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+
+                <div th:if="${surveys == null or surveys.isEmpty()}" class="text-center py-5">
+                    <p class="text-muted">등록된 설문이 없습니다.</p>
+                    <a href="/survey/admin/create" class="btn btn-primary">첫 설문 만들기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function deleteSurvey(surveyId) {
+            if (!confirm('정말 이 설문을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            fetch(`/api/surveys/${surveyId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('삭제 중 오류가 발생했습니다');
+            });
+        }
+    </script>
+</div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>설문조사</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <h2>📋 설문조사</h2>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- 응답 가능한 설문 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>응답 가능한 설문</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${availableSurveys != null and !availableSurveys.isEmpty()}">
+                    <div class="list-group">
+                        <div th:each="survey : ${availableSurveys}" class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 th:text="${survey.title}"></h5>
+                                    <p class="mb-1 text-muted" th:text="${survey.description}"></p>
+                                    <small class="text-muted">
+                                        기간: <span th:text="${#temporals.format(survey.startDate, 'yyyy-MM-dd')}"></span> ~
+                                        <span th:text="${#temporals.format(survey.endDate, 'yyyy-MM-dd')}"></span>
+                                    </small>
+                                    <br>
+                                    <small>
+                                        <span class="badge bg-info">질문 <span th:text="${survey.questionCount}"></span>개</span>
+                                        <span th:if="${survey.isAnonymous}" class="badge bg-secondary">익명</span>
+                                    </small>
+                                </div>
+                                <div>
+                                    <a th:href="@{/survey/{id}/respond(id=${survey.surveyId})}" class="btn btn-primary">
+                                        설문 참여
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${availableSurveys == null or availableSurveys.isEmpty()}" class="text-center py-4">
+                    <p class="text-muted">현재 응답 가능한 설문이 없습니다</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 응답 완료한 설문 -->
+        <div class="card">
+            <div class="card-header">
+                <h5>응답 완료한 설문</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${myResponses != null and !myResponses.isEmpty()}">
+                    <div class="list-group">
+                        <div th:each="survey : ${myResponses}" class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 th:text="${survey.title}"></h6>
+                                    <small class="text-muted">
+                                        응답일: <span th:text="${#temporals.format(survey.createdAt, 'yyyy-MM-dd HH:mm')}"></span>
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">완료</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${myResponses == null or myResponses.isEmpty()}" class="text-center py-4">
+                    <p class="text-muted">응답한 설문이 없습니다</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title>설문 응답</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 th:text="${survey.title}"></h3>
+                        <p class="mb-0 text-muted" th:text="${survey.description}"></p>
+                    </div>
+                    <div class="card-body">
+                        <form id="responseForm">
+                            <div th:each="question, iterStat : ${survey.questions}" class="mb-4 pb-4 border-bottom">
+                                <label class="form-label">
+                                    <strong>[[${iterStat.count}]]. [[${question.questionText}]]</strong>
+                                    <span th:if="${question.isRequired}" class="text-danger">*</span>
+                                </label>
+
+                                <!-- 객관식 단일선택 -->
+                                <div th:if="${question.questionType.name() == 'SINGLE_CHOICE'}">
+                                    <div th:each="option : ${question.options}" class="form-check">
+                                        <input class="form-check-input" type="radio"
+                                               th:name="'question-' + ${question.questionId}"
+                                               th:value="${option.optionId}"
+                                               th:required="${question.isRequired}">
+                                        <label class="form-check-label" th:text="${option.optionText}"></label>
+                                    </div>
+                                </div>
+
+                                <!-- 객관식 복수선택 -->
+                                <div th:if="${question.questionType.name() == 'MULTIPLE_CHOICE'}">
+                                    <div th:each="option : ${question.options}" class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               th:name="'question-' + ${question.questionId}"
+                                               th:value="${option.optionId}">
+                                        <label class="form-check-label" th:text="${option.optionText}"></label>
+                                    </div>
+                                </div>
+
+                                <!-- 주관식 단답형 -->
+                                <div th:if="${question.questionType.name() == 'SHORT_TEXT'}">
+                                    <input type="text" class="form-control"
+                                           th:name="'question-' + ${question.questionId}"
+                                           th:required="${question.isRequired}"
+                                           maxlength="500">
+                                </div>
+
+                                <!-- 주관식 서술형 -->
+                                <div th:if="${question.questionType.name() == 'LONG_TEXT'}">
+                                    <textarea class="form-control" rows="4"
+                                              th:name="'question-' + ${question.questionId}"
+                                              th:required="${question.isRequired}"
+                                              maxlength="5000"></textarea>
+                                </div>
+
+                                <!-- 척도형 -->
+                                <div th:if="${question.questionType.name() == 'SCALE'}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small th:text="${question.scaleMinLabel}"></small>
+                                        <div class="btn-group" role="group">
+                                            <input type="radio" class="btn-check"
+                                                   th:id="'q' + ${question.questionId} + '-1'"
+                                                   th:name="'question-' + ${question.questionId}"
+                                                   value="1"
+                                                   th:required="${question.isRequired}">
+                                            <label class="btn btn-outline-primary"
+                                                   th:for="'q' + ${question.questionId} + '-1'">1</label>
+
+                                            <input type="radio" class="btn-check"
+                                                   th:id="'q' + ${question.questionId} + '-2'"
+                                                   th:name="'question-' + ${question.questionId}"
+                                                   value="2">
+                                            <label class="btn btn-outline-primary"
+                                                   th:for="'q' + ${question.questionId} + '-2'">2</label>
+
+                                            <input type="radio" class="btn-check"
+                                                   th:id="'q' + ${question.questionId} + '-3'"
+                                                   th:name="'question-' + ${question.questionId}"
+                                                   value="3">
+                                            <label class="btn btn-outline-primary"
+                                                   th:for="'q' + ${question.questionId} + '-3'">3</label>
+
+                                            <input type="radio" class="btn-check"
+                                                   th:id="'q' + ${question.questionId} + '-4'"
+                                                   th:name="'question-' + ${question.questionId}"
+                                                   value="4">
+                                            <label class="btn btn-outline-primary"
+                                                   th:for="'q' + ${question.questionId} + '-4'">4</label>
+
+                                            <input type="radio" class="btn-check"
+                                                   th:id="'q' + ${question.questionId} + '-5'"
+                                                   th:name="'question-' + ${question.questionId}"
+                                                   value="5">
+                                            <label class="btn btn-outline-primary"
+                                                   th:for="'q' + ${question.questionId} + '-5'">5</label>
+                                        </div>
+                                        <small th:text="${question.scaleMaxLabel}"></small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="/survey" class="btn btn-secondary">취소</a>
+                                <button type="submit" class="btn btn-primary">제출하기</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const surveyId = [[${survey.surveyId}]];
+        const questions = [[${survey.questions}]];
+
+        document.getElementById('responseForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const answers = [];
+
+            questions.forEach(question => {
+                const questionId = question.questionId;
+                const questionType = question.questionType;
+
+                if (questionType === 'SINGLE_CHOICE') {
+                    const selected = document.querySelector(`input[name="question-${questionId}"]:checked`);
+                    if (selected) {
+                        answers.push({
+                            questionId: questionId,
+                            optionId: parseInt(selected.value)
+                        });
+                    }
+                } else if (questionType === 'MULTIPLE_CHOICE') {
+                    const selected = document.querySelectorAll(`input[name="question-${questionId}"]:checked`);
+                    if (selected.length > 0) {
+                        const optionIds = Array.from(selected).map(el => parseInt(el.value));
+                        answers.push({
+                            questionId: questionId,
+                            optionIds: optionIds
+                        });
+                    }
+                } else if (questionType === 'SHORT_TEXT' || questionType === 'LONG_TEXT') {
+                    const input = document.querySelector(`[name="question-${questionId}"]`);
+                    if (input && input.value.trim()) {
+                        answers.push({
+                            questionId: questionId,
+                            answerText: input.value.trim()
+                        });
+                    }
+                } else if (questionType === 'SCALE') {
+                    const selected = document.querySelector(`input[name="question-${questionId}"]:checked`);
+                    if (selected) {
+                        answers.push({
+                            questionId: questionId,
+                            answerNumber: parseInt(selected.value)
+                        });
+                    }
+                }
+            });
+
+            const submitData = {
+                surveyId: surveyId,
+                answers: answers
+            };
+
+            fetch('/api/surveys/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(submitData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/survey/complete';
+                } else {
+                    alert(data.error || '제출 실패');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('제출 중 오류가 발생했습니다');
+            });
+        });
+    </script>
+</div>
+</body>
+</html>
