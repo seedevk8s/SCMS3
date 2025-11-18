@@ -1,10 +1,17 @@
 package com.scms.app.controller;
 
+import com.scms.app.dto.RecommendedProgramDto;
 import com.scms.app.model.Program;
+import com.scms.app.model.Student;
+import com.scms.app.model.User;
 import com.scms.app.model.UserRole;
+import com.scms.app.repository.StudentRepository;
+import com.scms.app.repository.UserRepository;
+import com.scms.app.service.ProgramRecommendationService;
 import com.scms.app.service.ProgramService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,9 +26,13 @@ import java.util.List;
  */
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class HomeController {
 
     private final ProgramService programService;
+    private final ProgramRecommendationService recommendationService;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
 
     /**
      * 홈 페이지
@@ -108,6 +119,8 @@ public class HomeController {
             @RequestParam(required = false) String college,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) Boolean recommended,
+            @RequestParam(required = false) Long studentId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             Model model,
@@ -123,7 +136,40 @@ public class HomeController {
             }
         }
 
-        // 필터링 또는 검색 with 페이지네이션
+        // 추천 모드 처리
+        if (Boolean.TRUE.equals(recommended) && studentId != null) {
+            log.info("추천 프로그램 모드: studentId={}", studentId);
+
+            // 추천 프로그램 가져오기
+            List<RecommendedProgramDto> recommendedPrograms =
+                recommendationService.getRecommendedPrograms(studentId, 50); // 최대 50개
+
+            // RecommendedProgramDto를 Program으로 변환하여 표시
+            List<Program> programs = recommendedPrograms.stream()
+                .map(dto -> {
+                    try {
+                        return programService.getProgramById(dto.getProgramId());
+                    } catch (Exception e) {
+                        log.error("프로그램 조회 실패: programId={}", dto.getProgramId(), e);
+                        return null;
+                    }
+                })
+                .filter(p -> p != null)
+                .toList();
+
+            model.addAttribute("programs", programs);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 1);
+            model.addAttribute("totalItems", programs.size());
+            model.addAttribute("pageSize", programs.size());
+            model.addAttribute("pageTitle", "맞춤형 추천 프로그램 (" + programs.size() + "개)");
+            model.addAttribute("recommendedMode", true);
+            model.addAttribute("studentId", studentId);
+
+            return "programs";
+        }
+
+        // 일반 모드: 필터링 또는 검색 with 페이지네이션
         Page<Program> programPage;
         if (search != null && !search.trim().isEmpty()) {
             programPage = programService.searchProgramsByTitleWithPagination(search, page, size);
@@ -146,6 +192,7 @@ public class HomeController {
         model.addAttribute("searchKeyword", search);
 
         model.addAttribute("pageTitle", "프로그램 전체보기");
+        model.addAttribute("recommendedMode", false);
         return "programs";
     }
 
