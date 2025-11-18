@@ -26,15 +26,15 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
     open-in-view: true
 
-  # Flyway Configuration
+  # Flyway Configuration (현재 비활성화 - MileageDataInitializer 사용)
   flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
-    validate-on-migrate: false  # V2 실패 기록 무시
-    baseline-version: 2  # V2까지는 이미 실행됨 (JPA ddl-auto로 컬럼 생성됨)
-    out-of-order: false
-    clean-disabled: false  # repair 허용
+    enabled: false  # V2 실패 기록으로 인한 충돌 방지
+    # baseline-on-migrate: true
+    # locations: classpath:db/migration
+    # validate-on-migrate: false
+    # baseline-version: 2
+    # out-of-order: false
+    # clean-disabled: false
 
   # Thymeleaf Configuration
   thymeleaf:
