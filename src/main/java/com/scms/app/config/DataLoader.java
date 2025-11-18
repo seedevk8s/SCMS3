@@ -57,6 +57,9 @@ public class DataLoader implements CommandLineRunner {
         // 1. 사용자 데이터 초기화
         initializeUsers();
 
+        // 1-1. 상담사 계정 초기화 (별도로 확인하여 생성)
+        initializeCounselors();
+
         // 2. 프로그램 데이터 초기화
         initializePrograms();
 
@@ -98,9 +101,6 @@ public class DataLoader implements CommandLineRunner {
 
             // 관리자 계정 생성
             createAdmin();
-
-            // 상담사 계정 생성
-            createCounselors();
 
             long afterCount = userRepository.count();
             log.info("✅ 초기 사용자 데이터 생성 완료: {}명", afterCount);
@@ -162,7 +162,31 @@ public class DataLoader implements CommandLineRunner {
     }
 
     /**
-     * 상담사 계정 생성
+     * 상담사 계정 초기화 (별도 확인)
+     * - 상담사 계정이 없으면 생성
+     * - 다른 사용자 존재 여부와 무관하게 실행
+     */
+    private void initializeCounselors() {
+        long counselorCount = userRepository.findByRoleAndNotDeleted(UserRole.COUNSELOR).size();
+
+        if (counselorCount > 0) {
+            log.info("상담사 계정이 이미 존재합니다 ({}명). 초기화를 건너뜁니다.", counselorCount);
+            return;
+        }
+
+        log.info("상담사 계정을 생성합니다...");
+
+        try {
+            createCounselors();
+            long afterCount = userRepository.findByRoleAndNotDeleted(UserRole.COUNSELOR).size();
+            log.info("✅ 상담사 계정 생성 완료: {}명", afterCount);
+        } catch (Exception e) {
+            log.error("상담사 계정 생성 중 오류 발생", e);
+        }
+    }
+
+    /**
+     * 상담사 계정 생성 (실제 생성 로직)
      */
     private void createCounselors() {
         // 상담사 1: 김상담
