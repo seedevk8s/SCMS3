@@ -58,6 +58,35 @@ CREATE TABLE IF NOT EXISTS counselors (
     FOREIGN KEY (counselor_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='상담사 정보';
 
+-- 외부회원 테이블 (이메일 기반 로그인)
+CREATE TABLE IF NOT EXISTS external_users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY COMMENT '사용자 ID',
+    email VARCHAR(100) NOT NULL UNIQUE COMMENT '이메일 (로그인 ID)',
+    password VARCHAR(255) NOT NULL COMMENT '비밀번호 (BCrypt 암호화)',
+    name VARCHAR(50) NOT NULL COMMENT '이름',
+    phone VARCHAR(20) COMMENT '전화번호',
+    birth_date DATE NOT NULL COMMENT '생년월일',
+    address VARCHAR(200) COMMENT '주소',
+    gender VARCHAR(10) COMMENT '성별 (M, F, OTHER)',
+    status VARCHAR(20) DEFAULT 'ACTIVE' COMMENT '계정 상태 (ACTIVE, INACTIVE, SUSPENDED)',
+    locked TINYINT(1) NOT NULL DEFAULT 0 COMMENT '계정 잠금 여부',
+    fail_cnt INT NOT NULL DEFAULT 0 COMMENT '로그인 실패 횟수',
+    email_verified TINYINT(1) NOT NULL DEFAULT 0 COMMENT '이메일 인증 여부',
+    email_verify_token VARCHAR(255) COMMENT '이메일 인증 토큰',
+    email_verified_at DATETIME COMMENT '이메일 인증 일시',
+    agree_terms TINYINT(1) NOT NULL DEFAULT 0 COMMENT '이용약관 동의',
+    agree_privacy TINYINT(1) NOT NULL DEFAULT 0 COMMENT '개인정보 처리방침 동의',
+    agree_marketing TINYINT(1) DEFAULT 0 COMMENT '마케팅 수신 동의 (선택)',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '생성일시',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    deleted_at DATETIME COMMENT '삭제일시 (Soft Delete)',
+    last_login_at DATETIME COMMENT '마지막 로그인 일시',
+    INDEX idx_email (email),
+    INDEX idx_created_at (created_at),
+    INDEX idx_status (status),
+    INDEX idx_email_verified (email_verified)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='외부 회원';
+
 -- ============================================
 -- 학생 정보 테이블 (기존 - 추후 users 테이블로 통합 고려)
 -- ============================================
