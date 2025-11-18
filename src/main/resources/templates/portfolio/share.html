@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${portfolio.title} + ' - 공유 포트폴리오'">공유 포트폴리오</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="mb-4">
+                    <h2 class="fw-bold" th:text="${portfolio.title}">포트폴리오 제목</h2>
+                    <p class="text-muted" th:text="${portfolio.description}">포트폴리오 설명</p>
+                    <p class="small text-muted">작성자: <span th:text="${portfolio.userName}">작성자</span></p>
+                </div>
+
+                <div th:if="${portfolio.items == null or portfolio.items.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 포트폴리오에 항목이 없습니다.
+                </div>
+
+                <div th:if="${portfolio.items != null and !portfolio.items.isEmpty()}">
+                    <div class="card mb-3" th:each="item : ${portfolio.items}">
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${item.title}">항목 제목</h5>
+                            <p class="text-muted small mb-2">
+                                <span class="badge bg-secondary me-2" th:text="${item.itemType.description}">유형</span>
+                                <span th:if="${item.organization}" th:text="${item.organization}">기관</span>
+                                <span th:if="${item.startDate}">
+                                    | <span th:text="${#temporals.format(item.startDate, 'yyyy-MM-dd')}">2024-01-01</span>
+                                </span>
+                                <span th:if="${item.endDate}">
+                                    ~ <span th:text="${#temporals.format(item.endDate, 'yyyy-MM-dd')}">2024-01-01</span>
+                                </span>
+                            </p>
+                            <p class="card-text" th:text="${item.description}">항목 설명</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light mt-4">
+                    <i class="fas fa-info-circle"></i> 이 포트폴리오는 공유 링크를 통해 제공되고 있습니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <title th:text="${isEdit} ? '포트폴리오 수정' : '포트폴리오 생성'">포트폴리오</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 th:text="${isEdit} ? '포트폴리오 수정' : '새 포트폴리오 만들기'">포트폴리오</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="portfolioForm">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">제목 *</label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                       th:value="${portfolio?.title}" required maxlength="200">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">설명</label>
+                                <textarea class="form-control" id="description" name="description"
+                                          rows="4" maxlength="2000" th:text="${portfolio?.description}"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="visibility" class="form-label">공개 범위</label>
+                                <select class="form-select" id="visibility" name="visibility">
+                                    <option value="PRIVATE" th:selected="${portfolio == null or portfolio.visibility.name() == 'PRIVATE'}">비공개</option>
+                                    <option value="PUBLIC" th:selected="${portfolio?.visibility?.name() == 'PUBLIC'}">공개</option>
+                                </select>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/portfolio" class="btn btn-secondary">취소</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <span th:text="${isEdit} ? '수정' : '생성'">생성</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        document.getElementById('portfolioForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                visibility: document.getElementById('visibility').value
+            };
+
+            const isEdit = [[${isEdit}]] || false;
+            const portfolioId = [[${portfolio?.portfolioId}]];
+            const url = isEdit ? `/api/portfolios/${portfolioId}` : '/api/portfolios';
+            const method = isEdit ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.href = '/portfolio';
+                } else {
+                    alert(data.error || '처리 실패');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('처리 중 오류가 발생했습니다');
+            });
+        });
+    </script>
+</div>
+</body>
+</html>
