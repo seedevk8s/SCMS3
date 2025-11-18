@@ -551,8 +551,8 @@
             }
 
             try {
-                const response = await fetch(`/api/consultations/${sessionId}`, {
-                    method: 'DELETE'
+                const response = await fetch(`/api/consultations/${sessionId}/cancel`, {
+                    method: 'PUT'
                 });
 
                 const data = await response.json();
