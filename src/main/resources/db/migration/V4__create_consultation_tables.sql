@@ -82,51 +82,59 @@ CREATE TABLE IF NOT EXISTS counselor_schedules (
 -- 초기 샘플 데이터
 -- ============================================
 
--- 샘플 상담사 (users 테이블에 상담사 역할 추가)
--- 비밀번호: "counselor123"
-INSERT INTO users (student_num, name, email, phone, password, birth_date, department, role)
-VALUES
-(8000001, '김상담', 'counselor1@pureum.ac.kr', '010-1111-2222',
- '$2a$10$5FtU2vWqLR6xX7nO2YzS1OPfSTuBb8gP3JfXp2rUzPQ1Cz.ZCiQ.N',
- '1985-03-15', '학생상담센터', 'COUNSELOR'),
-(8000002, '이상담', 'counselor2@pureum.ac.kr', '010-3333-4444',
- '$2a$10$5FtU2vWqLR6xX7nO2YzS1OPfSTuBb8gP3JfXp2rUzPQ1Cz.ZCiQ.N',
- '1988-07-20', '학생상담센터', 'COUNSELOR');
+-- 주의: 상담사 계정은 DataLoader.java에서 자동으로 생성됩니다.
+-- 아래 INSERT 문은 중복 생성을 방지하기 위해 주석 처리되었습니다.
+-- DataLoader가 올바른 BCrypt 해시와 함께 상담사 계정을 생성합니다.
 
--- 상담사 프로필 정보
-INSERT INTO counselors (user_id, specialization, license, available) VALUES
-((SELECT user_id FROM users WHERE student_num = 8000001), '진로상담, 학업상담', '전문상담사 2급', 1),
-((SELECT user_id FROM users WHERE student_num = 8000002), '심리상담, 대인관계', '임상심리사 2급', 1);
+-- -- 샘플 상담사 (users 테이블에 상담사 역할 추가)
+-- -- 비밀번호: "counselor123"
+-- INSERT INTO users (student_num, name, email, phone, password, birth_date, department, role)
+-- VALUES
+-- (8000001, '김상담', 'counselor1@pureum.ac.kr', '010-1111-2222',
+--  '$2a$10$5FtU2vWqLR6xX7nO2YzS1OPfSTuBb8gP3JfXp2rUzPQ1Cz.ZCiQ.N',
+--  '1985-03-15', '학생상담센터', 'COUNSELOR'),
+-- (8000002, '이상담', 'counselor2@pureum.ac.kr', '010-3333-4444',
+--  '$2a$10$5FtU2vWqLR6xX7nO2YzS1OPfSTuBb8gP3JfXp2rUzPQ1Cz.ZCiQ.N',
+--  '1988-07-20', '학생상담센터', 'COUNSELOR');
 
--- 상담사 근무 일정 (평일 오전 9시 ~ 오후 6시)
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 1, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 2, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 3, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 4, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 5, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+-- -- 상담사 프로필 정보
+-- INSERT INTO counselors (user_id, specialization, license, available) VALUES
+-- ((SELECT user_id FROM users WHERE student_num = 8000001), '진로상담, 학업상담', '전문상담사 2급', 1),
+-- ((SELECT user_id FROM users WHERE student_num = 8000002), '심리상담, 대인관계', '임상심리사 2급', 1);
 
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 1, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 2, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 3, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 4, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
-INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
-SELECT id, 5, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
+-- -- 상담사 근무 일정 (평일 오전 9시 ~ 오후 6시)
+-- -- 주의: counselor_schedules는 counselors.id를 참조하는데,
+-- -- 현재 Counselor 엔티티는 counselor_id (= user_id)를 PK로 사용합니다.
+-- -- 일정 관리는 별도로 구현이 필요합니다.
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 1, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 2, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 3, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 4, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 5, '09:00:00', '18:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001);
+--
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 1, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 2, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 3, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 4, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
+-- INSERT INTO counselor_schedules (counselor_id, day_of_week, start_time, end_time, is_available)
+-- SELECT id, 5, '10:00:00', '19:00:00', 1 FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002);
 
--- 샘플 상담 세션 (테스트용)
-INSERT INTO consultation_sessions (student_id, counselor_id, consultation_type, status, requested_date, requested_time, title, content)
-VALUES
-((SELECT user_id FROM users WHERE student_num = 2024001),
- (SELECT id FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001)),
- 'CAREER', 'PENDING', '2025-12-01', '14:00:00', '진로 고민 상담', '졸업 후 진로에 대해 상담받고 싶습니다.'),
-((SELECT user_id FROM users WHERE student_num = 2024002),
- (SELECT id FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002)),
- 'PSYCHOLOGICAL', 'APPROVED', '2025-12-02', '15:00:00', '학업 스트레스 상담', '학업 스트레스가 심해서 상담받고 싶습니다.');
+-- -- 샘플 상담 세션 (테스트용)
+-- -- 주의: 상담사가 DataLoader에서 생성되므로, 샘플 데이터는 별도로 추가가 필요합니다.
+-- INSERT INTO consultation_sessions (student_id, counselor_id, consultation_type, status, requested_date, requested_time, title, content)
+-- VALUES
+-- ((SELECT user_id FROM users WHERE student_num = 2024001),
+--  (SELECT id FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000001)),
+--  'CAREER', 'PENDING', '2025-12-01', '14:00:00', '진로 고민 상담', '졸업 후 진로에 대해 상담받고 싶습니다.'),
+-- ((SELECT user_id FROM users WHERE student_num = 2024002),
+--  (SELECT id FROM counselors WHERE user_id = (SELECT user_id FROM users WHERE student_num = 8000002)),
+--  'PSYCHOLOGICAL', 'APPROVED', '2025-12-02', '15:00:00', '학업 스트레스 상담', '학업 스트레스가 심해서 상담받고 싶습니다.');

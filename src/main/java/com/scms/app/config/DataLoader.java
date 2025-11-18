@@ -1,6 +1,7 @@
 package com.scms.app.config;
 
 import com.scms.app.model.*;
+import com.scms.app.repository.CounselorRepository;
 import com.scms.app.repository.NotificationRepository;
 import com.scms.app.repository.ProgramApplicationRepository;
 import com.scms.app.repository.ProgramRepository;
@@ -44,6 +45,7 @@ public class DataLoader implements CommandLineRunner {
     private final JdbcTemplate jdbcTemplate;
     private final ProgramRepository programRepository;
     private final UserRepository userRepository;
+    private final CounselorRepository counselorRepository;
     private final ProgramApplicationRepository applicationRepository;
     private final ProgramReviewRepository reviewRepository;
     private final NotificationRepository notificationRepository;
@@ -96,6 +98,9 @@ public class DataLoader implements CommandLineRunner {
 
             // 관리자 계정 생성
             createAdmin();
+
+            // 상담사 계정 생성
+            createCounselors();
 
             long afterCount = userRepository.count();
             log.info("✅ 초기 사용자 데이터 생성 완료: {}명", afterCount);
@@ -154,6 +159,67 @@ public class DataLoader implements CommandLineRunner {
 
         userRepository.save(admin);
         log.info("관리자 계정 생성: 학번 9999999, 비밀번호: admin123");
+    }
+
+    /**
+     * 상담사 계정 생성
+     */
+    private void createCounselors() {
+        // 상담사 1: 김상담
+        User counselor1 = User.builder()
+                .studentNum(8000001)
+                .name("김상담")
+                .email("counselor1@pureum.ac.kr")
+                .phone("010-1111-2222")
+                .password(passwordEncoder.encode("counselor123"))
+                .birthDate(LocalDate.of(1985, 3, 15))
+                .department("학생상담센터")
+                .grade(null)
+                .role(UserRole.COUNSELOR)
+                .locked(false)
+                .failCnt(0)
+                .build();
+
+        User savedCounselor1 = userRepository.save(counselor1);
+
+        // 상담사 1 프로필 생성
+        Counselor counselorProfile1 = Counselor.builder()
+                .counselorId(savedCounselor1.getUserId())
+                .user(savedCounselor1)
+                .specialty("진로상담, 학업상담")
+                .introduction("전문상담사 2급 자격을 보유하고 있으며, 학생들의 진로와 학업 고민을 함께 해결합니다.")
+                .build();
+
+        counselorRepository.save(counselorProfile1);
+        log.info("상담사 계정 생성: 김상담 (학번: 8000001, 비밀번호: counselor123)");
+
+        // 상담사 2: 이상담
+        User counselor2 = User.builder()
+                .studentNum(8000002)
+                .name("이상담")
+                .email("counselor2@pureum.ac.kr")
+                .phone("010-3333-4444")
+                .password(passwordEncoder.encode("counselor123"))
+                .birthDate(LocalDate.of(1988, 7, 20))
+                .department("학생상담센터")
+                .grade(null)
+                .role(UserRole.COUNSELOR)
+                .locked(false)
+                .failCnt(0)
+                .build();
+
+        User savedCounselor2 = userRepository.save(counselor2);
+
+        // 상담사 2 프로필 생성
+        Counselor counselorProfile2 = Counselor.builder()
+                .counselorId(savedCounselor2.getUserId())
+                .user(savedCounselor2)
+                .specialty("심리상담, 대인관계")
+                .introduction("임상심리사 2급 자격을 보유하고 있으며, 심리 및 대인관계 상담을 전문으로 합니다.")
+                .build();
+
+        counselorRepository.save(counselorProfile2);
+        log.info("상담사 계정 생성: 이상담 (학번: 8000002, 비밀번호: counselor123)");
     }
 
     /**
