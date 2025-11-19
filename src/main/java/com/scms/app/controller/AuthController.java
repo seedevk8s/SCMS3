@@ -4,6 +4,7 @@ import com.scms.app.dto.LoginRequest;
 import com.scms.app.dto.LoginResponse;
 import com.scms.app.dto.PasswordChangeRequest;
 import com.scms.app.dto.PasswordResetRequest;
+import com.scms.app.dto.UserResponse;
 import com.scms.app.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
