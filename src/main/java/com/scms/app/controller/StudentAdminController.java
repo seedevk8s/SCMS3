@@ -53,8 +53,13 @@ public class StudentAdminController {
         try {
             Page<User> studentPage = userService.getStudents(page, size, search, department, grade);
 
+            // User 엔티티를 UserResponse DTO로 변환
+            List<UserResponse> content = studentPage.getContent().stream()
+                    .map(UserResponse::from)
+                    .collect(java.util.stream.Collectors.toList());
+
             Map<String, Object> response = new HashMap<>();
-            response.put("content", studentPage.getContent());
+            response.put("content", content);
             response.put("totalElements", studentPage.getTotalElements());
             response.put("totalPages", studentPage.getTotalPages());
             response.put("currentPage", studentPage.getNumber());
