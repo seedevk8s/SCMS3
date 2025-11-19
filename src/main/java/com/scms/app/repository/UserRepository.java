@@ -2,6 +2,8 @@ package com.scms.app.repository;
 
 import com.scms.app.model.User;
 import com.scms.app.model.UserRole;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -71,4 +73,62 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     @Query("SELECT u FROM User u WHERE u.department = :department AND u.deletedAt IS NULL")
     List<User> findByDepartmentAndNotDeleted(@Param("department") String department);
+
+    // ==================== 관리자용 메서드 ====================
+
+    /**
+     * 학생 목록 조회 (페이징, 삭제되지 않은 학생만)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL")
+    Page<User> findStudents(Pageable pageable);
+
+    /**
+     * 학생 검색 (이름, 학번, 학과, 삭제되지 않은 학생만)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL " +
+           "AND (CAST(u.studentNum AS string) LIKE %:keyword% OR u.name LIKE %:keyword% " +
+           "OR u.email LIKE %:keyword% OR u.department LIKE %:keyword%)")
+    Page<User> searchStudents(@Param("keyword") String keyword, Pageable pageable);
+
+    /**
+     * 학과별 학생 조회 (페이징)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.department = :department AND u.deletedAt IS NULL")
+    Page<User> findStudentsByDepartment(@Param("department") String department, Pageable pageable);
+
+    /**
+     * 학년별 학생 조회 (페이징)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.grade = :grade AND u.deletedAt IS NULL")
+    Page<User> findStudentsByGrade(@Param("grade") Integer grade, Pageable pageable);
+
+    /**
+     * 전체 학생 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL")
+    long countStudents();
+
+    /**
+     * 잠긴 학생 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STUDENT' AND u.locked = true AND u.deletedAt IS NULL")
+    long countLockedStudents();
+
+    /**
+     * 학과별 학생 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STUDENT' AND u.department = :department AND u.deletedAt IS NULL")
+    long countStudentsByDepartment(@Param("department") String department);
+
+    /**
+     * 학년별 학생 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = 'STUDENT' AND u.grade = :grade AND u.deletedAt IS NULL")
+    long countStudentsByGrade(@Param("grade") Integer grade);
+
+    /**
+     * 모든 학과 목록 조회 (중복 제거, 삭제되지 않은 학생만)
+     */
+    @Query("SELECT DISTINCT u.department FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL AND u.department IS NOT NULL ORDER BY u.department")
+    List<String> findAllDepartments();
 }

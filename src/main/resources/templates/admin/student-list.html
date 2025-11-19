@@ -4,6 +4,211 @@
       layout:decorate="~{layout/admin-layout}">
 <head>
     <title>학생 관리 - SCMS</title>
+    <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <th:block layout:fragment="css">
+        <style>
+            .stats-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                background: white;
+                border-radius: 8px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .stat-card h3 {
+                font-size: 0.9rem;
+                color: #666;
+                margin: 0 0 0.5rem 0;
+            }
+
+            .stat-card .value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #333;
+            }
+
+            .stat-card.primary .value { color: #0066cc; }
+            .stat-card.success .value { color: #28a745; }
+            .stat-card.warning .value { color: #ffc107; }
+            .stat-card.danger .value { color: #dc3545; }
+
+            .search-section {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .search-controls {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .search-controls input,
+            .search-controls select {
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .search-controls button {
+                padding: 0.5rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .btn-search {
+                background-color: #0066cc;
+                color: white;
+            }
+
+            .btn-reset {
+                background-color: #6c757d;
+                color: white;
+            }
+
+            .btn-add {
+                background-color: #28a745;
+                color: white;
+                margin-left: auto;
+            }
+
+            .grid-container {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            /* 모달 스타일 */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
+
+            .modal.active {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .modal-content {
+                background: white;
+                padding: 2rem;
+                border-radius: 8px;
+                max-width: 600px;
+                width: 90%;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 1.5rem;
+                padding-bottom: 1rem;
+                border-bottom: 2px solid #0066cc;
+            }
+
+            .modal-header h2 {
+                margin: 0;
+                color: #0066cc;
+            }
+
+            .close-btn {
+                font-size: 1.5rem;
+                cursor: pointer;
+                background: none;
+                border: none;
+                color: #666;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: 600;
+                color: #333;
+            }
+
+            .form-group input,
+            .form-group select {
+                width: 100%;
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .form-actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: flex-end;
+                margin-top: 1.5rem;
+                padding-top: 1rem;
+                border-top: 1px solid #eee;
+            }
+
+            .btn-primary {
+                background-color: #0066cc;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .btn-secondary {
+                background-color: #6c757d;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .bulk-section {
+                background: #f8f9fa;
+                padding: 1rem;
+                border-radius: 4px;
+                margin-top: 1rem;
+            }
+
+            .bulk-section h4 {
+                margin: 0 0 0.5rem 0;
+                color: #333;
+            }
+
+            .bulk-section p {
+                margin: 0 0 1rem 0;
+                font-size: 0.9rem;
+                color: #666;
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
@@ -14,30 +219,499 @@
             <p>내부 학생 회원을 관리합니다</p>
         </div>
 
-        <div class="container mt-4">
-            <div class="alert alert-warning">
-                <h4>🚧 기능 준비 중</h4>
-                <p>학생 관리 기능은 현재 개발 중입니다.</p>
-                <hr>
-                <p class="mb-0"><strong>외부회원 관리</strong>는 이미 구현되어 있습니다. 좌측 메뉴의 <strong>"외부회원 관리"</strong>를 클릭하여 확인하세요.</p>
+        <!-- 통계 카드 -->
+        <div class="stats-container">
+            <div class="stat-card primary">
+                <h3>전체 학생</h3>
+                <div class="value" id="totalStudents">0</div>
             </div>
+            <div class="stat-card success">
+                <h3>활성 계정</h3>
+                <div class="value" id="activeStudents">0</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>잠긴 계정</h3>
+                <div class="value" id="lockedStudents">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>1학년</h3>
+                <div class="value" id="grade1">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>2학년</h3>
+                <div class="value" id="grade2">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>3학년</h3>
+                <div class="value" id="grade3">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>4학년</h3>
+                <div class="value" id="grade4">0</div>
+            </div>
+        </div>
 
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5>계획된 기능</h5>
-                </div>
-                <div class="card-body">
-                    <ul>
-                        <li>학생 목록 조회 및 검색</li>
-                        <li>학생 정보 수정</li>
-                        <li>학생 계정 상태 관리</li>
-                        <li>학생 통계 및 분석</li>
-                        <li>일괄 등록 및 관리</li>
-                    </ul>
-                </div>
+        <!-- 검색 섹션 -->
+        <div class="search-section">
+            <div class="search-controls">
+                <input type="text" id="searchInput" placeholder="학번, 이름, 이메일, 학과 검색..." style="flex: 1; min-width: 200px;">
+                <select id="departmentFilter">
+                    <option value="">전체 학과</option>
+                </select>
+                <select id="gradeFilter">
+                    <option value="">전체 학년</option>
+                    <option value="1">1학년</option>
+                    <option value="2">2학년</option>
+                    <option value="3">3학년</option>
+                    <option value="4">4학년</option>
+                </select>
+                <button class="btn-search" onclick="searchStudents()">검색</button>
+                <button class="btn-reset" onclick="resetSearch()">초기화</button>
+                <button class="btn-add" onclick="showAddModal()">학생 등록</button>
+                <button class="btn-add" onclick="showBulkAddModal()">일괄 등록</button>
             </div>
+        </div>
+
+        <!-- 그리드 -->
+        <div class="grid-container">
+            <div id="grid"></div>
+        </div>
+    </div>
+
+    <!-- 학생 등록 모달 -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>학생 등록</h2>
+                <button class="close-btn" onclick="closeAddModal()">&times;</button>
+            </div>
+            <form id="addStudentForm">
+                <div class="form-group">
+                    <label for="studentNum">학번 *</label>
+                    <input type="number" id="studentNum" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">이름 *</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">이메일 *</label>
+                    <input type="email" id="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">전화번호</label>
+                    <input type="tel" id="phone">
+                </div>
+                <div class="form-group">
+                    <label for="birthDate">생년월일 *</label>
+                    <input type="date" id="birthDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="department">학과 *</label>
+                    <input type="text" id="department" required>
+                </div>
+                <div class="form-group">
+                    <label for="grade">학년 *</label>
+                    <select id="grade" required>
+                        <option value="">선택하세요</option>
+                        <option value="1">1학년</option>
+                        <option value="2">2학년</option>
+                        <option value="3">3학년</option>
+                        <option value="4">4학년</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeAddModal()">취소</button>
+                    <button type="submit" class="btn-primary">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 일괄 등록 모달 -->
+    <div id="bulkAddModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>학생 일괄 등록</h2>
+                <button class="close-btn" onclick="closeBulkAddModal()">&times;</button>
+            </div>
+            <div class="bulk-section">
+                <h4>CSV 형식 안내</h4>
+                <p>학번, 이름, 이메일, 전화번호, 생년월일(YYYY-MM-DD), 학과, 학년 순서로 입력하세요</p>
+                <p><strong>예시:</strong> 20240001,홍길동,hong@example.com,010-1234-5678,2006-01-15,컴퓨터공학과,1</p>
+            </div>
+            <form id="bulkAddForm">
+                <div class="form-group">
+                    <label for="bulkData">학생 데이터 (한 줄에 한 명씩)</label>
+                    <textarea id="bulkData" rows="10" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeBulkAddModal()">취소</button>
+                    <button type="submit" class="btn-primary">일괄 등록</button>
+                </div>
+            </form>
+            <div id="bulkResult" style="margin-top: 1rem; display: none;"></div>
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script>
+        let grid;
+        let currentPage = 0;
+        let currentSize = 20;
+        let currentSearch = '';
+        let currentDepartment = '';
+        let currentGrade = '';
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initGrid();
+            loadStatistics();
+            loadStudents();
+            loadDepartments();
+
+            // Enter 키로 검색
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchStudents();
+                }
+            });
+        });
+
+        // 그리드 초기화
+        function initGrid() {
+            grid = new tui.Grid({
+                el: document.getElementById('grid'),
+                data: [],
+                columns: [
+                    { header: 'ID', name: 'userId', width: 60, align: 'center' },
+                    { header: '학번', name: 'studentNum', width: 100, align: 'center' },
+                    { header: '이름', name: 'name', width: 100 },
+                    { header: '이메일', name: 'email', width: 200 },
+                    { header: '전화번호', name: 'phone', width: 130 },
+                    { header: '학과', name: 'department', width: 120 },
+                    { header: '학년', name: 'grade', width: 60, align: 'center' },
+                    {
+                        header: '계정 상태',
+                        name: 'locked',
+                        width: 100,
+                        align: 'center',
+                        formatter: function(e) {
+                            return e.value ? '<span style="color: red;">잠김</span>' : '<span style="color: green;">활성</span>';
+                        }
+                    },
+                    {
+                        header: '실패 횟수',
+                        name: 'failCnt',
+                        width: 90,
+                        align: 'center'
+                    },
+                    {
+                        header: '등록일',
+                        name: 'createdAt',
+                        width: 110,
+                        align: 'center',
+                        formatter: function(e) {
+                            if (!e.value) return '-';
+                            return new Date(e.value).toLocaleDateString('ko-KR');
+                        }
+                    },
+                    {
+                        header: '액션',
+                        name: 'actions',
+                        width: 250,
+                        align: 'center',
+                        formatter: function(e) {
+                            const row = e.row;
+                            const lockText = row.locked ? '해제' : '잠금';
+                            const lockColor = row.locked ? 'green' : 'orange';
+                            return `
+                                <button onclick="toggleLock(${row.userId})" style="padding: 4px 8px; margin: 2px; background: ${lockColor}; color: white; border: none; border-radius: 3px; cursor: pointer;">${lockText}</button>
+                                <button onclick="resetPassword(${row.userId})" style="padding: 4px 8px; margin: 2px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">PW초기화</button>
+                                <button onclick="deleteStudent(${row.userId})" style="padding: 4px 8px; margin: 2px; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer;">삭제</button>
+                            `;
+                        }
+                    }
+                ],
+                pageOptions: {
+                    perPage: 20
+                },
+                rowHeaders: ['rowNum'],
+                bodyHeight: 500
+            });
+        }
+
+        // 통계 로드
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/admin/students/statistics');
+                const stats = await response.json();
+
+                document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+                document.getElementById('activeStudents').textContent = stats.activeStudents || 0;
+                document.getElementById('lockedStudents').textContent = stats.lockedStudents || 0;
+
+                const gradeStats = stats.gradeStats || {};
+                document.getElementById('grade1').textContent = gradeStats[1] || 0;
+                document.getElementById('grade2').textContent = gradeStats[2] || 0;
+                document.getElementById('grade3').textContent = gradeStats[3] || 0;
+                document.getElementById('grade4').textContent = gradeStats[4] || 0;
+            } catch (error) {
+                console.error('통계 로드 실패:', error);
+            }
+        }
+
+        // 학과 목록 로드
+        async function loadDepartments() {
+            try {
+                const response = await fetch('/admin/students/statistics');
+                const stats = await response.json();
+                const departments = stats.departments || [];
+
+                const select = document.getElementById('departmentFilter');
+                departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('학과 목록 로드 실패:', error);
+            }
+        }
+
+        // 학생 목록 로드
+        async function loadStudents() {
+            try {
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    size: currentSize
+                });
+
+                if (currentSearch) params.append('search', currentSearch);
+                if (currentDepartment) params.append('department', currentDepartment);
+                if (currentGrade) params.append('grade', currentGrade);
+
+                const response = await fetch(`/admin/students/api?${params}`);
+                const data = await response.json();
+
+                grid.resetData(data.content || []);
+            } catch (error) {
+                console.error('학생 목록 로드 실패:', error);
+                alert('학생 목록을 불러오는데 실패했습니다');
+            }
+        }
+
+        // 검색
+        function searchStudents() {
+            currentSearch = document.getElementById('searchInput').value;
+            currentDepartment = document.getElementById('departmentFilter').value;
+            currentGrade = document.getElementById('gradeFilter').value;
+            currentPage = 0;
+            loadStudents();
+        }
+
+        // 검색 초기화
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('gradeFilter').value = '';
+            currentSearch = '';
+            currentDepartment = '';
+            currentGrade = '';
+            currentPage = 0;
+            loadStudents();
+        }
+
+        // 계정 잠금/해제
+        async function toggleLock(userId) {
+            if (!confirm('계정 상태를 변경하시겠습니까?')) return;
+
+            try {
+                const response = await fetch(`/admin/students/${userId}/toggle-lock`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadStudents();
+                    loadStatistics();
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('계정 잠금/해제 실패:', error);
+                alert('작업 중 오류가 발생했습니다');
+            }
+        }
+
+        // 비밀번호 초기화
+        async function resetPassword(userId) {
+            if (!confirm('비밀번호를 생년월일(YYMMDD)로 초기화하시겠습니까?')) return;
+
+            try {
+                const response = await fetch(`/admin/students/${userId}/reset-password`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('비밀번호 초기화 실패:', error);
+                alert('작업 중 오류가 발생했습니다');
+            }
+        }
+
+        // 학생 삭제
+        async function deleteStudent(userId) {
+            if (!confirm('정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) return;
+
+            try {
+                const response = await fetch(`/admin/students/${userId}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadStudents();
+                    loadStatistics();
+                } else {
+                    alert(result.message || '삭제 실패');
+                }
+            } catch (error) {
+                console.error('학생 삭제 실패:', error);
+                alert('삭제 중 오류가 발생했습니다');
+            }
+        }
+
+        // 학생 등록 모달
+        function showAddModal() {
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+            document.getElementById('addStudentForm').reset();
+        }
+
+        // 학생 등록 처리
+        document.getElementById('addStudentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const data = {
+                studentNum: parseInt(document.getElementById('studentNum').value),
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                birthDate: document.getElementById('birthDate').value,
+                department: document.getElementById('department').value,
+                grade: parseInt(document.getElementById('grade').value),
+                role: 'STUDENT'
+            };
+
+            try {
+                const response = await fetch('/admin/students', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('학생이 등록되었습니다');
+                    closeAddModal();
+                    loadStudents();
+                    loadStatistics();
+                } else {
+                    alert(result.message || '등록 실패');
+                }
+            } catch (error) {
+                console.error('학생 등록 실패:', error);
+                alert('등록 중 오류가 발생했습니다');
+            }
+        });
+
+        // 일괄 등록 모달
+        function showBulkAddModal() {
+            document.getElementById('bulkAddModal').classList.add('active');
+            document.getElementById('bulkResult').style.display = 'none';
+        }
+
+        function closeBulkAddModal() {
+            document.getElementById('bulkAddModal').classList.remove('active');
+            document.getElementById('bulkAddForm').reset();
+            document.getElementById('bulkResult').style.display = 'none';
+        }
+
+        // 일괄 등록 처리
+        document.getElementById('bulkAddForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const bulkData = document.getElementById('bulkData').value;
+            const lines = bulkData.split('\n').filter(line => line.trim());
+
+            if (lines.length === 0) {
+                alert('데이터를 입력하세요');
+                return;
+            }
+
+            const students = [];
+            for (const line of lines) {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length !== 7) continue;
+
+                students.push({
+                    studentNum: parseInt(parts[0]),
+                    name: parts[1],
+                    email: parts[2],
+                    phone: parts[3],
+                    birthDate: parts[4],
+                    department: parts[5],
+                    grade: parseInt(parts[6]),
+                    role: 'STUDENT'
+                });
+            }
+
+            try {
+                const response = await fetch('/admin/students/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(students)
+                });
+                const result = await response.json();
+
+                const resultDiv = document.getElementById('bulkResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h4>일괄 등록 결과</h4>
+                    <p>총 ${result.total}명 중 ${result.success}명 성공, ${result.fail}명 실패</p>
+                    ${result.errors && result.errors.length > 0 ? `
+                        <div style="max-height: 200px; overflow-y: auto; background: #fff; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">
+                            <h5>오류 목록:</h5>
+                            <ul style="margin: 0; padding-left: 1.5rem;">
+                                ${result.errors.map(err => `<li>${err}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+
+                if (result.success > 0) {
+                    loadStudents();
+                    loadStatistics();
+                }
+            } catch (error) {
+                console.error('일괄 등록 실패:', error);
+                alert('일괄 등록 중 오류가 발생했습니다');
+            }
+        });
+    </script>
+</th:block>
 </body>
 </html>

@@ -22,9 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 /**
  * 사용자 관리 Service
@@ -414,5 +418,253 @@ public class UserService {
         passwordResetTokenRepository.deleteExpiredTokens(LocalDateTime.now());
         passwordResetTokenRepository.deleteUsedTokensOlderThan(LocalDateTime.now().minusDays(7));
         log.info("만료된 비밀번호 재설정 토큰 정리 완료");
+    }
+
+    // ==================== 관리자 전용 메서드 ====================
+
+    /**
+     * 학생 목록 조회 (페이징, 검색)
+     */
+    public Page<User> getStudents(int page, int size, String search, String department, Integer grade) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 검색어가 있는 경우
+        if (search != null && !search.trim().isEmpty()) {
+            return userRepository.searchStudents(search.trim(), pageable);
+        }
+
+        // 학과 필터
+        if (department != null && !department.trim().isEmpty()) {
+            return userRepository.findStudentsByDepartment(department, pageable);
+        }
+
+        // 학년 필터
+        if (grade != null) {
+            return userRepository.findStudentsByGrade(grade, pageable);
+        }
+
+        // 전체 학생 조회
+        return userRepository.findStudents(pageable);
+    }
+
+    /**
+     * 학생 통계 조회
+     */
+    public Map<String, Object> getStudentStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // 전체 학생 수
+        long totalStudents = userRepository.countStudents();
+        stats.put("totalStudents", totalStudents);
+
+        // 잠긴 학생 수
+        long lockedStudents = userRepository.countLockedStudents();
+        stats.put("lockedStudents", lockedStudents);
+
+        // 활성 학생 수
+        stats.put("activeStudents", totalStudents - lockedStudents);
+
+        // 학년별 통계
+        Map<Integer, Long> gradeStats = new HashMap<>();
+        for (int i = 1; i <= 4; i++) {
+            gradeStats.put(i, userRepository.countStudentsByGrade(i));
+        }
+        stats.put("gradeStats", gradeStats);
+
+        // 학과별 통계 (상위 10개)
+        List<String> departments = userRepository.findAllDepartments();
+        Map<String, Long> departmentStats = new LinkedHashMap<>();
+        for (String dept : departments) {
+            if (dept != null && !dept.trim().isEmpty()) {
+                departmentStats.put(dept, userRepository.countStudentsByDepartment(dept));
+            }
+        }
+        stats.put("departmentStats", departmentStats);
+
+        // 모든 학과 목록
+        stats.put("departments", departments);
+
+        log.info("학생 통계 조회 완료: 전체 {}명, 잠김 {}명", totalStudents, lockedStudents);
+        return stats;
+    }
+
+    /**
+     * 학생 계정 잠금/해제 토글
+     */
+    @Transactional
+    public boolean toggleStudentLock(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("학생을 찾을 수 없습니다: ID " + userId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new IllegalArgumentException("학생 계정이 아닙니다");
+        }
+
+        if (user.getLocked()) {
+            user.unlock();
+            log.info("학생 계정 잠금 해제: {} (학번: {})", user.getName(), user.getStudentNum());
+        } else {
+            user.lock();
+            log.info("학생 계정 잠금: {} (학번: {})", user.getName(), user.getStudentNum());
+        }
+
+        userRepository.save(user);
+        return user.getLocked();
+    }
+
+    /**
+     * 학생 로그인 실패 횟수 초기화
+     */
+    @Transactional
+    public void resetStudentFailCount(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("학생을 찾을 수 없습니다: ID " + userId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new IllegalArgumentException("학생 계정이 아닙니다");
+        }
+
+        user.resetFailCount();
+        userRepository.save(user);
+
+        log.info("학생 로그인 실패 횟수 초기화: {} (학번: {})", user.getName(), user.getStudentNum());
+    }
+
+    /**
+     * 관리자에 의한 학생 정보 수정
+     */
+    @Transactional
+    public UserResponse updateStudentByAdmin(Integer userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("학생을 찾을 수 없습니다: ID " + userId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new IllegalArgumentException("학생 계정이 아닙니다");
+        }
+
+        // 이메일 변경 시 중복 확인
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new DuplicateUserException("이메일", request.getEmail());
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        // 정보 업데이트
+        if (request.getPhone() != null) {
+            user.setPhone(request.getPhone());
+        }
+        if (request.getDepartment() != null) {
+            user.setDepartment(request.getDepartment());
+        }
+        if (request.getGrade() != null) {
+            user.setGrade(request.getGrade());
+        }
+
+        User updatedUser = userRepository.save(user);
+        log.info("관리자에 의한 학생 정보 수정: {} (학번: {})", updatedUser.getName(), updatedUser.getStudentNum());
+
+        return UserResponse.from(updatedUser);
+    }
+
+    /**
+     * 관리자에 의한 학생 비밀번호 초기화
+     */
+    @Transactional
+    public void resetStudentPasswordByAdmin(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("학생을 찾을 수 없습니다: ID " + userId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new IllegalArgumentException("학생 계정이 아닙니다");
+        }
+
+        // 비밀번호를 생년월일 6자리로 초기화
+        String initialPassword = user.getBirthDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
+        String encodedPassword = passwordEncoder.encode(initialPassword);
+        user.setPassword(encodedPassword);
+        user.unlock(); // 계정 잠금 해제
+
+        userRepository.save(user);
+        log.info("관리자에 의한 학생 비밀번호 초기화: {} (학번: {})", user.getName(), user.getStudentNum());
+    }
+
+    /**
+     * 관리자에 의한 학생 삭제
+     */
+    @Transactional
+    public void deleteStudentByAdmin(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("학생을 찾을 수 없습니다: ID " + userId));
+
+        if (user.getRole() != UserRole.STUDENT) {
+            throw new IllegalArgumentException("학생 계정이 아닙니다");
+        }
+
+        user.delete();
+        userRepository.save(user);
+
+        log.info("관리자에 의한 학생 삭제: {} (학번: {})", user.getName(), user.getStudentNum());
+    }
+
+    /**
+     * 학생 일괄 등록
+     */
+    @Transactional
+    public Map<String, Object> bulkCreateStudents(List<UserCreateRequest> requests) {
+        int successCount = 0;
+        int failCount = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (UserCreateRequest request : requests) {
+            try {
+                // 학번 중복 확인
+                if (userRepository.existsByStudentNum(request.getStudentNum())) {
+                    errors.add(String.format("학번 %d: 이미 존재하는 학번입니다", request.getStudentNum()));
+                    failCount++;
+                    continue;
+                }
+
+                // 이메일 중복 확인
+                if (userRepository.existsByEmail(request.getEmail())) {
+                    errors.add(String.format("학번 %d: 이메일 %s가 이미 사용 중입니다", request.getStudentNum(), request.getEmail()));
+                    failCount++;
+                    continue;
+                }
+
+                // 초기 비밀번호: 생년월일 6자리 (YYMMDD)
+                String initialPassword = request.getBirthDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
+                String encodedPassword = passwordEncoder.encode(initialPassword);
+
+                User user = User.builder()
+                        .studentNum(request.getStudentNum())
+                        .name(request.getName())
+                        .email(request.getEmail())
+                        .phone(request.getPhone())
+                        .password(encodedPassword)
+                        .birthDate(request.getBirthDate())
+                        .department(request.getDepartment())
+                        .grade(request.getGrade())
+                        .role(UserRole.STUDENT)
+                        .build();
+
+                userRepository.save(user);
+                successCount++;
+
+            } catch (Exception e) {
+                errors.add(String.format("학번 %d: %s", request.getStudentNum(), e.getMessage()));
+                failCount++;
+                log.error("학생 일괄 등록 실패: 학번 {}", request.getStudentNum(), e);
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("total", requests.size());
+        result.put("success", successCount);
+        result.put("fail", failCount);
+        result.put("errors", errors);
+
+        log.info("학생 일괄 등록 완료: 총 {}명, 성공 {}명, 실패 {}명", requests.size(), successCount, failCount);
+        return result;
     }
 }

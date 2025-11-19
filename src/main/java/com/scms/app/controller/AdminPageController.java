@@ -36,16 +36,6 @@ public class AdminPageController {
     }
 
     /**
-     * 학생 관리
-     */
-    @GetMapping("/students")
-    public String studentManagement(Model model) {
-        log.info("학생 관리 페이지 접근");
-        model.addAttribute("currentUri", "/admin/students");
-        return "admin/student-list";
-    }
-
-    /**
      * 통계
      */
     @GetMapping("/statistics")
