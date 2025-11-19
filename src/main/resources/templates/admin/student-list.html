@@ -208,6 +208,15 @@
                 font-size: 0.9rem;
                 color: #666;
             }
+
+            /* 페이지네이션 스타일 */
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #eee;
+            }
         </style>
     </th:block>
 </head>
@@ -275,6 +284,8 @@
         <!-- 그리드 -->
         <div class="grid-container">
             <div id="grid"></div>
+            <!-- 페이지네이션 -->
+            <div id="pagination" class="pagination-container"></div>
         </div>
     </div>
 
@@ -361,11 +372,15 @@
     <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
     <script>
         let grid;
+        let pagination;
         let currentPage = 0;
         let currentSize = 20;
+        let totalPages = 0;
+        let totalElements = 0;
         let currentSearch = '';
         let currentDepartment = '';
         let currentGrade = '';
+        let isLoadingData = false; // 무한 루프 방지
 
         // 페이지 로드 시 초기화
         document.addEventListener('DOMContentLoaded', async function() {
@@ -379,11 +394,12 @@
             }
 
             try {
-                // 1. Grid 초기화 (동기)
+                // 1. Grid 및 Pagination 초기화 (동기)
                 initGrid();
-                console.log('Grid initialized, starting data load...');
+                initPagination();
+                console.log('Grid and Pagination initialized, starting data load...');
 
-                // 2. Grid 초기화 완료 후 데이터 로드 (비동기)
+                // 2. 초기화 완료 후 데이터 로드 (비동기)
                 await Promise.all([
                     loadStatistics(),
                     loadStudents(),
@@ -471,6 +487,39 @@
             console.log('Grid initialized successfully:', grid);
         }
 
+        // 페이지네이션 초기화
+        function initPagination() {
+            console.log('Initializing pagination...');
+            const paginationEl = document.getElementById('pagination');
+            if (!paginationEl) {
+                throw new Error('Pagination 엘리먼트를 찾을 수 없습니다');
+            }
+
+            pagination = new tui.Pagination(paginationEl, {
+                totalItems: 0,
+                itemsPerPage: currentSize,
+                visiblePages: 5,
+                page: 1,
+                centerAlign: true,
+                firstItemClassName: 'tui-first-child',
+                lastItemClassName: 'tui-last-child'
+            });
+
+            // 페이지 변경 이벤트
+            pagination.on('afterMove', function(event) {
+                // 데이터 로딩 중이면 무시 (무한 루프 방지)
+                if (isLoadingData) {
+                    console.log('Skipping afterMove during data load');
+                    return;
+                }
+                currentPage = event.page - 1; // TOAST UI는 1-based, Spring은 0-based
+                console.log('Page changed to:', currentPage + 1);
+                loadStudents();
+            });
+
+            console.log('Pagination initialized successfully:', pagination);
+        }
+
         // 통계 로드
         async function loadStatistics() {
             try {
@@ -519,6 +568,8 @@
                     return;
                 }
 
+                isLoadingData = true; // 로딩 시작
+
                 const params = new URLSearchParams({
                     page: currentPage,
                     size: currentSize
@@ -538,10 +589,29 @@
                 const data = await response.json();
                 console.log('Received student data:', data);
 
+                // Grid 데이터 업데이트
                 grid.resetData(data.content || []);
+
+                // Pagination 업데이트
+                totalElements = data.totalElements || 0;
+                totalPages = data.totalPages || 0;
+
+                if (pagination) {
+                    pagination.reset(totalElements);
+                    // 현재 페이지가 전체 페이지를 초과하면 마지막 페이지로 이동
+                    if (currentPage + 1 > totalPages && totalPages > 0) {
+                        currentPage = totalPages - 1;
+                        pagination.movePageTo(totalPages);
+                    } else if (totalElements > 0) {
+                        pagination.movePageTo(currentPage + 1);
+                    }
+                    console.log(`Pagination updated: ${totalElements} items, ${totalPages} pages, current page: ${currentPage + 1}`);
+                }
             } catch (error) {
                 console.error('학생 목록 로드 실패:', error);
                 alert('학생 목록을 불러오는데 실패했습니다\n' + error.message);
+            } finally {
+                isLoadingData = false; // 로딩 완료
             }
         }
 
