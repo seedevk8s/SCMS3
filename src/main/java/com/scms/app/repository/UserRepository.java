@@ -86,7 +86,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * 학생 검색 (이름, 학번, 학과, 삭제되지 않은 학생만)
      */
     @Query("SELECT u FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL " +
-           "AND (CAST(u.studentNum AS string) LIKE %:keyword% OR u.name LIKE %:keyword% " +
+           "AND (CAST(u.studentNum AS CHAR) LIKE %:keyword% OR u.name LIKE %:keyword% " +
            "OR u.email LIKE %:keyword% OR u.department LIKE %:keyword%)")
     Page<User> searchStudents(@Param("keyword") String keyword, Pageable pageable);
 
