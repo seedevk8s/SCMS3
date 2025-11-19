@@ -47,6 +47,12 @@
                 </svg>
                 <span>학생 관리</span>
             </a>
+            <a href="/admin/external-users" class="admin-nav-item admin-nav-subitem" th:classappend="${currentUri != null && #strings.contains(currentUri, '/admin/external-users')} ? 'active' : ''">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                </svg>
+                <span>외부회원 관리</span>
+            </a>
         </div>
 
         <!-- 통계 -->
