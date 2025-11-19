@@ -364,7 +364,7 @@
         let currentGrade = '';
 
         // 페이지 로드 시 초기화
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log('DOM loaded, initializing...');
 
             // TOAST UI Grid 라이브러리 로드 확인
@@ -375,10 +375,18 @@
             }
 
             try {
+                // 1. Grid 초기화 (동기)
                 initGrid();
-                loadStatistics();
-                loadStudents();
-                loadDepartments();
+                console.log('Grid initialized, starting data load...');
+
+                // 2. Grid 초기화 완료 후 데이터 로드 (비동기)
+                await Promise.all([
+                    loadStatistics(),
+                    loadStudents(),
+                    loadDepartments()
+                ]);
+
+                console.log('All data loaded successfully');
             } catch (error) {
                 console.error('초기화 오류:', error);
                 alert('페이지 초기화 중 오류가 발생했습니다: ' + error.message);
