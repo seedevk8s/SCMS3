@@ -298,11 +298,13 @@
                 overflow: hidden;
                 height: 26px;
                 padding: 0;
-                font-size: 0;
+                font-size: 0 !important;
                 line-height: 26px;
                 white-space: nowrap;
                 font-weight: normal;
                 border: 1px solid #ddd;
+                text-indent: -9999px;
+                color: transparent !important;
             }
 
             .tui-pagination .tui-prev-is-ellip {
@@ -342,46 +344,57 @@
             }
 
             .tui-pagination .tui-first {
-                width: 11px;
+                width: 28px;
                 margin-right: 0;
-            }
-
-            .tui-pagination .tui-first:before {
-                content: '';
-                position: absolute;
-                top: 9px;
-                left: 4px;
-                width: 2px;
-                height: 8px;
-                background: #333;
-            }
-
-            .tui-pagination .tui-first:after {
-                content: '';
-                position: absolute;
-                top: 12px;
-                left: 6px;
-                width: 4px;
-                height: 4px;
-                border: 1px solid #333;
-                border-width: 0 0 2px 2px;
-                -webkit-transform: rotate(45deg);
-                -ms-transform: rotate(45deg);
-                transform: rotate(45deg);
             }
 
             .tui-pagination .tui-prev {
                 margin-right: 0;
-                width: 18px;
+                width: 28px;
             }
 
-            .tui-pagination .tui-prev:after {
+            .tui-pagination .tui-next {
+                width: 28px;
+                margin-left: 0;
+            }
+
+            .tui-pagination .tui-last {
+                width: 28px;
+                margin-left: 0;
+            }
+
+            /* 아이콘 스타일 */
+            .tui-pagination .tui-ico-first,
+            .tui-pagination .tui-ico-prev,
+            .tui-pagination .tui-ico-next,
+            .tui-pagination .tui-ico-last {
+                display: block;
+                position: relative;
+                width: 100%;
+                height: 100%;
+                font-size: 0;
+                color: transparent;
+                text-indent: -9999px;
+                overflow: hidden;
+            }
+
+            .tui-pagination .tui-ico-first:before {
                 content: '';
                 position: absolute;
-                top: 12px;
-                left: 9px;
-                width: 4px;
-                height: 4px;
+                top: 9px;
+                left: 7px;
+                width: 2px;
+                height: 8px;
+                background: #333;
+            }
+
+            .tui-pagination .tui-ico-first:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                left: 10px;
+                width: 6px;
+                height: 6px;
                 border: 1px solid #333;
                 border-width: 0 0 2px 2px;
                 -webkit-transform: rotate(45deg);
@@ -389,18 +402,27 @@
                 transform: rotate(45deg);
             }
 
-            .tui-pagination .tui-next {
-                width: 18px;
-                margin-left: 0;
-            }
-
-            .tui-pagination .tui-next:after {
+            .tui-pagination .tui-ico-prev:after {
                 content: '';
                 position: absolute;
-                top: 12px;
-                right: 9px;
-                width: 4px;
-                height: 4px;
+                top: 9px;
+                left: 11px;
+                width: 6px;
+                height: 6px;
+                border: 1px solid #333;
+                border-width: 0 0 2px 2px;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .tui-pagination .tui-ico-next:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                right: 11px;
+                width: 6px;
+                height: 6px;
                 border: 1px solid #333;
                 border-width: 2px 2px 0 0;
                 -webkit-transform: rotate(45deg);
@@ -408,54 +430,44 @@
                 transform: rotate(45deg);
             }
 
-            .tui-pagination .tui-last {
-                width: 11px;
-                margin-left: 0;
-            }
-
-            .tui-pagination .tui-last:before {
+            .tui-pagination .tui-ico-last:before {
                 content: '';
                 position: absolute;
                 top: 9px;
-                right: 4px;
+                right: 7px;
                 width: 2px;
                 height: 8px;
                 background: #333;
             }
 
-            .tui-pagination .tui-last:after {
+            .tui-pagination .tui-ico-last:after {
                 content: '';
                 position: absolute;
-                top: 12px;
-                right: 6px;
-                width: 4px;
-                height: 4px;
+                top: 9px;
+                right: 10px;
+                width: 6px;
+                height: 6px;
                 border: 1px solid #333;
                 border-width: 2px 2px 0 0;
                 -webkit-transform: rotate(45deg);
                 -ms-transform: rotate(45deg);
                 transform: rotate(45deg);
+            }
+
+            /* 비활성화된 아이콘 */
+            .tui-pagination .tui-is-disabled .tui-ico-first:before,
+            .tui-pagination .tui-is-disabled .tui-ico-first:after,
+            .tui-pagination .tui-is-disabled .tui-ico-prev:after,
+            .tui-pagination .tui-is-disabled .tui-ico-next:after,
+            .tui-pagination .tui-is-disabled .tui-ico-last:before,
+            .tui-pagination .tui-is-disabled .tui-ico-last:after {
+                background-color: #ddd !important;
+                border-color: #ddd !important;
             }
 
             .tui-pagination .tui-is-disabled:hover {
                 background: #fff;
                 cursor: default;
-            }
-
-            .tui-pagination .tui-is-disabled .tui-ico-first {
-                background-position: 0 -24px;
-            }
-
-            .tui-pagination .tui-is-disabled .tui-ico-prev {
-                background-position: -12px -24px;
-            }
-
-            .tui-pagination .tui-is-disabled .tui-ico-next {
-                background-position: -24px -24px;
-            }
-
-            .tui-pagination .tui-is-disabled .tui-ico-last {
-                background-position: -36px -24px;
             }
 
             .tui-pagination .tui-prev-is-ellip,
@@ -777,7 +789,21 @@
                 page: 1,
                 centerAlign: true,
                 firstItemClassName: 'tui-first-child',
-                lastItemClassName: 'tui-last-child'
+                lastItemClassName: 'tui-last-child',
+                usageStatistics: false,
+                template: {
+                    page: '<a href="#" class="tui-page-btn">{{page}}</a>',
+                    currentPage: '<strong class="tui-page-btn tui-is-selected">{{page}}</strong>',
+                    moveButton: '<a href="#" class="tui-page-btn tui-{{type}}">' +
+                            '<span class="tui-ico-{{type}}"></span>' +
+                        '</a>',
+                    disabledMoveButton: '<span class="tui-page-btn tui-is-disabled tui-{{type}}">' +
+                            '<span class="tui-ico-{{type}}"></span>' +
+                        '</span>',
+                    moreButton: '<a href="#" class="tui-page-btn tui-{{type}}-is-ellip">' +
+                            '<span class="tui-ico-ellip">...</span>' +
+                        '</a>'
+                }
             });
 
             // 페이지 변경 이벤트
