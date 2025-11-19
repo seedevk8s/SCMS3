@@ -131,4 +131,86 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      */
     @Query("SELECT DISTINCT u.department FROM User u WHERE u.role = 'STUDENT' AND u.deletedAt IS NULL AND u.department IS NOT NULL ORDER BY u.department")
     List<String> findAllDepartments();
+
+    // ==================== 전체 사용자 관리 메서드 ====================
+
+    /**
+     * ID로 사용자 조회 (삭제되지 않은 사용자만)
+     */
+    @Query("SELECT u FROM User u WHERE u.userId = :userId AND u.deletedAt IS NULL")
+    Optional<User> findByIdAndNotDeleted(@Param("userId") Long userId);
+
+    /**
+     * 전체 사용자 목록 조회 (페이징, 삭제되지 않은 사용자만)
+     */
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    Page<User> findAllByNotDeleted(Pageable pageable);
+
+    /**
+     * 역할별 사용자 조회 (페이징)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.deletedAt IS NULL")
+    Page<User> findAllByRole(@Param("role") UserRole role, Pageable pageable);
+
+    /**
+     * 잠금 상태별 사용자 조회 (페이징)
+     */
+    @Query("SELECT u FROM User u WHERE u.locked = :locked AND u.deletedAt IS NULL")
+    Page<User> findAllByLocked(@Param("locked") Boolean locked, Pageable pageable);
+
+    /**
+     * 역할과 잠금 상태로 사용자 조회 (페이징)
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.locked = :locked AND u.deletedAt IS NULL")
+    Page<User> findAllByRoleAndLocked(@Param("role") UserRole role, @Param("locked") Boolean locked, Pageable pageable);
+
+    /**
+     * 전체 사용자 검색 (이름, 이메일, 학번)
+     */
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL " +
+           "AND (u.name LIKE %:keyword% OR u.email LIKE %:keyword% " +
+           "OR CONCAT(COALESCE(u.studentNum, 0), '') LIKE %:keyword%)")
+    Page<User> findAllBySearch(@Param("keyword") String keyword, Pageable pageable);
+
+    /**
+     * 역할별 사용자 검색
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.deletedAt IS NULL " +
+           "AND (u.name LIKE %:keyword% OR u.email LIKE %:keyword% " +
+           "OR CONCAT(COALESCE(u.studentNum, 0), '') LIKE %:keyword%)")
+    Page<User> findAllBySearchAndRole(@Param("keyword") String keyword, @Param("role") UserRole role, Pageable pageable);
+
+    /**
+     * 잠금 상태별 사용자 검색
+     */
+    @Query("SELECT u FROM User u WHERE u.locked = :locked AND u.deletedAt IS NULL " +
+           "AND (u.name LIKE %:keyword% OR u.email LIKE %:keyword% " +
+           "OR CONCAT(COALESCE(u.studentNum, 0), '') LIKE %:keyword%)")
+    Page<User> findAllBySearchAndLocked(@Param("keyword") String keyword, @Param("locked") Boolean locked, Pageable pageable);
+
+    /**
+     * 역할과 잠금 상태로 사용자 검색
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.locked = :locked AND u.deletedAt IS NULL " +
+           "AND (u.name LIKE %:keyword% OR u.email LIKE %:keyword% " +
+           "OR CONCAT(COALESCE(u.studentNum, 0), '') LIKE %:keyword%)")
+    Page<User> findAllBySearchAndRoleAndLocked(@Param("keyword") String keyword, @Param("role") UserRole role, @Param("locked") Boolean locked, Pageable pageable);
+
+    /**
+     * 전체 사용자 수 (삭제되지 않은)
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deletedAt IS NULL")
+    long countByDeletedFalse();
+
+    /**
+     * 역할별 사용자 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.role = :role AND u.deletedAt IS NULL")
+    long countByRoleAndDeletedFalse(@Param("role") UserRole role);
+
+    /**
+     * 잠긴 사용자 수
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.locked = true AND u.deletedAt IS NULL")
+    long countByLockedTrueAndDeletedFalse();
 }

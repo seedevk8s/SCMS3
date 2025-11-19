@@ -669,4 +669,151 @@ public class UserService {
         log.info("학생 일괄 등록 완료: 총 {}명, 성공 {}명, 실패 {}명", requests.size(), successCount, failCount);
         return result;
     }
+
+    /**
+     * 전체 사용자 목록 조회 (페이징, 검색, 필터링)
+     */
+    public Page<UserResponse> getAllUsers(int page, int size, String search, UserRole role, Boolean locked) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<User> usersPage;
+
+        if (search != null && !search.trim().isEmpty()) {
+            // 검색 조건이 있으면 검색
+            if (role != null && locked != null) {
+                usersPage = userRepository.findAllBySearchAndRoleAndLocked(search.trim(), role, locked, pageable);
+            } else if (role != null) {
+                usersPage = userRepository.findAllBySearchAndRole(search.trim(), role, pageable);
+            } else if (locked != null) {
+                usersPage = userRepository.findAllBySearchAndLocked(search.trim(), locked, pageable);
+            } else {
+                usersPage = userRepository.findAllBySearch(search.trim(), pageable);
+            }
+        } else {
+            // 검색 조건이 없으면 필터만 적용
+            if (role != null && locked != null) {
+                usersPage = userRepository.findAllByRoleAndLocked(role, locked, pageable);
+            } else if (role != null) {
+                usersPage = userRepository.findAllByRole(role, pageable);
+            } else if (locked != null) {
+                usersPage = userRepository.findAllByLocked(locked, pageable);
+            } else {
+                usersPage = userRepository.findAllByNotDeleted(pageable);
+            }
+        }
+
+        return usersPage.map(UserResponse::fromEntity);
+    }
+
+    /**
+     * 전체 사용자 통계 조회
+     */
+    public Map<String, Object> getAllUserStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // 전체 사용자 수
+        long totalUsers = userRepository.countByDeletedFalse();
+        stats.put("totalUsers", totalUsers);
+
+        // 역할별 사용자 수
+        long totalStudents = userRepository.countByRoleAndDeletedFalse(UserRole.STUDENT);
+        long totalCounselors = userRepository.countByRoleAndDeletedFalse(UserRole.COUNSELOR);
+        long totalAdmins = userRepository.countByRoleAndDeletedFalse(UserRole.ADMIN);
+
+        stats.put("totalStudents", totalStudents);
+        stats.put("totalCounselors", totalCounselors);
+        stats.put("totalAdmins", totalAdmins);
+
+        // 잠긴 계정 수
+        long lockedUsers = userRepository.countByLockedTrueAndDeletedFalse();
+        stats.put("lockedUsers", lockedUsers);
+
+        return stats;
+    }
+
+    /**
+     * 사용자 계정 잠금/해제 토글
+     */
+    @Transactional
+    public void toggleUserLock(Long userId) {
+        User user = userRepository.findByIdAndNotDeleted(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
+
+        user.setLocked(!user.getLocked());
+        userRepository.save(user);
+
+        log.info("사용자 계정 잠금 상태 변경: userId={}, locked={}", userId, user.getLocked());
+    }
+
+    /**
+     * 사용자 비밀번호 초기화
+     */
+    @Transactional
+    public String resetUserPassword(Long userId) {
+        User user = userRepository.findByIdAndNotDeleted(userId)
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
+
+        String newPassword;
+        String message;
+
+        if (user.getRole() == UserRole.STUDENT) {
+            // 학생: 생년월일 6자리 (YYMMDD)
+            newPassword = user.getBirthDate().format(DateTimeFormatter.ofPattern("yyMMdd"));
+            user.setPassword(passwordEncoder.encode(newPassword));
+            message = "비밀번호가 생년월일(YYMMDD)로 초기화되었습니다";
+        } else {
+            // 상담사/관리자: 임시 비밀번호 생성 및 이메일 발송
+            newPassword = generateTemporaryPassword();
+            user.setPassword(passwordEncoder.encode(newPassword));
+
+            // 이메일 발송
+            try {
+                emailService.sendPasswordResetEmail(user.getEmail(), user.getName(), newPassword);
+                message = "임시 비밀번호가 이메일로 발송되었습니다";
+            } catch (Exception e) {
+                log.error("비밀번호 초기화 이메일 발송 실패: userId={}", userId, e);
+                message = "비밀번호는 초기화되었으나 이메일 발송에 실패했습니다";
+            }
+        }
+
+        user.resetFailCount();
+        userRepository.save(user);
+
+        log.info("사용자 비밀번호 초기화: userId={}, role={}", userId, user.getRole());
+        return message;
+    }
+
+    /**
+     * 임시 비밀번호 생성 (12자리: 영문 대소문자 + 숫자 + 특수문자)
+     */
+    private String generateTemporaryPassword() {
+        String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String special = "!@#$%^&*";
+        String all = upper + lower + digits + special;
+
+        Random random = new Random();
+        StringBuilder password = new StringBuilder();
+
+        // 각 종류에서 최소 1개씩
+        password.append(upper.charAt(random.nextInt(upper.length())));
+        password.append(lower.charAt(random.nextInt(lower.length())));
+        password.append(digits.charAt(random.nextInt(digits.length())));
+        password.append(special.charAt(random.nextInt(special.length())));
+
+        // 나머지 8자리는 랜덤
+        for (int i = 0; i < 8; i++) {
+            password.append(all.charAt(random.nextInt(all.length())));
+        }
+
+        // 문자 섞기
+        List<Character> chars = password.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.toList());
+        Collections.shuffle(chars, random);
+
+        return chars.stream()
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+    }
 }
