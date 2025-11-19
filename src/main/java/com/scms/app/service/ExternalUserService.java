@@ -12,6 +12,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +28,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -443,5 +450,146 @@ public class ExternalUserService {
         externalUserRepository.save(user);
 
         log.info("회원 탈퇴 완료: ID {}", userId);
+    }
+
+    // ==================== 관리자 전용 메서드 ====================
+
+    /**
+     * 전체 외부회원 목록 조회 (관리자용)
+     *
+     * @param page 페이지 번호
+     * @param size 페이지 크기
+     * @param search 검색어 (이름, 이메일)
+     * @param provider 프로바이더 필터
+     * @param emailVerified 이메일 인증 여부 필터
+     * @return 페이징된 외부회원 목록
+     */
+    public Page<ExternalUser> getAllExternalUsers(
+            int page, int size, String search,
+            String provider, Boolean emailVerified) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 검색어가 있으면 검색, 없으면 전체 조회
+        if (search != null && !search.trim().isEmpty()) {
+            return externalUserRepository.findByNameContainingOrEmailContainingAndDeletedAtIsNull(
+                    search, search, pageable);
+        }
+
+        return externalUserRepository.findByDeletedAtIsNull(pageable);
+    }
+
+    /**
+     * 외부회원 통계 조회 (관리자용)
+     *
+     * @return 통계 정보
+     */
+    public Map<String, Object> getExternalUserStatistics() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // 전체 회원 수 (삭제되지 않은)
+        long totalCount = externalUserRepository.countByDeletedAtIsNull();
+
+        // 이메일 인증된 회원 수
+        long verifiedCount = externalUserRepository.countByEmailVerifiedAndDeletedAtIsNull(true);
+
+        // 잠긴 계정 수
+        long lockedCount = externalUserRepository.countByLockedAndDeletedAtIsNull(true);
+
+        // 프로바이더별 통계
+        long localCount = externalUserRepository.countByProviderAndDeletedAtIsNull("LOCAL");
+        long googleCount = externalUserRepository.countByProviderAndDeletedAtIsNull("GOOGLE");
+        long kakaoCount = externalUserRepository.countByProviderAndDeletedAtIsNull("KAKAO");
+        long naverCount = externalUserRepository.countByProviderAndDeletedAtIsNull("NAVER");
+
+        stats.put("totalCount", totalCount);
+        stats.put("verifiedCount", verifiedCount);
+        stats.put("unverifiedCount", totalCount - verifiedCount);
+        stats.put("lockedCount", lockedCount);
+        stats.put("localCount", localCount);
+        stats.put("googleCount", googleCount);
+        stats.put("kakaoCount", kakaoCount);
+        stats.put("naverCount", naverCount);
+
+        return stats;
+    }
+
+    /**
+     * 계정 잠금/해제 토글 (관리자용)
+     *
+     * @param userId 사용자 ID
+     * @return 변경 후 잠금 상태
+     */
+    @Transactional
+    public boolean toggleAccountLock(Integer userId) {
+        ExternalUser user = findById(userId);
+
+        if (user.getLocked()) {
+            user.unlock();
+            log.info("관리자가 계정 잠금 해제: {} (ID: {})", user.getName(), userId);
+        } else {
+            user.lock();
+            log.info("관리자가 계정 잠금: {} (ID: {})", user.getName(), userId);
+        }
+
+        externalUserRepository.save(user);
+        return user.getLocked();
+    }
+
+    /**
+     * 이메일 인증 수동 처리 (관리자용)
+     *
+     * @param userId 사용자 ID
+     */
+    @Transactional
+    public void verifyEmailManually(Integer userId) {
+        ExternalUser user = findById(userId);
+
+        if (user.getEmailVerified()) {
+            throw new IllegalArgumentException("이미 인증된 이메일입니다");
+        }
+
+        user.verifyEmail();
+        externalUserRepository.save(user);
+
+        log.info("관리자가 이메일 인증 처리: {} (ID: {})", user.getName(), userId);
+    }
+
+    /**
+     * 회원 강제 삭제 (관리자용)
+     *
+     * @param userId 사용자 ID
+     */
+    @Transactional
+    public void deleteExternalUserByAdmin(Integer userId) {
+        ExternalUser user = findById(userId);
+
+        // Soft Delete
+        user.delete();
+
+        // 개인정보 비식별화
+        user.setName("관리자삭제_" + userId);
+        user.setPhone(null);
+        user.setAddress(null);
+        user.setProfileImageUrl(null);
+
+        externalUserRepository.save(user);
+
+        log.info("관리자가 회원 삭제: ID {}", userId);
+    }
+
+    /**
+     * 계정 상태 변경 (관리자용)
+     *
+     * @param userId 사용자 ID
+     * @param status 변경할 상태
+     */
+    @Transactional
+    public void changeAccountStatus(Integer userId, AccountStatus status) {
+        ExternalUser user = findById(userId);
+        user.setStatus(status);
+        externalUserRepository.save(user);
+
+        log.info("관리자가 계정 상태 변경: {} (ID: {}) -> {}", user.getName(), userId, status);
     }
 }

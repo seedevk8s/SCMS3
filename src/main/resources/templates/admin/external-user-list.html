@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>외부회원 관리</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
+        <style>
+            .admin-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+            .admin-header h1 {
+                font-size: 28px;
+                font-weight: 700;
+                color: #172B4D;
+            }
+            .statistics-cards {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+            .stat-card {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .stat-card-title {
+                font-size: 14px;
+                color: #6B778C;
+                margin-bottom: 8px;
+            }
+            .stat-card-value {
+                font-size: 28px;
+                font-weight: 700;
+                color: #172B4D;
+            }
+            .search-bar {
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                margin-bottom: 20px;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+            }
+            .search-bar input {
+                flex: 1;
+                padding: 10px;
+                border: 1px solid #DFE1E6;
+                border-radius: 4px;
+                font-size: 14px;
+            }
+            .search-bar button {
+                padding: 10px 20px;
+                background: #2C5F5D;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+            .search-bar button:hover {
+                background: #1a3d3b;
+            }
+            #gridContainer {
+                background: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                padding: 20px;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="admin-header">
+        <h1>외부회원 관리</h1>
+        <button class="btn btn-primary" onclick="refreshStatistics()">
+            <i class="bi bi-arrow-clockwise"></i> 새로고침
+        </button>
+    </div>
+
+    <!-- 통계 카드 -->
+    <div class="statistics-cards">
+        <div class="stat-card">
+            <div class="stat-card-title">전체 회원</div>
+            <div class="stat-card-value" id="totalCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">이메일 인증</div>
+            <div class="stat-card-value" id="verifiedCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">미인증</div>
+            <div class="stat-card-value" id="unverifiedCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">잠긴 계정</div>
+            <div class="stat-card-value" id="lockedCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">로컬 계정</div>
+            <div class="stat-card-value" id="localCount">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-title">소셜 로그인</div>
+            <div class="stat-card-value" id="socialCount">-</div>
+        </div>
+    </div>
+
+    <!-- 검색 바 -->
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="이름 또는 이메일로 검색..."
+               onkeypress="if(event.key === 'Enter') searchUsers()">
+        <button onclick="searchUsers()">
+            <i class="bi bi-search"></i> 검색
+        </button>
+        <button onclick="resetSearch()" style="background: #6B778C;">
+            <i class="bi bi-x-circle"></i> 초기화
+        </button>
+    </div>
+
+    <!-- 그리드 -->
+    <div id="gridContainer"></div>
+</div>
+
+<th:block layout:fragment="script">
+    <script src="https://uicdn.toast.com/grid/latest/tui-grid.js"></script>
+    <script th:inline="javascript">
+        let grid;
+        let currentPage = 0;
+        let currentSearch = '';
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            initGrid();
+            loadStatistics();
+            loadUsers();
+        });
+
+        // 그리드 초기화
+        function initGrid() {
+            grid = new tui.Grid({
+                el: document.getElementById('gridContainer'),
+                data: [],
+                columns: [
+                    {
+                        header: 'ID',
+                        name: 'userId',
+                        width: 60,
+                        align: 'center'
+                    },
+                    {
+                        header: '이메일',
+                        name: 'email',
+                        width: 200
+                    },
+                    {
+                        header: '이름',
+                        name: 'name',
+                        width: 100
+                    },
+                    {
+                        header: '전화번호',
+                        name: 'phone',
+                        width: 120
+                    },
+                    {
+                        header: '프로바이더',
+                        name: 'provider',
+                        width: 100,
+                        align: 'center',
+                        formatter: function(e) {
+                            const badges = {
+                                'LOCAL': '<span class="badge bg-primary">로컬</span>',
+                                'GOOGLE': '<span class="badge bg-danger">Google</span>',
+                                'KAKAO': '<span class="badge bg-warning">Kakao</span>',
+                                'NAVER': '<span class="badge bg-success">Naver</span>'
+                            };
+                            return badges[e.value] || e.value;
+                        }
+                    },
+                    {
+                        header: '이메일 인증',
+                        name: 'emailVerified',
+                        width: 100,
+                        align: 'center',
+                        formatter: function(e) {
+                            return e.value
+                                ? '<span class="badge bg-success">인증됨</span>'
+                                : '<span class="badge bg-warning">미인증</span>';
+                        }
+                    },
+                    {
+                        header: '계정 상태',
+                        name: 'status',
+                        width: 100,
+                        align: 'center',
+                        formatter: function(e) {
+                            const statusBadges = {
+                                'ACTIVE': '<span class="badge bg-success">활성</span>',
+                                'INACTIVE': '<span class="badge bg-secondary">비활성</span>',
+                                'SUSPENDED': '<span class="badge bg-danger">정지</span>'
+                            };
+                            return statusBadges[e.value] || e.value;
+                        }
+                    },
+                    {
+                        header: '잠금',
+                        name: 'locked',
+                        width: 80,
+                        align: 'center',
+                        formatter: function(e) {
+                            return e.value
+                                ? '<span class="badge bg-danger">잠김</span>'
+                                : '<span class="badge bg-success">정상</span>';
+                        }
+                    },
+                    {
+                        header: '가입일',
+                        name: 'createdAt',
+                        width: 110,
+                        align: 'center',
+                        formatter: function(e) {
+                            return e.value ? new Date(e.value).toLocaleDateString('ko-KR') : '-';
+                        }
+                    },
+                    {
+                        header: '관리',
+                        name: 'actions',
+                        width: 200,
+                        align: 'center',
+                        formatter: function(e) {
+                            const row = e.row;
+                            const lockBtn = row.locked
+                                ? '<button class="btn btn-sm btn-success" onclick="toggleLock(' + row.userId + ')">잠금 해제</button>'
+                                : '<button class="btn btn-sm btn-warning" onclick="toggleLock(' + row.userId + ')">잠금</button>';
+
+                            let verifyBtn = '';
+                            if (!row.emailVerified) {
+                                verifyBtn = '<button class="btn btn-sm btn-info" onclick="verifyEmail(' + row.userId + ')">인증</button>';
+                            }
+
+                            const deleteBtn = '<button class="btn btn-sm btn-danger" onclick="deleteUser(' + row.userId + ')">삭제</button>';
+
+                            return lockBtn + ' ' + verifyBtn + ' ' + deleteBtn;
+                        }
+                    }
+                ],
+                pageOptions: {
+                    perPage: 20
+                },
+                rowHeaders: ['rowNum'],
+                bodyHeight: 500
+            });
+        }
+
+        // 통계 로드
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/admin/external-users/statistics');
+                const stats = await response.json();
+
+                document.getElementById('totalCount').textContent = stats.totalCount || 0;
+                document.getElementById('verifiedCount').textContent = stats.verifiedCount || 0;
+                document.getElementById('unverifiedCount').textContent = stats.unverifiedCount || 0;
+                document.getElementById('lockedCount').textContent = stats.lockedCount || 0;
+                document.getElementById('localCount').textContent = stats.localCount || 0;
+
+                const socialCount = (stats.googleCount || 0) + (stats.kakaoCount || 0) + (stats.naverCount || 0);
+                document.getElementById('socialCount').textContent = socialCount;
+            } catch (error) {
+                console.error('통계 로드 실패:', error);
+            }
+        }
+
+        // 사용자 목록 로드
+        async function loadUsers(page = 0, search = '') {
+            try {
+                let url = '/admin/external-users/api?page=' + page + '&size=20';
+                if (search) {
+                    url += '&search=' + encodeURIComponent(search);
+                }
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                grid.resetData(data.users);
+            } catch (error) {
+                console.error('사용자 목록 로드 실패:', error);
+                alert('사용자 목록을 불러오는 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 검색
+        function searchUsers() {
+            currentSearch = document.getElementById('searchInput').value;
+            currentPage = 0;
+            loadUsers(currentPage, currentSearch);
+        }
+
+        // 검색 초기화
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            currentSearch = '';
+            currentPage = 0;
+            loadUsers();
+        }
+
+        // 통계 새로고침
+        function refreshStatistics() {
+            loadStatistics();
+            loadUsers();
+        }
+
+        // 계정 잠금/해제
+        async function toggleLock(userId) {
+            if (!confirm('계정 잠금 상태를 변경하시겠습니까?')) return;
+
+            try {
+                const response = await fetch('/admin/external-users/' + userId + '/toggle-lock', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadUsers(currentPage, currentSearch);
+                    loadStatistics();
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('계정 잠금 토글 실패:', error);
+                alert('작업 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 이메일 인증
+        async function verifyEmail(userId) {
+            if (!confirm('이메일 인증 처리를 하시겠습니까?')) return;
+
+            try {
+                const response = await fetch('/admin/external-users/' + userId + '/verify-email', {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadUsers(currentPage, currentSearch);
+                    loadStatistics();
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('이메일 인증 실패:', error);
+                alert('작업 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 회원 삭제
+        async function deleteUser(userId) {
+            if (!confirm('정말로 이 회원을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+
+            try {
+                const response = await fetch('/admin/external-users/' + userId, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadUsers(currentPage, currentSearch);
+                    loadStatistics();
+                } else {
+                    alert(result.message || '삭제 실패');
+                }
+            } catch (error) {
+                console.error('회원 삭제 실패:', error);
+                alert('삭제 중 오류가 발생했습니다.');
+            }
+        }
+    </script>
+</th:block>
+</body>
+</html>
