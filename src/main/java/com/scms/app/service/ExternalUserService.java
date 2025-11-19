@@ -1,5 +1,7 @@
 package com.scms.app.service;
 
+import com.scms.app.dto.ExternalPasswordChangeRequest;
+import com.scms.app.dto.ExternalProfileUpdateRequest;
 import com.scms.app.dto.ExternalSignupRequest;
 import com.scms.app.model.AccountStatus;
 import com.scms.app.model.ExternalUser;
@@ -9,11 +11,18 @@ import com.scms.app.repository.PasswordResetTokenRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -29,6 +38,9 @@ public class ExternalUserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    @Value("${file.upload-dir:${user.home}/scms-uploads}")
+    private String uploadDir;
 
     /**
      * 외부회원 가입
@@ -262,5 +274,174 @@ public class ExternalUserService {
         passwordResetTokenRepository.save(resetToken);
 
         log.info("토큰을 이용한 비밀번호 재설정 완료: {} (ID: {})", user.getName(), user.getUserId());
+    }
+
+    /**
+     * 프로필 수정
+     *
+     * @param userId 사용자 ID
+     * @param request 프로필 수정 요청
+     * @return 수정된 외부회원
+     */
+    @Transactional
+    public ExternalUser updateProfile(Integer userId, ExternalProfileUpdateRequest request) {
+        ExternalUser user = findById(userId);
+
+        // 소셜 로그인 사용자는 일부 정보만 수정 가능
+        if (user.isSocialUser()) {
+            log.warn("소셜 로그인 사용자의 프로필 수정 제한: {} ({})", user.getName(), user.getProvider());
+            user.setPhone(request.getPhone());
+            user.setAddress(request.getAddress());
+        } else {
+            // 로컬 계정은 모든 정보 수정 가능
+            user.setName(request.getName());
+            user.setPhone(request.getPhone());
+            user.setBirthDate(request.getBirthDate());
+            user.setAddress(request.getAddress());
+            user.setGender(request.getGender());
+        }
+
+        ExternalUser updatedUser = externalUserRepository.save(user);
+        log.info("프로필 수정 완료: {} (ID: {})", updatedUser.getName(), updatedUser.getUserId());
+
+        return updatedUser;
+    }
+
+    /**
+     * 비밀번호 변경
+     *
+     * @param userId 사용자 ID
+     * @param request 비밀번호 변경 요청
+     */
+    @Transactional
+    public void changePassword(Integer userId, ExternalPasswordChangeRequest request) {
+        ExternalUser user = findById(userId);
+
+        // 소셜 로그인 사용자는 비밀번호 변경 불가
+        if (user.isSocialUser()) {
+            throw new IllegalArgumentException("소셜 로그인 사용자는 비밀번호를 변경할 수 없습니다");
+        }
+
+        // 새 비밀번호 확인
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("새 비밀번호가 일치하지 않습니다");
+        }
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다");
+        }
+
+        // 비밀번호 변경
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        externalUserRepository.save(user);
+
+        log.info("비밀번호 변경 완료: {} (ID: {})", user.getName(), user.getUserId());
+    }
+
+    /**
+     * 프로필 이미지 업로드
+     *
+     * @param userId 사용자 ID
+     * @param file 업로드할 이미지 파일
+     * @return 저장된 이미지 URL
+     */
+    @Transactional
+    public String updateProfileImage(Integer userId, MultipartFile file) {
+        ExternalUser user = findById(userId);
+
+        // 파일 검증
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("파일이 비어있습니다");
+        }
+
+        // 파일 크기 검증 (5MB)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IllegalArgumentException("파일 크기는 5MB 이하여야 합니다");
+        }
+
+        // 파일 타입 검증
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다");
+        }
+
+        try {
+            // 파일 저장 경로 생성
+            Path uploadPath = Paths.get(uploadDir, "profiles");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 고유한 파일명 생성
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : "";
+            String filename = "profile_" + userId + "_" + System.currentTimeMillis() + extension;
+
+            // 파일 저장
+            Path filePath = uploadPath.resolve(filename);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // URL 생성 (실제 서버 도메인으로 변경 필요)
+            String imageUrl = "/uploads/profiles/" + filename;
+
+            // 기존 이미지 삭제 (로컬 저장소인 경우)
+            if (user.getProfileImageUrl() != null && user.getProfileImageUrl().startsWith("/uploads/")) {
+                try {
+                    String oldFilename = user.getProfileImageUrl().substring(user.getProfileImageUrl().lastIndexOf("/") + 1);
+                    Path oldFilePath = uploadPath.resolve(oldFilename);
+                    Files.deleteIfExists(oldFilePath);
+                } catch (Exception e) {
+                    log.warn("기존 프로필 이미지 삭제 실패: {}", e.getMessage());
+                }
+            }
+
+            // 사용자 프로필 이미지 URL 업데이트
+            user.setProfileImageUrl(imageUrl);
+            externalUserRepository.save(user);
+
+            log.info("프로필 이미지 업로드 완료: {} (ID: {}, URL: {})", user.getName(), user.getUserId(), imageUrl);
+
+            return imageUrl;
+        } catch (IOException e) {
+            log.error("프로필 이미지 업로드 실패: {}", e.getMessage(), e);
+            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다", e);
+        }
+    }
+
+    /**
+     * 회원 탈퇴 (Soft Delete)
+     *
+     * @param userId 사용자 ID
+     * @param password 비밀번호 (로컬 계정인 경우 확인용)
+     */
+    @Transactional
+    public void deleteAccount(Integer userId, String password) {
+        ExternalUser user = findById(userId);
+
+        // 로컬 계정인 경우 비밀번호 확인
+        if (!user.isSocialUser()) {
+            if (password == null || password.isEmpty()) {
+                throw new IllegalArgumentException("비밀번호를 입력해주세요");
+            }
+            if (!passwordEncoder.matches(password, user.getPassword())) {
+                throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+            }
+        }
+
+        // Soft Delete
+        user.delete();
+
+        // 개인정보 비식별화 (선택적)
+        user.setName("탈퇴한 사용자");
+        user.setPhone(null);
+        user.setAddress(null);
+        user.setProfileImageUrl(null);
+
+        externalUserRepository.save(user);
+
+        log.info("회원 탈퇴 완료: ID {}", userId);
     }
 }

@@ -41,4 +41,12 @@ public class ExternalUserPageController {
     public String verifySuccessPage() {
         return "external/verify-success";
     }
+
+    /**
+     * 프로필 관리 페이지
+     */
+    @GetMapping("/profile")
+    public String profilePage() {
+        return "external/profile";
+    }
 }

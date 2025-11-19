@@ -1,8 +1,6 @@
 package com.scms.app.controller;
 
-import com.scms.app.dto.ExternalLoginRequest;
-import com.scms.app.dto.ExternalSignupRequest;
-import com.scms.app.dto.ExternalUserResponse;
+import com.scms.app.dto.*;
 import com.scms.app.model.ExternalUser;
 import com.scms.app.service.ExternalUserService;
 import jakarta.servlet.http.HttpSession;
@@ -11,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -178,5 +177,194 @@ public class ExternalUserController {
             errorResponse.put("message", "인증 메일 재발송 중 오류가 발생했습니다");
             return ResponseEntity.internalServerError().body(errorResponse);
         }
+    }
+
+    /**
+     * 프로필 수정 API
+     *
+     * @param request 프로필 수정 요청
+     * @param session HTTP 세션
+     * @return 수정된 프로필 정보
+     */
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, Object>> updateProfile(
+            @Valid @RequestBody ExternalProfileUpdateRequest request,
+            HttpSession session) {
+        try {
+            Integer userId = (Integer) session.getAttribute("externalUserId");
+            if (userId == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "로그인이 필요합니다");
+                return ResponseEntity.status(401).body(errorResponse);
+            }
+
+            ExternalUser updatedUser = externalUserService.updateProfile(userId, request);
+
+            // 세션 정보 업데이트
+            session.setAttribute("externalUserName", updatedUser.getName());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "프로필이 수정되었습니다");
+            response.put("user", ExternalUserResponse.from(updatedUser));
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("프로필 수정 중 오류 발생", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "프로필 수정 중 오류가 발생했습니다");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    /**
+     * 비밀번호 변경 API
+     *
+     * @param request 비밀번호 변경 요청
+     * @param session HTTP 세션
+     * @return 성공 메시지
+     */
+    @PutMapping("/password")
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @Valid @RequestBody ExternalPasswordChangeRequest request,
+            HttpSession session) {
+        try {
+            Integer userId = (Integer) session.getAttribute("externalUserId");
+            if (userId == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "로그인이 필요합니다");
+                return ResponseEntity.status(401).body(errorResponse);
+            }
+
+            externalUserService.changePassword(userId, request);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "비밀번호가 변경되었습니다");
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("비밀번호 변경 중 오류 발생", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "비밀번호 변경 중 오류가 발생했습니다");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    /**
+     * 프로필 이미지 업로드 API
+     *
+     * @param file 업로드할 이미지 파일
+     * @param session HTTP 세션
+     * @return 저장된 이미지 URL
+     */
+    @PostMapping("/profile-image")
+    public ResponseEntity<Map<String, Object>> uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            HttpSession session) {
+        try {
+            Integer userId = (Integer) session.getAttribute("externalUserId");
+            if (userId == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "로그인이 필요합니다");
+                return ResponseEntity.status(401).body(errorResponse);
+            }
+
+            String imageUrl = externalUserService.updateProfileImage(userId, file);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "프로필 이미지가 업로드되었습니다");
+            response.put("imageUrl", imageUrl);
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("프로필 이미지 업로드 중 오류 발생", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "이미지 업로드 중 오류가 발생했습니다");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    /**
+     * 회원 탈퇴 API
+     *
+     * @param password 비밀번호 (로컬 계정인 경우)
+     * @param session HTTP 세션
+     * @return 성공 메시지
+     */
+    @DeleteMapping("/account")
+    public ResponseEntity<Map<String, Object>> deleteAccount(
+            @RequestParam(required = false) String password,
+            HttpSession session) {
+        try {
+            Integer userId = (Integer) session.getAttribute("externalUserId");
+            if (userId == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "로그인이 필요합니다");
+                return ResponseEntity.status(401).body(errorResponse);
+            }
+
+            externalUserService.deleteAccount(userId, password);
+
+            // 세션 무효화
+            session.invalidate();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "회원 탈퇴가 완료되었습니다");
+
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        } catch (Exception e) {
+            log.error("회원 탈퇴 중 오류 발생", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "회원 탈퇴 중 오류가 발생했습니다");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    /**
+     * 로그아웃 API
+     *
+     * @param session HTTP 세션
+     * @return 성공 메시지
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, Object>> logout(HttpSession session) {
+        session.invalidate();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "로그아웃 되었습니다");
+
+        return ResponseEntity.ok(response);
     }
 }
