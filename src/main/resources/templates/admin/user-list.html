@@ -4,6 +4,386 @@
       layout:decorate="~{layout/admin-layout}">
 <head>
     <title>사용자 관리 - SCMS</title>
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" href="https://uicdn.toast.com/tui.pagination/v3.4.1/tui-pagination.css" />
+        <link rel="stylesheet" href="https://uicdn.toast.com/grid/v4.21.19/tui-grid.css" />
+        <style>
+            .stats-container {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .stat-card {
+                background: white;
+                border-radius: 8px;
+                padding: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .stat-card h3 {
+                font-size: 0.9rem;
+                color: #666;
+                margin: 0 0 0.5rem 0;
+            }
+
+            .stat-card .value {
+                font-size: 2rem;
+                font-weight: 700;
+                color: #333;
+            }
+
+            .stat-card.primary .value { color: #0066cc; }
+            .stat-card.success .value { color: #28a745; }
+            .stat-card.warning .value { color: #ffc107; }
+            .stat-card.danger .value { color: #dc3545; }
+            .stat-card.info .value { color: #17a2b8; }
+
+            .search-section {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                margin-bottom: 1.5rem;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            .search-controls {
+                display: flex;
+                gap: 1rem;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+
+            .search-controls input,
+            .search-controls select {
+                padding: 0.5rem;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .search-controls button {
+                padding: 0.5rem 1.5rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-weight: 600;
+            }
+
+            .btn-search {
+                background-color: #0066cc;
+                color: white;
+            }
+
+            .btn-reset {
+                background-color: #6c757d;
+                color: white;
+            }
+
+            .grid-container {
+                background: white;
+                padding: 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            /* 페이지네이션 스타일 */
+            .pagination-container {
+                display: flex;
+                justify-content: center;
+                margin-top: 1.5rem;
+                padding-top: 1.5rem;
+                border-top: 1px solid #eee;
+            }
+
+            /* TOAST UI Pagination 커스텀 스타일 */
+            .tui-pagination * {
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+            }
+
+            .tui-pagination {
+                height: 28px;
+                margin: 14px 0 12px;
+                line-height: normal;
+                text-align: center;
+                font-size: 0;
+            }
+
+            .tui-pagination .tui-page-btn {
+                display: inline-block;
+                position: relative;
+                width: 28px;
+                padding: 8px 0 6px;
+                margin-left: 0;
+                color: #333;
+                font-size: 12px;
+                font-weight: normal;
+                line-height: 1;
+                text-decoration: none;
+                vertical-align: middle;
+                border: 1px solid #ddd;
+                border-width: 1px 0;
+            }
+
+            .tui-pagination .tui-page-btn:hover {
+                background-color: #f4f4f4;
+            }
+
+            .tui-pagination .tui-is-selected,
+            .tui-pagination strong {
+                color: #fff;
+                background: #0066cc;
+                border-color: #0066cc;
+                cursor: default;
+            }
+
+            .tui-pagination .tui-is-selected:hover {
+                background-color: #0066cc;
+            }
+
+            .tui-pagination .tui-first-child.tui-is-selected,
+            .tui-pagination strong.tui-first-child {
+                margin-left: 0;
+            }
+
+            .tui-pagination .tui-first-child,
+            .tui-pagination .tui-prev-is-ellip {
+                border-left: 1px solid #ddd;
+            }
+
+            .tui-pagination .tui-last-child,
+            .tui-pagination .tui-next-is-ellip {
+                border-right: 1px solid #ddd;
+            }
+
+            .tui-pagination .tui-first-child.tui-is-selected {
+                border-left: 1px solid #0066cc;
+            }
+
+            .tui-pagination .tui-last-child.tui-is-selected {
+                border-right: 1px solid #0066cc;
+            }
+
+            .tui-pagination .tui-first,
+            .tui-pagination .tui-prev,
+            .tui-pagination .tui-next,
+            .tui-pagination .tui-last,
+            .tui-pagination .tui-prev-is-ellip,
+            .tui-pagination .tui-next-is-ellip {
+                overflow: hidden;
+                height: 26px;
+                padding: 0;
+                font-size: 0 !important;
+                line-height: 26px;
+                white-space: nowrap;
+                font-weight: normal;
+                border: 1px solid #ddd;
+                text-indent: -9999px;
+                color: transparent !important;
+            }
+
+            .tui-pagination .tui-prev-is-ellip {
+                border-right: 0;
+            }
+
+            .tui-pagination .tui-next-is-ellip {
+                border-left: 0;
+            }
+
+            .tui-pagination .tui-first + .tui-prev,
+            .tui-pagination .tui-prev + .tui-first {
+                border-left: 0;
+            }
+
+            .tui-pagination .tui-last + .tui-next,
+            .tui-pagination .tui-next + .tui-last {
+                border-right: 0;
+            }
+
+            .tui-pagination .tui-first:hover,
+            .tui-pagination .tui-prev:hover,
+            .tui-pagination .tui-next:hover,
+            .tui-pagination .tui-last:hover {
+                background-color: #f4f4f4;
+                border-color: #ddd;
+            }
+
+            .tui-pagination .tui-first-child.tui-prev-is-ellip,
+            .tui-pagination .tui-first-child.tui-next-is-ellip {
+                border-left: 1px solid #ddd;
+            }
+
+            .tui-pagination .tui-last-child.tui-prev-is-ellip,
+            .tui-pagination .tui-last-child.tui-next-is-ellip {
+                border-right: 1px solid #ddd;
+            }
+
+            .tui-pagination .tui-first {
+                width: 28px;
+                margin-right: 0;
+            }
+
+            .tui-pagination .tui-prev {
+                margin-right: 0;
+                width: 28px;
+            }
+
+            .tui-pagination .tui-next {
+                width: 28px;
+                margin-left: 0;
+            }
+
+            .tui-pagination .tui-last {
+                width: 28px;
+                margin-left: 0;
+            }
+
+            /* 아이콘 스타일 */
+            .tui-pagination .tui-ico-first,
+            .tui-pagination .tui-ico-prev,
+            .tui-pagination .tui-ico-next,
+            .tui-pagination .tui-ico-last {
+                display: block;
+                position: relative;
+                width: 100%;
+                height: 100%;
+                font-size: 0;
+                color: transparent;
+                text-indent: -9999px;
+                overflow: hidden;
+            }
+
+            .tui-pagination .tui-ico-first:before {
+                content: '';
+                position: absolute;
+                top: 9px;
+                left: 7px;
+                width: 2px;
+                height: 8px;
+                background: #333;
+            }
+
+            .tui-pagination .tui-ico-first:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                left: 10px;
+                width: 6px;
+                height: 6px;
+                border: 1px solid #333;
+                border-width: 0 0 2px 2px;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .tui-pagination .tui-ico-prev:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                left: 11px;
+                width: 6px;
+                height: 6px;
+                border: 1px solid #333;
+                border-width: 0 0 2px 2px;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .tui-pagination .tui-ico-next:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                right: 11px;
+                width: 6px;
+                height: 6px;
+                border: 1px solid #333;
+                border-width: 2px 2px 0 0;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            .tui-pagination .tui-ico-last:before {
+                content: '';
+                position: absolute;
+                top: 9px;
+                right: 7px;
+                width: 2px;
+                height: 8px;
+                background: #333;
+            }
+
+            .tui-pagination .tui-ico-last:after {
+                content: '';
+                position: absolute;
+                top: 9px;
+                right: 10px;
+                width: 6px;
+                height: 6px;
+                border: 1px solid #333;
+                border-width: 2px 2px 0 0;
+                -webkit-transform: rotate(45deg);
+                -ms-transform: rotate(45deg);
+                transform: rotate(45deg);
+            }
+
+            /* 비활성화된 아이콘 */
+            .tui-pagination .tui-is-disabled .tui-ico-first:before,
+            .tui-pagination .tui-is-disabled .tui-ico-first:after,
+            .tui-pagination .tui-is-disabled .tui-ico-prev:after,
+            .tui-pagination .tui-is-disabled .tui-ico-next:after,
+            .tui-pagination .tui-is-disabled .tui-ico-last:before,
+            .tui-pagination .tui-is-disabled .tui-ico-last:after {
+                background-color: #ddd !important;
+                border-color: #ddd !important;
+            }
+
+            .tui-pagination .tui-is-disabled:hover {
+                background: #fff;
+                cursor: default;
+            }
+
+            .tui-pagination .tui-prev-is-ellip,
+            .tui-pagination .tui-next-is-ellip {
+                padding: 0;
+                line-height: 1;
+            }
+
+            .tui-pagination .tui-prev-is-ellip {
+                border-right: 0;
+            }
+
+            .tui-pagination .tui-next-is-ellip {
+                border-left: 0;
+            }
+
+            .tui-pagination .tui-ico-ellip {
+                display: inline-block;
+                height: 26px;
+                padding: 0 16px 0 4px;
+                vertical-align: top;
+                font-size: 12px;
+                line-height: 26px;
+            }
+
+            /* 비활성화된 버튼 스타일 */
+            .tui-pagination .tui-is-disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+            }
+
+            .tui-pagination .tui-is-disabled:before,
+            .tui-pagination .tui-is-disabled:after {
+                background-color: #999 !important;
+                border-color: #999 !important;
+            }
+        </style>
+    </th:block>
 </head>
 
 <body>
@@ -14,15 +394,369 @@
             <p>전체 사용자(학생, 상담사, 관리자)를 관리합니다</p>
         </div>
 
-        <div class="container mt-4">
-            <div class="alert alert-warning">
-                <h4>🚧 기능 준비 중</h4>
-                <p>사용자 관리 기능은 현재 개발 중입니다.</p>
-                <hr>
-                <p class="mb-0"><strong>외부회원 관리</strong>는 이미 구현되어 있습니다. 좌측 메뉴의 <strong>"외부회원 관리"</strong>를 클릭하여 확인하세요.</p>
+        <!-- 통계 카드 -->
+        <div class="stats-container">
+            <div class="stat-card primary">
+                <h3>전체 사용자</h3>
+                <div class="value" id="totalUsers">0</div>
             </div>
+            <div class="stat-card success">
+                <h3>학생</h3>
+                <div class="value" id="totalStudents">0</div>
+            </div>
+            <div class="stat-card info">
+                <h3>상담사</h3>
+                <div class="value" id="totalCounselors">0</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>관리자</h3>
+                <div class="value" id="totalAdmins">0</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>잠긴 계정</h3>
+                <div class="value" id="lockedUsers">0</div>
+            </div>
+        </div>
+
+        <!-- 검색 섹션 -->
+        <div class="search-section">
+            <div class="search-controls">
+                <input type="text" id="searchInput" placeholder="이름, 이메일, 학번 검색..." style="flex: 1; min-width: 200px;">
+                <select id="roleFilter">
+                    <option value="">전체 역할</option>
+                    <option value="STUDENT">학생</option>
+                    <option value="COUNSELOR">상담사</option>
+                    <option value="ADMIN">관리자</option>
+                </select>
+                <select id="lockedFilter">
+                    <option value="">전체 상태</option>
+                    <option value="false">활성</option>
+                    <option value="true">잠김</option>
+                </select>
+                <button class="btn-search" onclick="searchUsers()">검색</button>
+                <button class="btn-reset" onclick="resetSearch()">초기화</button>
+            </div>
+        </div>
+
+        <!-- 그리드 -->
+        <div class="grid-container">
+            <div id="grid"></div>
+            <!-- 페이지네이션 -->
+            <div id="pagination" class="pagination-container"></div>
         </div>
     </div>
 </div>
+
+<th:block layout:fragment="script">
+    <script src="https://uicdn.toast.com/tui.pagination/v3.4.1/tui-pagination.js"></script>
+    <script src="https://uicdn.toast.com/grid/v4.21.19/tui-grid.js"></script>
+    <script>
+        let grid;
+        let pagination;
+        let currentPage = 0;
+        let currentSize = 20;
+        let totalPages = 0;
+        let totalElements = 0;
+        let currentSearch = '';
+        let currentRole = '';
+        let currentLocked = '';
+        let isLoadingData = false;
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM loaded, initializing...');
+
+            if (typeof tui === 'undefined' || typeof tui.Grid === 'undefined') {
+                console.error('TOAST UI Grid 라이브러리가 로드되지 않았습니다');
+                alert('페이지 로드 중 오류가 발생했습니다. 페이지를 새로고침해주세요.');
+                return;
+            }
+
+            try {
+                initGrid();
+                initPagination();
+                console.log('Grid and Pagination initialized, starting data load...');
+
+                await Promise.all([
+                    loadStatistics(),
+                    loadUsers()
+                ]);
+
+                console.log('All data loaded successfully');
+            } catch (error) {
+                console.error('초기화 오류:', error);
+                alert('페이지 초기화 중 오류가 발생했습니다: ' + error.message);
+            }
+
+            // Enter 키로 검색
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchUsers();
+                }
+            });
+        });
+
+        // 그리드 초기화
+        function initGrid() {
+            console.log('Initializing grid...');
+            const gridEl = document.getElementById('grid');
+            if (!gridEl) {
+                throw new Error('Grid 엘리먼트를 찾을 수 없습니다');
+            }
+
+            grid = new tui.Grid({
+                el: document.getElementById('grid'),
+                data: [],
+                columns: [
+                    { header: 'ID', name: 'userId', width: 60, align: 'center' },
+                    {
+                        header: '역할',
+                        name: 'role',
+                        width: 80,
+                        align: 'center',
+                        formatter: function(e) {
+                            const roleMap = {
+                                'STUDENT': '<span style="background: #0066cc; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">학생</span>',
+                                'COUNSELOR': '<span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">상담사</span>',
+                                'ADMIN': '<span style="background: #ffc107; color: #333; padding: 2px 8px; border-radius: 4px; font-size: 11px;">관리자</span>'
+                            };
+                            return roleMap[e.value] || e.value;
+                        }
+                    },
+                    { header: '학번', name: 'studentNum', width: 100, align: 'center' },
+                    { header: '이름', name: 'name', width: 100 },
+                    { header: '이메일', name: 'email', width: 200 },
+                    { header: '전화번호', name: 'phone', width: 130 },
+                    { header: '학과', name: 'department', width: 120 },
+                    {
+                        header: '계정 상태',
+                        name: 'locked',
+                        width: 100,
+                        align: 'center',
+                        formatter: function(e) {
+                            return e.value ? '<span style="color: red;">잠김</span>' : '<span style="color: green;">활성</span>';
+                        }
+                    },
+                    {
+                        header: '실패 횟수',
+                        name: 'failCnt',
+                        width: 90,
+                        align: 'center'
+                    },
+                    {
+                        header: '등록일',
+                        name: 'createdAt',
+                        width: 110,
+                        align: 'center',
+                        formatter: function(e) {
+                            if (!e.value) return '-';
+                            return new Date(e.value).toLocaleDateString('ko-KR');
+                        }
+                    },
+                    {
+                        header: '액션',
+                        name: 'actions',
+                        width: 200,
+                        align: 'center',
+                        formatter: function(e) {
+                            const row = e.row;
+                            const lockText = row.locked ? '해제' : '잠금';
+                            const lockColor = row.locked ? 'green' : 'orange';
+                            return `
+                                <button onclick="toggleLock(${row.userId})" style="padding: 4px 8px; margin: 2px; background: ${lockColor}; color: white; border: none; border-radius: 3px; cursor: pointer;">${lockText}</button>
+                                <button onclick="resetPassword(${row.userId})" style="padding: 4px 8px; margin: 2px; background: #6c757d; color: white; border: none; border-radius: 3px; cursor: pointer;">PW초기화</button>
+                            `;
+                        }
+                    }
+                ],
+                rowHeaders: ['rowNum'],
+                bodyHeight: 500
+            });
+            console.log('Grid initialized successfully:', grid);
+        }
+
+        // 페이지네이션 초기화
+        function initPagination() {
+            console.log('Initializing pagination...');
+            const paginationEl = document.getElementById('pagination');
+            if (!paginationEl) {
+                throw new Error('Pagination 엘리먼트를 찾을 수 없습니다');
+            }
+
+            pagination = new tui.Pagination(paginationEl, {
+                totalItems: 0,
+                itemsPerPage: currentSize,
+                visiblePages: 5,
+                page: 1,
+                centerAlign: true,
+                firstItemClassName: 'tui-first-child',
+                lastItemClassName: 'tui-last-child',
+                usageStatistics: false,
+                template: {
+                    page: '<a href="#" class="tui-page-btn">{{page}}</a>',
+                    currentPage: '<strong class="tui-page-btn tui-is-selected">{{page}}</strong>',
+                    moveButton: '<a href="#" class="tui-page-btn tui-{{type}}">' +
+                            '<span class="tui-ico-{{type}}"></span>' +
+                        '</a>',
+                    disabledMoveButton: '<span class="tui-page-btn tui-is-disabled tui-{{type}}">' +
+                            '<span class="tui-ico-{{type}}"></span>' +
+                        '</span>',
+                    moreButton: '<a href="#" class="tui-page-btn tui-{{type}}-is-ellip">' +
+                            '<span class="tui-ico-ellip">...</span>' +
+                        '</a>'
+                }
+            });
+
+            // 페이지 변경 이벤트
+            pagination.on('afterMove', function(event) {
+                if (isLoadingData) {
+                    console.log('Skipping afterMove during data load');
+                    return;
+                }
+                currentPage = event.page - 1;
+                console.log('Page changed to:', currentPage + 1);
+                loadUsers();
+            });
+
+            console.log('Pagination initialized successfully:', pagination);
+        }
+
+        // 통계 로드
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/users/statistics');
+                const stats = await response.json();
+
+                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
+                document.getElementById('totalStudents').textContent = stats.totalStudents || 0;
+                document.getElementById('totalCounselors').textContent = stats.totalCounselors || 0;
+                document.getElementById('totalAdmins').textContent = stats.totalAdmins || 0;
+                document.getElementById('lockedUsers').textContent = stats.lockedUsers || 0;
+            } catch (error) {
+                console.error('통계 로드 실패:', error);
+            }
+        }
+
+        // 사용자 목록 로드
+        async function loadUsers() {
+            try {
+                if (!grid) {
+                    console.error('Grid가 초기화되지 않았습니다');
+                    alert('Grid가 초기화되지 않았습니다. 페이지를 새로고침해주세요.');
+                    return;
+                }
+
+                isLoadingData = true;
+
+                const params = new URLSearchParams({
+                    page: currentPage,
+                    size: currentSize
+                });
+
+                if (currentSearch) params.append('search', currentSearch);
+                if (currentRole) params.append('role', currentRole);
+                if (currentLocked) params.append('locked', currentLocked);
+
+                console.log('Fetching users:', `/api/users?${params}`);
+                const response = await fetch(`/api/users?${params}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                console.log('Received user data:', data);
+
+                // Grid 데이터 업데이트
+                grid.resetData(data.content || []);
+
+                // Pagination 업데이트
+                totalElements = data.totalElements || 0;
+                totalPages = data.totalPages || 0;
+
+                if (pagination) {
+                    pagination.reset(totalElements);
+                    if (currentPage + 1 > totalPages && totalPages > 0) {
+                        currentPage = totalPages - 1;
+                        pagination.movePageTo(totalPages);
+                    } else if (totalElements > 0) {
+                        pagination.movePageTo(currentPage + 1);
+                    }
+                    console.log(`Pagination updated: ${totalElements} items, ${totalPages} pages, current page: ${currentPage + 1}`);
+                }
+            } catch (error) {
+                console.error('사용자 목록 로드 실패:', error);
+                alert('사용자 목록을 불러오는데 실패했습니다\n' + error.message);
+            } finally {
+                isLoadingData = false;
+            }
+        }
+
+        // 검색
+        function searchUsers() {
+            currentSearch = document.getElementById('searchInput').value;
+            currentRole = document.getElementById('roleFilter').value;
+            currentLocked = document.getElementById('lockedFilter').value;
+            currentPage = 0;
+            loadUsers();
+        }
+
+        // 검색 초기화
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('lockedFilter').value = '';
+            currentSearch = '';
+            currentRole = '';
+            currentLocked = '';
+            currentPage = 0;
+            loadUsers();
+        }
+
+        // 계정 잠금/해제
+        async function toggleLock(userId) {
+            if (!confirm('계정 상태를 변경하시겠습니까?')) return;
+
+            try {
+                const response = await fetch(`/api/users/${userId}/toggle-lock`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                    loadUsers();
+                    loadStatistics();
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('계정 잠금/해제 실패:', error);
+                alert('작업 중 오류가 발생했습니다');
+            }
+        }
+
+        // 비밀번호 초기화
+        async function resetPassword(userId) {
+            if (!confirm('비밀번호를 초기화하시겠습니까?\n학생: 생년월일(YYMMDD)\n상담사/관리자: 임시 비밀번호를 이메일로 발송')) return;
+
+            try {
+                const response = await fetch(`/api/users/${userId}/reset-password`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+                } else {
+                    alert(result.message || '작업 실패');
+                }
+            } catch (error) {
+                console.error('비밀번호 초기화 실패:', error);
+                alert('작업 중 오류가 발생했습니다');
+            }
+        }
+    </script>
+</th:block>
 </body>
 </html>
