@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin-layout}">
+<head>
+    <title>관리자 대시보드 - SCMS</title>
+</head>
+
+<body>
+<div layout:fragment="content">
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1>관리자 대시보드</h1>
+            <p>시스템 전체 현황을 확인할 수 있습니다</p>
+        </div>
+
+        <div class="container mt-4">
+            <div class="alert alert-info">
+                <h4>📊 대시보드 준비 중</h4>
+                <p>관리자 대시보드 기능은 현재 개발 중입니다.</p>
+                <hr>
+                <p class="mb-0">좌측 메뉴에서 다른 관리 기능을 이용하실 수 있습니다:</p>
+                <ul class="mt-2">
+                    <li><strong>프로그램 관리</strong>: 프로그램 등록 및 관리</li>
+                    <li><strong>외부회원 관리</strong>: 외부회원 통계 및 관리 (신규 추가)</li>
+                    <li><strong>마일리지 관리</strong>: 마일리지 현황 조회</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
